@@ -23,6 +23,7 @@ struct Sample
     Time time;
     Sampling_type type = repeated;
     uint8_t frequency = 1;
+    uint8_t depth;
 };
 
 class Samples
@@ -31,8 +32,8 @@ class Samples
 private:
     uint8_t current_sample = 0;
 public:
-    void add_sample(uint8_t _hour, uint8_t _minutes);
-    void add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _frequency);
+    void add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _depth);
+    void add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _frequency, uint8_t _depth);
 };
 
 #endif
