@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "Flow_sensor.h"
 
 /**
@@ -5,43 +6,10 @@
  * @param pin Input connection on the board
  *
  */
-Flow_sensor::Flow_sensor(byte pin)
+Flow_sensor::Flow_sensor(byte _input_pin)
 {
-    this->pin = pin;
-    lastReading = LOW;
-    init();
+    input_pin = _input_pin;
+    pinMode(input_pin, INPUT);
 }
 
-void Flow_sensor::init()
-{
-    pinMode(pin, INPUT);
-    update();
-}
 
-void Flow_sensor::update()
-{
-    // You can handle the debounce of the button directly
-    // in the class, so you don't have to think about it
-    // elsewhere in your code
-    byte newReading = digitalRead(pin);
-
-    if (newReading != lastReading)
-    {
-        lastDebounceTime = millis();
-    }
-    if (millis() - lastDebounceTime > debounceDelay)
-    {
-        // Update the 'state' attribute only if debounce is checked
-        state = newReading;
-    }
-    lastReading = newReading;
-}
-byte Flow_sensor::getState()
-{
-    update();
-    return state;
-}
-bool Flow_sensor::isPressed()
-{
-    return (getState() == HIGH);
-}

@@ -2,19 +2,19 @@
 
 /**
  * @brief Constructor for a button
- * @param pin Input connection on the board
+ * @param _input_pin Input connection on the board
  *
  */
-Button::Button(byte pin)
+Button::Button(byte _input_pin)
 {
-    this->pin = pin;
+    input_pin = _input_pin;
     lastReading = LOW;
     init();
 }
 
 void Button::init()
 {
-    pinMode(pin, INPUT);
+    pinMode(input_pin, INPUT);
     update();
 }
 
@@ -23,7 +23,7 @@ void Button::update()
     // You can handle the debounce of the button directly
     // in the class, so you don't have to think about it
     // elsewhere in your code
-    byte newReading = digitalRead(pin);
+    byte newReading = digitalRead(input_pin);
 
     if (newReading != lastReading)
     {

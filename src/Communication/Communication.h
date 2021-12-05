@@ -2,17 +2,11 @@
 #define COMMUNICATION_H
 
 #include <Arduino.h>
+#include "Settings.h"
 
-class Communication
-{
+class Communication{
+    struct Date get_time();
 
-private:
-
-
-public:
-    Communication();
-    void init();
-    void print(int value);
 };
 
 #endif

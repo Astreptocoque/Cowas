@@ -1,19 +1,16 @@
+#include <Arduino.h>
 #include "Led.h"
 
-Led::Led(byte pin) {
-  this->pin = pin;
-  init();
-}
-
-void Led::init() {
-  pinMode(pin, OUTPUT);
+Led::Led(byte _control_pin){
+  control_pin = _control_pin;
+  pinMode(control_pin, OUTPUT);
   off();
 }
 
 void Led::on() {
-  digitalWrite(pin, HIGH);
+  digitalWrite(control_pin, HIGH);
 }
 
 void Led::off() {
-  digitalWrite(pin, LOW);
+  digitalWrite(control_pin, LOW);
 }
