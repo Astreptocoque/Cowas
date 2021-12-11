@@ -20,7 +20,7 @@ public:
         output.println("Pressure sensor created on port " + _pin_slave_select);
     }
 
-    virtual void readPressure(){
+    virtual void read(){
         output.println("Pressure read");
     }
     virtual float getPressure(){

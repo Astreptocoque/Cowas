@@ -22,7 +22,7 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select)
  * @brief Pressure with reference 0 at atmospheric pressure
  * 
  */
-void Trustability_ABP_Gage::readPressure()
+void Trustability_ABP_Gage::read()
 {
     SPISettings SPIPressure(800000, MSBFIRST, SPI_MODE0);
 

@@ -31,8 +31,9 @@
 #include "samples.h"
 
 // ============ PIN DEFINITIONS ==================
+// ====> define here the pins
 #define BUTTON_PIN 5
-// #define PRESSURE1_PIN 1
+#define PRESSURE1_PIN 3
 // #define PRESSURE2_PIN 2
 // #define VALVE1_PIN 3
 #define VALVE2_PIN 11
@@ -43,13 +44,15 @@
 // #define MOTOR_SPOOL_PIN 9
 
 // ==============================================================================
-// = !! Warning !! == NO CONSTRUCTOR EXPLICITELY DEFINED== !! Warning !! =
-// because nothing works before setup() is called, so initializing code before it
-// in constructor won't work.
-// Workaround : use a begin() function as all arduino libraries do.
+// ====> = !! Warning !! == NO CONSTRUCTOR EXPLICITELY DEFINED== !! Warning !! =
+// ====> because nothing works before setup() is called, so initializing code before it
+// ====> in constructor won't work.
+// ====> Workaround : use a begin() function as all arduino libraries do.
 
 // ============= VIRTUAL TESTING =================
-Serial_output output;
+// ====> write here the hardware to test the code virtualy in the terminal output
+// ====> declare hardware with respective interface class
+// Serial_output output;
 // Pressure_interface pressure1;
 // Pressure_interface pressure2;
 // Valve_3_2_interface valve1;
@@ -61,14 +64,17 @@ Serial_output output;
 // Motor_interface motor_spool;
 
 // ============= REAL HARDWARE =================
-// Serial_output output();
-// Trustability_ABP_Gage pressure1(PRESSURE1_PIN);
-// Trustability_ABP_Gage pressure2(PRESSURE2_PIN);
-// Valve_3_2 valve1(VALVE1_PIN);
+// ====> write here the hardware to test with the real machine
+// ====> declare hardware with respective hardware class
+// ====> do not forget to add the object.begin(PIN) in setup()
+Serial_output output;
+Trustability_ABP_Gage pressure1;
+// Trustability_ABP_Gage pressure2;
+// Valve_3_2 valve1;
 Valve_3_2 valve2;
 Valve_3_2 valve3;
-// Valve_2_2 valve_sterivex1(VALVE_STERIVEX1);
-// Valve_2_2 valve_sterivex2(VALVE_STERIVEX2);
+// Valve_2_2 valve_sterivex1;
+// Valve_2_2 valve_sterivex2;
 // Pump pump;
 // Motor motor_spool(MOTOR_SPOOL_PIN);
 Button button;
@@ -84,30 +90,27 @@ Button button;
 
 void setup()
 {   
+
+    // ========== SYSTEM INITIALIZATION ============
     output.begin(1);
-    // delay(500);
-    // pressure1.begin(PRESSURE1_PIN);
+    SPI.begin();
+
+    // ========== HARDWARE INITIALIZATION ==========
+    pressure1.begin(PRESSURE1_PIN);
     // delay(500);
     // pressure2.begin(PRESSURE2_PIN);
     // delay(500);
     // valve1.begin(VALVE1_PIN);
     // delay(500);
     valve2.begin(VALVE2_PIN);
-    delay(500);
     valve3.begin(VALVE3_PIN);
-    delay(500);
     button.begin(BUTTON_PIN);
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
-    // delay(500);
     // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
-    // delay(500);
     // pump.begin(PUMP_PIN);
-    // delay(500);
     // motor_spool.begin(MOTOR_SPOOL_PIN);
-    delay(500);
 
     pinMode(LED_BUILTIN, OUTPUT);
-    // SPI.begin();
     // output.println("SPI initialized");
     // digitalWrite(LED_BUILTIN, HIGH);
     // communication with esp8266
@@ -136,17 +139,11 @@ void loop()
 //     delay(1000);
 
 
-    button.waitPressedAndReleased();
-    // valve2.set_I_way();
-    // valve3.set_I_way();
-    valve3.set_I_way();
-    output.println("Valve 3 state = " + String(valve3.get_state()));
-
-    button.waitPressedAndReleased();
-    // valve2.set_I_way();
-    // valve3.set_I_way();
-    valve3.set_L_way();
-    output.println("Valve 3 state = " + String(valve3.get_state()));
+    pressure1.read();
+    output.println("Pression = " + String(pressure1.getPressure()));
+    pressure1.getTemperature();
+    output.println("Temperature = " + String(pressure1.getTemperature()));
+    delay(500);
     // button.waitPressedAndReleased();
     // // valve2.set_L_way();
     // // valve3.set_L_way();

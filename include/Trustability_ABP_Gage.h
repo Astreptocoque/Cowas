@@ -14,7 +14,7 @@ private:
 
 public:
     void begin(byte _pin_slave_select);
-    void readPressure();
+    void read();
     float getPressure();
     float getTemperature();
 };

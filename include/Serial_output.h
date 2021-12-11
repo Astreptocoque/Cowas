@@ -25,7 +25,6 @@ public:
  * @param _serial_type 1 is serial monitor, 2 is sd card
  *
  */
-
 void begin(uint8_t _serial_type){
     serial_type = _serial_type;
     digitalWrite(LED_BUILTIN, HIGH);
