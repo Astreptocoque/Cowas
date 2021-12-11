@@ -29,6 +29,7 @@
 #include <SPI.h>
 #include "Serial_output.h"
 #include "samples.h"
+#include "Settings.h"
 
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE 
@@ -143,6 +144,7 @@ void setup()
     // pressureThread.onRun(callback);
     // controller.add(&pressureThread);
     output.println("system initalized");
+    
 
     // DO NOT TOUCH
     output.println("========== Press start button ==========");
@@ -164,18 +166,20 @@ void loop()
 //     output.println(pressure1.getPressure());
 //     delay(1000);
 
+    button.waitPressedAndReleased();
+    update_time();
+    
 
-    button.waitPressedAndReleased();
-    pump.start();
-    valve3.set_I_way();
-    button.waitPressedAndReleased();
-    pump.stop();
-    valve2.switch_way();
-    valve3.set_L_way();
-    // output.println("Valve 3 state = " + String(valve3.get_state()));
-    // output.println("Valve 2 state = " + String(valve2.get_state()));
-    // if time to sample
-    // define cowas as busy
+    // button.waitPressedAndReleased();
+    // pump.start();
+    // valve3.set_I_way();
+    // button.waitPressedAndReleased();
+    // pump.stop();
+    // valve2.switch_way();
+    // valve3.set_L_way();
+
+
+ 
 
     // // PURGE
     // output.println("==== PURGE ====");
