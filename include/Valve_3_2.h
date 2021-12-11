@@ -10,6 +10,7 @@ class Valve_3_2 : public Valve_3_2_interface
 private:
 
 public:
+    void begin(byte _pin_control, String _name);
     void begin(byte _pin_control);
     void set_L_way();
     void set_I_way();

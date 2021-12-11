@@ -31,23 +31,23 @@
 #include "samples.h"
 
 // ============ EXECUTION MODE ===================
-// #define REAL_HARDWARE 
-#define VIRTUAL_HARDWARE
+#define REAL_HARDWARE 
+// #define VIRTUAL_HARDWARE
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
 #define BUTTON_PIN 5
 #define START_BUTTON_PIN 26
 #define BLUE_LED_PIN 22
 #define GREEN_LED_PIN 24
-// #define PRESSURE1_PIN 3
-// #define PRESSURE2_PIN 2
-// #define VALVE1_PIN 3
-// #define VALVE2_PIN 11
-// #define VALVE3_PIN 10
-#define VALVE_STERIVEX1_PIN 10
-// #define VALVE_STERIVEX2_PIN 7
-// #define PUMP_PIN 8
-// #define MOTOR_SPOOL_PIN 9
+#define PRESSURE1_PIN 3
+#define PRESSURE2_PIN 2
+#define VALVE1_PIN 3
+#define VALVE2_PIN 11
+#define VALVE3_PIN 10
+// #define VALVE_STERIVEX1_PIN 10
+#define VALVE_STERIVEX2_PIN 7
+#define PUMP_PIN 8
+// // #define MOTOR_SPOOL_PIN 9
 
 // ==============================================================================
 // ====> = !! Warning !! == NO CONSTRUCTOR EXPLICITELY DEFINED== !! Warning !! =
@@ -113,11 +113,11 @@ void setup()
     SPI.begin();
 
     // ========== HARDWARE INITIALIZATION ==========
-    // pressure1.begin(PRESSURE1_PIN);
+    pressure1.begin(PRESSURE1_PIN, "P1", 3);
     // pressure2.begin(PRESSURE2_PIN);
     // valve1.begin(VALVE1_PIN);
-    // valve2.begin(VALVE2_PIN);
-    // valve3.begin(VALVE3_PIN);
+    valve2.begin(VALVE2_PIN, "V2");
+    valve3.begin(VALVE3_PIN, "V3");
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     button.begin(BUTTON_PIN);
     blue_led.begin(22);
@@ -125,7 +125,7 @@ void setup()
     start_button.begin(26);
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
-    // pump.begin(PUMP_PIN);
+    pump.begin(PUMP_PIN, "P1");
     // motor_spool.begin(MOTOR_SPOOL_PIN);
 
     pinMode(LED_BUILTIN, OUTPUT);
@@ -142,9 +142,14 @@ void setup()
     // pressureThread.setInterval(1000);
     // pressureThread.onRun(callback);
     // controller.add(&pressureThread);
+    output.println("system initalized");
+
+    // DO NOT TOUCH
+    output.println("========== Press start button ==========");
     green_led.on();
     start_button.waitPressedAndReleased();
     green_led.off();
+    output.println("Programm started\n");
 }
 
 
@@ -159,15 +164,14 @@ void loop()
 //     output.println(pressure1.getPressure());
 //     delay(1000);
 
-    blue_led.on();
-    output.read();
-    // button.waitPressedAndReleased();
-    // valve_sterivex1.set_open_way();
-    // button.waitPressedAndReleased();
-    // valve_sterivex1.set_close_way();
-    // button.waitPressedAndReleased();
-    // // valve2.set_L_way();
-    // // valve3.set_L_way();
+
+    button.waitPressedAndReleased();
+    pump.start();
+    valve3.set_I_way();
+    button.waitPressedAndReleased();
+    pump.stop();
+    valve2.switch_way();
+    valve3.set_L_way();
     // output.println("Valve 3 state = " + String(valve3.get_state()));
     // output.println("Valve 2 state = " + String(valve2.get_state()));
     // if time to sample
