@@ -14,10 +14,7 @@ protected:
     int flow; // refers to power
 
 public:
-    Pump_interface(){
-        output.println("Pump created without control pin");
-    }
-    Pump_interface(byte _control_pin){
+    virtual void begin(byte _control_pin){
         control_pin = _control_pin;
         output.println("Pump created on pin " + String(control_pin));
     }

@@ -6,44 +6,42 @@
 
 extern Serial_output output;
 
+enum valve_3_2_state{L_way, I_way};
+
 class Valve_3_2_interface : public Valve_interface
 {
 
 protected:
     int pin_slave_select;
-    bool state; // 1 open, 0 closed
+    valve_3_2_state state; // 1 open, 0 closed
 
 public:
-    Valve_3_2_interface()
-    {
-        output.println("Valve initialized without port");
-    }
-
-    Valve_3_2_interface(byte _pin_control)
+    virtual void begin(byte _pin_control)
     {
         output.println("Valve created on port " + _pin_control);
-        state = 0;
+        state = I_way;
         output.println("Valve init I way");
     }
 
     virtual void switch_way()
     {
         output.println("Valve on " + String((get_state()?"I":"L")) + " way");
-        state = get_state() ? 0:1;
+        if(state == L_way) state = I_way; 
+        else state = L_way;
     }
 
-    virtual void L_way()
+    virtual void set_L_way()
     {
-        state = 0;
+        state = L_way;
         output.println("Valve on L way - TO CHECK");
     }
-    virtual void I_way()
+    virtual void set_I_way()
     {
-        state = 1;
+        state = I_way;
         output.println("Valve on I way - TO CHECK");
     }
 
-    virtual bool get_state()
+    virtual valve_3_2_state get_state()
     {
         output.println("Get valve state");
         return state;

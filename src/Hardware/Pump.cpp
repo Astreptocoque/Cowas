@@ -6,7 +6,7 @@
  * @param control_pin Output connection on the board
  *
  */
-Pump::Pump(byte _control_pin)
+void Pump::begin(byte _control_pin)
 {
     control_pin = _control_pin;
     pinMode(control_pin, INPUT);

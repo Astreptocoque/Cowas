@@ -14,10 +14,7 @@ protected:
     int power; // refers to power
 
 public:
-    Motor_interface(){
-        output.println("Motor created without control pin");
-    }
-    Motor_interface(byte _control_pin){
+    virtual void begin(byte _control_pin){
         control_pin = _control_pin;
         output.println("Motor created on pin " + String(control_pin));
     }

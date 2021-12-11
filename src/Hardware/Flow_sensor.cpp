@@ -6,7 +6,7 @@
  * @param pin Input connection on the board
  *
  */
-Flow_sensor::Flow_sensor(byte _input_pin)
+void Flow_sensor::begin(byte _input_pin)
 {
     input_pin = _input_pin;
     pinMode(input_pin, INPUT);

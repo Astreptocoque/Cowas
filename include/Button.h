@@ -14,8 +14,7 @@ private:
     unsigned long debounceDelay = 50;
 
 public:
-    Button(byte _input_pin);
-    void init();
+    void begin(byte _input_pin);
     void update();
     byte getState();
     bool isPressed();

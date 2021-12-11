@@ -16,12 +16,7 @@ protected:
     float temperature = 0;
 
 public:
-
-    Pressure_interface(){
-        output.println("Pressure sensor initialized without port");
-    }
-
-    Pressure_interface(byte _pin_slave_select){
+    virtual void begin(byte _pin_slave_select){
         output.println("Pressure sensor created on port " + _pin_slave_select);
     }
 

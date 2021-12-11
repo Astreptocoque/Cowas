@@ -12,7 +12,7 @@
  * @param pin Input connection on the board
  *
  */
-Trustability_ABP_Gage::Trustability_ABP_Gage(byte _pin_slave_select)
+void Trustability_ABP_Gage::begin(byte _pin_slave_select)
 {
     pin_slave_select = _pin_slave_select;
     pinMode(pin_slave_select, OUTPUT);

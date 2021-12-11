@@ -11,7 +11,7 @@ private:
 
 
 public:
-    Flow_sensor(byte pin);
+   void begin(byte pin);
 
 };
 

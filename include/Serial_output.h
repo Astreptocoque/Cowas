@@ -25,15 +25,19 @@ public:
  * @param _serial_type 1 is serial monitor, 2 is sd card
  *
  */
-Serial_output(uint8_t _serial_type)
-{
+
+void begin(uint8_t _serial_type){
     serial_type = _serial_type;
+    digitalWrite(LED_BUILTIN, HIGH);
     switch(serial_type){
         case 1: // serial monitor
             Serial.begin(9600);
             delay(100);
             Serial.println("Serial initialized");
             break;
+        default:
+            Serial.begin(9600);
+            Serial.println("Error initalizing serial");
     }
 }
 

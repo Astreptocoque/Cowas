@@ -14,12 +14,7 @@ protected:
     bool state; // 1 open, 0 closed
 
 public:
-    Valve_2_2_interface()
-    {
-        output.println("Valve initialized without port");
-    }
-
-    Valve_2_2_interface(byte _pin_control)
+    virtual void begin(byte _pin_control)
     {
         output.println("Valve created on port " + _pin_control);
         state = 0;

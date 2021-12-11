@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Led.h"
 
-Led::Led(byte _control_pin){
+void Led::begin(byte _control_pin){
   control_pin = _control_pin;
   pinMode(control_pin, OUTPUT);
   off();

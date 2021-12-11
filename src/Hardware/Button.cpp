@@ -5,18 +5,13 @@
  * @param _input_pin Input connection on the board
  *
  */
-Button::Button(byte _input_pin)
+void Button::begin(byte _input_pin)
 {
     input_pin = _input_pin;
-    lastReading = LOW;
-    init();
-}
-
-void Button::init()
-{
     pinMode(input_pin, INPUT);
     update();
 }
+
 
 void Button::update()
 {

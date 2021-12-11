@@ -11,11 +11,7 @@ class Led_interface {
     byte control_pin;
     
   public:
-    Led_interface(){
-        output.println("LED created without pin");
-    }
-
-    Led_interface(byte _control_pin){
+    virtual void begin(byte _control_pin){
         control_pin = _control_pin;
         output.println("LED created on pin " + String(control_pin));
     }
