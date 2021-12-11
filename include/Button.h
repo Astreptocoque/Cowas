@@ -2,8 +2,9 @@
 #define BUTTON_H
 
 #include <Arduino.h>
+#include <interfaces/Button_interface.h>
 
-class Button
+class Button : public Button_interface
 {
 
 private:

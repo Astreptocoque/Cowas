@@ -31,11 +31,14 @@
 #include "samples.h"
 
 // ============ EXECUTION MODE ===================
-#define REAL_HARDWARE
-
+// #define REAL_HARDWARE 
+#define VIRTUAL_HARDWARE
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
 #define BUTTON_PIN 5
+#define START_BUTTON_PIN 26
+#define BLUE_LED_PIN 22
+#define GREEN_LED_PIN 24
 // #define PRESSURE1_PIN 3
 // #define PRESSURE2_PIN 2
 // #define VALVE1_PIN 3
@@ -66,6 +69,10 @@ Valve_2_2_interface valve_sterivex1;
 Valve_2_2_interface valve_sterivex2;
 Pump_interface pump;
 Motor_interface motor_spool;
+Led_interface blue_led;
+Led_interface green_led;
+Button_interface start_button;
+Button_interface button;
 #endif
 
 // ============= REAL HARDWARE =================
@@ -84,6 +91,9 @@ Valve_2_2 valve_sterivex2;
 Pump pump;
 Motor motor_spool;
 Button button;
+Led blue_led;
+Led green_led;
+Button start_button;
 #endif
 
 
@@ -99,7 +109,7 @@ void setup()
 {   
 
     // ========== SYSTEM INITIALIZATION ============
-    output.begin(1);
+    output.begin(terminal);
     SPI.begin();
 
     // ========== HARDWARE INITIALIZATION ==========
@@ -110,6 +120,9 @@ void setup()
     // valve3.begin(VALVE3_PIN);
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     button.begin(BUTTON_PIN);
+    blue_led.begin(22);
+    green_led.begin(24);
+    start_button.begin(26);
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
     // pump.begin(PUMP_PIN);
@@ -129,6 +142,9 @@ void setup()
     // pressureThread.setInterval(1000);
     // pressureThread.onRun(callback);
     // controller.add(&pressureThread);
+    green_led.on();
+    start_button.waitPressedAndReleased();
+    green_led.off();
 }
 
 
@@ -143,10 +159,12 @@ void loop()
 //     output.println(pressure1.getPressure());
 //     delay(1000);
 
-    button.waitPressedAndReleased();
-    valve_sterivex1.set_open_way();
-    button.waitPressedAndReleased();
-    valve_sterivex1.set_close_way();
+    blue_led.on();
+    output.read();
+    // button.waitPressedAndReleased();
+    // valve_sterivex1.set_open_way();
+    // button.waitPressedAndReleased();
+    // valve_sterivex1.set_close_way();
     // button.waitPressedAndReleased();
     // // valve2.set_L_way();
     // // valve3.set_L_way();
