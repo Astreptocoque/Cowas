@@ -11,10 +11,10 @@ private:
 
 public:
     void begin(byte _pin_control);
-    void open_way();
-    void close_way();
+    void set_open_way();
+    void set_close_way();
     void switch_way();
-    bool get_state();
+    valve_2_2_state get_state();
 };
 
 #endif

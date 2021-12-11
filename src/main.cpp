@@ -30,15 +30,18 @@
 #include "Serial_output.h"
 #include "samples.h"
 
+// ============ EXECUTION MODE ===================
+#define REAL_HARDWARE
+
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
 #define BUTTON_PIN 5
-#define PRESSURE1_PIN 3
+// #define PRESSURE1_PIN 3
 // #define PRESSURE2_PIN 2
 // #define VALVE1_PIN 3
-#define VALVE2_PIN 11
-#define VALVE3_PIN 10
-// #define VALVE_STERIVEX1_PIN 6
+// #define VALVE2_PIN 11
+// #define VALVE3_PIN 10
+#define VALVE_STERIVEX1_PIN 10
 // #define VALVE_STERIVEX2_PIN 7
 // #define PUMP_PIN 8
 // #define MOTOR_SPOOL_PIN 9
@@ -52,32 +55,36 @@
 // ============= VIRTUAL TESTING =================
 // ====> write here the hardware to test the code virtualy in the terminal output
 // ====> declare hardware with respective interface class
-// Serial_output output;
-// Pressure_interface pressure1;
-// Pressure_interface pressure2;
-// Valve_3_2_interface valve1;
-// Valve_3_2_interface valve2;
-// Valve_3_2_interface valve3;
-// Valve_2_2_interface valve_sterivex1;
-// Valve_2_2_interface valve_sterivex2;
-// Pump_interface pump;
-// Motor_interface motor_spool;
+#ifdef VIRTUAL_HARDWARE
+Serial_output output;
+Pressure_interface pressure1;
+Pressure_interface pressure2;
+Valve_3_2_interface valve1;
+Valve_3_2_interface valve2;
+Valve_3_2_interface valve3;
+Valve_2_2_interface valve_sterivex1;
+Valve_2_2_interface valve_sterivex2;
+Pump_interface pump;
+Motor_interface motor_spool;
+#endif
 
 // ============= REAL HARDWARE =================
 // ====> write here the hardware to test with the real machine
 // ====> declare hardware with respective hardware class
 // ====> do not forget to add the object.begin(PIN) in setup()
+#ifdef REAL_HARDWARE
 Serial_output output;
 Trustability_ABP_Gage pressure1;
-// Trustability_ABP_Gage pressure2;
-// Valve_3_2 valve1;
+Trustability_ABP_Gage pressure2;
+Valve_3_2 valve1;
 Valve_3_2 valve2;
 Valve_3_2 valve3;
-// Valve_2_2 valve_sterivex1;
-// Valve_2_2 valve_sterivex2;
-// Pump pump;
-// Motor motor_spool(MOTOR_SPOOL_PIN);
+Valve_2_2 valve_sterivex1;
+Valve_2_2 valve_sterivex2;
+Pump pump;
+Motor motor_spool;
 Button button;
+#endif
 
 
 // Treads
@@ -96,14 +103,12 @@ void setup()
     SPI.begin();
 
     // ========== HARDWARE INITIALIZATION ==========
-    pressure1.begin(PRESSURE1_PIN);
-    // delay(500);
+    // pressure1.begin(PRESSURE1_PIN);
     // pressure2.begin(PRESSURE2_PIN);
-    // delay(500);
     // valve1.begin(VALVE1_PIN);
-    // delay(500);
-    valve2.begin(VALVE2_PIN);
-    valve3.begin(VALVE3_PIN);
+    // valve2.begin(VALVE2_PIN);
+    // valve3.begin(VALVE3_PIN);
+    // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     button.begin(BUTTON_PIN);
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
@@ -138,12 +143,10 @@ void loop()
 //     output.println(pressure1.getPressure());
 //     delay(1000);
 
-
-    pressure1.read();
-    output.println("Pression = " + String(pressure1.getPressure()));
-    pressure1.getTemperature();
-    output.println("Temperature = " + String(pressure1.getTemperature()));
-    delay(500);
+    button.waitPressedAndReleased();
+    valve_sterivex1.set_open_way();
+    button.waitPressedAndReleased();
+    valve_sterivex1.set_close_way();
     // button.waitPressedAndReleased();
     // // valve2.set_L_way();
     // // valve3.set_L_way();

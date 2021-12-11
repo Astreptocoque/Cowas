@@ -9,21 +9,23 @@ void Valve_2_2::begin(byte _pin_control)
 {
     pin_control = _pin_control;
     pinMode(pin_control, OUTPUT);
+    set_close_way();
 }
 
-void Valve_2_2::open_way(){
+void Valve_2_2::set_open_way(){
     digitalWrite(pin_control, HIGH);
-    state = 1;
+    state = open_way;
 }
-void Valve_2_2::close_way(){
+void Valve_2_2::set_close_way(){
     digitalWrite(pin_control, LOW);
-    state = 0;
+    state = close_way;
 }
 void Valve_2_2::switch_way()
 {
-    state = get_state()?0:1;
+    if(state == open_way) state = close_way;
+    else state = open_way;
     digitalWrite(pin_control, state);
 }
-bool Valve_2_2::get_state(){
+valve_2_2_state Valve_2_2::get_state(){
     return state;
 }

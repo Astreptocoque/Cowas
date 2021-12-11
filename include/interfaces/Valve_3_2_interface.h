@@ -2,17 +2,16 @@
 #define VALVE_3_2_INTERFACE_H
 
 #include "Serial_output.h"
-#include "Valve_interface.h"
 
 extern Serial_output output;
 
 enum valve_3_2_state{L_way, I_way};
 
-class Valve_3_2_interface : public Valve_interface
+class Valve_3_2_interface
 {
 
 protected:
-    int pin_slave_select;
+    int pin_control;
     valve_3_2_state state; // 1 open, 0 closed
 
 public:
@@ -25,27 +24,28 @@ public:
 
     virtual void switch_way()
     {
-        output.println("Valve on " + String((get_state()?"I":"L")) + " way");
         if(state == L_way) state = I_way; 
         else state = L_way;
+        output.println("Valve on " + String((state == I_way?"I":"L")) + " way");
+
     }
 
     virtual void set_L_way()
     {
         state = L_way;
-        output.println("Valve on L way - TO CHECK");
+        output.println("Valve on L way");
     }
     virtual void set_I_way()
     {
         state = I_way;
-        output.println("Valve on I way - TO CHECK");
+        output.println("Valve on I way");
     }
 
-    virtual valve_3_2_state get_state()
-    {
-        output.println("Get valve state");
-        return state;
-    }
+    // virtual valve_3_2_state get_state()
+    // {
+    //     output.println("Get valve state");
+    //     return state;
+    // }
 };
 
 #endif

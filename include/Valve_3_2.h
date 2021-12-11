@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "interfaces/Valve_3_2_interface.h"
 
-
 class Valve_3_2 : public Valve_3_2_interface
 {
 
