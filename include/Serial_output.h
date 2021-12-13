@@ -103,6 +103,17 @@ serial_type_enum get_serial_type(){
     return serial_type;
 }
 
+int waitInt(){
+    int data = 0;
+    if(serial_type == terminal){
+        while(Serial.available() == 0){
+            delay(10);
+        }
+        data = read();
+    }
+    return data;
+}
+
 
 
 
