@@ -14,7 +14,7 @@ protected:
     int pin_slave_select;
     float pressure = 0;
     float temperature = 0;
-    String name = "default";
+    String ID = "no_ID";
     float  max_pressure = 3; // in bar
 
 public:
@@ -22,9 +22,9 @@ public:
         output.println("Pressure sensor created on port " + _pin_slave_select);
         max_pressure = _max_pressure;
     }
-    virtual void begin(byte _pin_slave_select, String _name, float _max_pressure){
-        output.println("Pressure sensor created on port " + _pin_slave_select);
-        name = _name;
+    virtual void begin(byte _pin_slave_select, float _max_pressure, String _ID){
+        output.println("Pressure sensor " + ID + " initiated");
+        ID = _ID;
         max_pressure = _max_pressure;
     }
     virtual void read(){

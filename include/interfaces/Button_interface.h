@@ -14,12 +14,20 @@ class Button_interface
 protected:
     byte input_pin;
     int state;
+    String ID = "no_ID";
 
 public:
     void begin(byte _input_pin)
     {
+        output.println("Button " + ID + " initiated");
         input_pin = _input_pin;
-        update();
+    }
+
+    void begin(byte _input_pin, String _ID)
+    {
+        output.println("Button " + ID + " initiated");
+        input_pin = _input_pin;
+        ID = _ID;
     }
 
     void update()
@@ -39,13 +47,13 @@ public:
 
     byte getState()
     {
-        update();
+        output.println("Get button " + ID + " value");
         return state;
     }
 
     bool isPressed()
     {
-        return (getState() == HIGH);
+        return 1;
     }
 
     void waitPressedAndReleased()
