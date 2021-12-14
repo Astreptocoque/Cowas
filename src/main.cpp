@@ -53,6 +53,7 @@ void step_counter();
 #define ENCODER_A_PIN 13
 #define ENCODER_B_PIN 12
 #define ENCODER_Z_PIN 11
+#define BUTTON_CONTAINER_PIN 31
 // // #define SPOOL_PIN 9
 
 // ==============================================================================
@@ -79,6 +80,7 @@ Led_interface blue_led;
 Led_interface green_led;
 Button_interface start_button;
 Button_interface button;
+Button_interface button_container;
 #endif
 
 // ============= REAL HARDWARE =================
@@ -101,6 +103,7 @@ Button button2;
 Led blue_led;
 Led green_led;
 Button start_button;
+Button button_container;
 #endif
 
 // Treads
@@ -131,9 +134,10 @@ void setup()
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     button.begin(BUTTON_PIN);
     button2.begin(BUTTON2_PIN);
-    blue_led.begin(22);
-    green_led.begin(24);
-    start_button.begin(26);
+    blue_led.begin(BLUE_LED_PIN);
+    green_led.begin(GREEN_LED_PIN);
+    start_button.begin(START_BUTTON_PIN);
+    button_container.begin(BUTTON_CONTAINER_PIN);
     spool.begin();
     // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
     // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
@@ -181,7 +185,7 @@ void setup()
         }
         if (button2.isPressed())
         {
-            spool.set_speed(50, down);
+            spool.set_speed(100, down);
             spool.start();
             while(button2.isPressed())
                 step_counter();
@@ -214,32 +218,35 @@ void loop()
     // delay(1000);
     // spool.stop();
 
-    button.waitPressedAndReleased();
-    spool.set_speed(150, up);
-    spool.start();
-    valve1.set_I_way();
-    
-    // uint32_t temps = millis();
-    // while (millis() - temps < timem * 1000)
-    // {
-    while (counter > -300)
-    {
-        step_counter();
-    }
-    spool.stop();
-    delay(1000);
-    button.waitPressedAndReleased();
-    spool.set_speed(50, down);
-    spool.start();
+    button_container.waitPressedAndReleased();
+    output.println("button container pressed");
 
-    // unsigned int start_millis = millis();
-    // while (millis() - start_millis < timem * 1000)
-    while (counter < 0)
-    {
-        step_counter();
-    }
-    spool.stop();
-    delay(1000);
+    // button.waitPressedAndReleased();
+    // spool.set_speed(150, up);
+    // spool.start();
+    // valve1.set_I_way();
+    
+    // // uint32_t temps = millis();
+    // // while (millis() - temps < timem * 1000)
+    // // {
+    // while (counter > -300)
+    // {
+    //     step_counter();
+    // }
+    // spool.stop();
+    // delay(1000);
+    // button.waitPressedAndReleased();
+    // spool.set_speed(50, down);
+    // spool.start();
+
+    // // unsigned int start_millis = millis();
+    // // while (millis() - start_millis < timem * 1000)
+    // while (counter < 0)
+    // {
+    //     step_counter();
+    // }
+    // spool.stop();
+    // delay(1000);
 
     // spool.set_speed(250, up);
     // spool.start();
