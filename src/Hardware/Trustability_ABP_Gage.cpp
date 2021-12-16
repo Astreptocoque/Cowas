@@ -76,3 +76,7 @@ float Trustability_ABP_Gage::getTemperature()
 {
     return temperature;
 }
+
+void ISR_pressure_checking(){
+
+}

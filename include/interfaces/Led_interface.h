@@ -13,12 +13,10 @@ class Led_interface {
     
   public:
     virtual void begin(byte _control_pin){
-        control_pin = _control_pin;
         output.println("LED " + ID + " initiated");
     }
 
     virtual void begin(byte _control_pin, String _ID){
-        control_pin = _control_pin;
         ID = _ID;
         output.println("LED " + ID + " initiated");
     }

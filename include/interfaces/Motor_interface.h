@@ -15,23 +15,30 @@ protected:
     byte control_pin;
     int speed; // refers to power
     motor_direction direction;
+    String ID = "no_ID";
 
 public:
     virtual void begin(){
+        output.println("Motor " + ID + " initiated");
     }
     virtual void set_speed(int _speed, int _direction){
-        output.println("Power set on " + String(_speed) + "% 24VDC");
+        output.println("Power set on " + String(_speed) + "%");
     }
     virtual void start(){
         output.println("Motor started with speed " + String(speed) + " in direction " + (direction==up?"up":"down"));
     }
-    virtual void start(uint8_t _depth){
-        output.println("Motor started and run for " + String(_depth) + " meters");
+    virtual void start(uint8_t _speed, motor_direction _direction){
+        output.println("Motor started with speed " + String(speed) + " in direction " + (direction==up?"up":"down"));
+    }
+    virtual void start(int _depth){
+        output.println("Motor started to go at " + String(_depth) + " depth");
+    }
+    virtual void start_origin(){
+        output.println("Motor started to go slowly at origin");
     }
     virtual void stop(){
         output.println("Motor stopped");
-    }
-    
+    }    
 };
 
 #endif

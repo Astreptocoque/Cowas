@@ -1,8 +1,7 @@
 /**
  * @file MAIN.CPP
  * @author Timothée Hirt & Christophe Deloose & Elio Sanchez
- * @brief A GenoRobotics project - CoWaS (Continous Water Sampling). Simple version with direct control
- *        of the pump and display
+ * @brief A GenoRobotics project - CoWaS (Continous Water Sampling). 
  *        ARDUINO DUE !!!
  * @version 2.0
  * @date 2021-10-10
@@ -10,10 +9,6 @@
  * @copyright Copyright (c) 2021
  * 
  */
-
-// #include <StaticThreadController.h>
-// #include <Thread.h>
-// #include <ThreadController.h>
 
 #include <Arduino.h>
 #include "Button.h"
@@ -24,21 +19,21 @@
 #include "Motor.h"
 #include "Encoder.h"
 #include "Potentiometer.h"
-
 #include "Led.h"
-
-#include "Communication/Communication.h"
 #include <SPI.h>
 #include "Serial_output.h"
 #include "samples.h"
 #include "Settings.h"
+#include "Critical_error.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
-
+void before_start_program();
+void go_to_depth(int _depth);
+static void(* resetFunc)(void) = 0;
 // ============ EXECUTION MODE ===================
-#define REAL_HARDWARE
-// #define VIRTUAL_HARDWARE
+/* #define REAL_HARDWARE
+ */#define VIRTUAL_HARDWARE
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
@@ -64,7 +59,7 @@ void before_start();
 #define POTENTIOMETER_PIN A0
 
 // ==============================================================================
-// ====> = !! Warning !! == NO CONSTRUCTOR EXPLICITELY DEFINED== !! Warning !! =
+// ====> NO CONSTRUCTOR EXPLICITELY DEFINED
 // ====> because nothing works before setup() is called, so initializing code before it
 // ====> in constructor won't work.
 // ====> Workaround : use a begin() function as all arduino libraries do.
@@ -112,25 +107,14 @@ Valve_2_2 valve_sterivex2;
 Pump pump;
 Motor spool;
 Encoder encoder;
-Button button_start;
-Button button_container;
-Button button_spool;
-Button button_left;
-Button button_right;
+Button button_start;            // normally open
+Button button_container;        // normally ???
+Button button_spool;            // normally closed
+Button button_left;             // normally open
+Button button_right;            // normally open
 Potentiometer potentiometer;
 #endif
 
-// Treads
-// Thread pressureThread = Thread();
-// ThreadController controller = ThreadController();
-
-// void callback(){
-//     pressure1.readPressure();
-// }
-int counter = 0;
-int aState;
-int aLastState;
-int bState;
 
 void setup()
 {
@@ -138,10 +122,9 @@ void setup()
     // ========== SYSTEM INITIALIZATION ============
     output.begin(terminal);
     SPI.begin();
-
     // ========== HARDWARE INITIALIZATION ==========
-    blue_led.begin(BLUE_LED_PIN, "L1");
-    green_led.begin(GREEN_LED_PIN, "L2");
+    blue_led.begin(BLUE_LED_PIN, "blue");
+    green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
     // pressure2.begin(PRESSURE2_PIN);
     valve1.begin(VALVE1_PIN, "V1");
@@ -151,7 +134,6 @@ void setup()
     valve_sterivex2.begin(VALVE_STERIVEX2_PIN, "VS2");
     pump.begin(PUMP_PIN, "P1");
     spool.begin();
-    delay(500);
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
     attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
@@ -161,147 +143,45 @@ void setup()
     button_spool.begin(BUTTON_SPOOL_PIN, "B_spool");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_PIN), ISR_emergency_stop, FALLING);
     potentiometer.begin(POTENTIOMETER_PIN);
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    // output.println("SPI initialized");
-    // digitalWrite(LED_BUILTIN, HIGH);
-    // communication with esp8266
-    // output.println("ESP8266 initalized");
-    // wifi connectivity
-    // output.println("Wifi connected");
-    // update current time
-    // output.println("Time updated");
-
-    // pressureThread settings
-    // pressureThread.setInterval(1000);
-    // pressureThread.onRun(callback);
-    // controller.add(&pressureThread);
+    
     output.println("system initalized");
 
-    // ======== PRE-STARTING EXECUTION =========
-    output.println("========== Press start button to play program ==========");
-    output.println("========== Press left button to move spool up ==========");
-    output.println("========== Press right button to move spool down ==========");
+/*     // ======== PRE-STARTING EXECUTION =========
+    output.println("========== Press start button to play program ==========================");
+    output.println("========== Press left button to move spool up ==========================");
+    output.println("========== Press right button to move spool down =======================");
     output.println("========== Press reset button on due button to come back here ==========");
 
     green_led.on();
-    before_start();
+    before_start_program();
     button_start.waitPressedAndReleased();
     green_led.off();
     output.println("Programm started\n");
+    before_start(); */
 }
 
 void loop()
 {
-
-    // update_time();
-
-    spool.set_speed(400, up);
-    spool.start();
-
-    while (encoder.get_distance() > -4300)
-    {
-        encoder.step_counter();
-        if (button_left.isPressed())
-        {
-            output.println("Pulses A : " + String(encoder.get_pulses_A()));
-            output.println("Pulses Z : " + String(encoder.get_pulses_A()));
-            output.println("Distance : " + String(encoder.get_distance()));
-            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
-            button_left.waitPressedAndReleased();
-        }
-        if(button_right.isPressed()){
-            spool.stop();
-            button_right.waitPressedAndReleased();
-            spool.start();
-        }
-    }
-    spool.stop();
-
-    while (!button_right.isPressed())
-    {
-        if (button_left.isPressed())
-        {
-            output.println("Pulses A : " + String(encoder.get_pulses_A()));
-            output.println("Pulses Z : " + String(encoder.get_pulses_A()));
-            output.println("Distance : " + String(encoder.get_distance()));
-            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
-            button_left.waitPressedAndReleased();
-        }
-    }
-    button_right.waitPressedAndReleased();
-
-    green_led.on();
-    button_start.waitPressedAndReleased();
-    green_led.off();
-    // if(button_right.isPressed()){
-    //     encoder.reset();
-    //     button_right.waitPressedAndReleased();
-    // }
-
-    // button.waitPressedAndReleased();
-    // spool.set_speed(150, up);
-    // spool.start();
-    // valve1.set_I_way();
-
-    // // uint32_t temps = millis();
-    // // while (millis() - temps < timem * 1000)
-    // // {
-    // while (counter > -300)
-    // {
-    //     step_counter();
-    // }
-    // spool.stop();
-    // delay(1000);
-    // button.waitPressedAndReleased();
-    // spool.set_speed(50, down);
-    // spool.start();
-
-    // // unsigned int start_millis = millis();
-    // // while (millis() - start_millis < timem * 1000)
-    // while (counter < 0)
-    // {
-    //     step_counter();
-    // }
-    // spool.stop();
-    // delay(1000);
+    
+    spool.start_origin();
+    resetFunc();
 }
 
-// void step_counter()
-// {
-//     aState = digitalRead(ENCODER_A_PIN);
-//     if (aState != aLastState)
-//     {
-//         if (digitalRead(ENCODER_B_PIN) != aState)
-//         {
-//             counter++;
-//         }
-//         else
-//         {
-//             counter--;
-//         }
-//     }
-//     aLastState = aState;
-//     if (button_left.isPressed())
-//     {
-//         output.println(counter);
-//         button_left.waitPressedAndReleased();
-//     }
-//     if (button_right.isPressed()){
-//         counter = 0;
-//         output.println(counter);
-//         button_right.waitPressedAndReleased();
-//     }
-// }
 
-void before_start()
+void go_to_depth(int _depth){
+
+}
+
+
+void before_start_program()
 {
     // move the motor before starting
+
     while (!button_start.isPressed())
     {
         if (button_left.isPressed())
         {
-            spool.set_speed(200, up);
+            spool.set_speed(potentiometer.get_value(0,100), up);
             spool.start();
             while (button_left.isPressed())
                 delay(5);
@@ -309,7 +189,7 @@ void before_start()
         }
         if (button_right.isPressed())
         {
-            spool.set_speed(200, down);
+            spool.set_speed(potentiometer.get_value(0,100), down);
             spool.start();
             while (button_right.isPressed())
                 delay(5);
@@ -317,4 +197,8 @@ void before_start()
         }
         delay(10);
     }
+}
+
+void before_start(){
+    spool.start();
 }

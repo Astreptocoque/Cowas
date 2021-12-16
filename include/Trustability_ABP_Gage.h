@@ -18,6 +18,9 @@ public:
     void read();
     float getPressure();
     float getTemperature();
+    
 };
+
+void ISR_pressure_checking();
 
 #endif

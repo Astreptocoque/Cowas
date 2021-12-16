@@ -20,7 +20,7 @@ enum Sampling_type{unique,repeated};
 
 struct Sample
 {
-    Time time;
+    Date date;
     Sampling_type type = repeated;
     uint8_t frequency = 1;
     uint8_t depth;

@@ -16,12 +16,10 @@ protected:
 
 public:
     virtual void begin(byte _control_pin){
-        control_pin = _control_pin;
         output.println("Pump " + ID + " initiated");
     }
     virtual void begin(byte _control_pin, String _ID){
         ID = _ID;
-        control_pin = _control_pin;
         output.println("Pump " + ID + " initiated");
     }
     virtual void set_flow(int _flow){

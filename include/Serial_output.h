@@ -114,6 +114,11 @@ int waitInt(){
     return data;
 }
 
+void flush(){
+    if(serial_type == terminal){
+        Serial.flush();
+    }
+}
 
 
 

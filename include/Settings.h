@@ -4,7 +4,9 @@
 #include <Arduino.h>
 #include "Serial_output.h"
 
-#define MAX_SAMPLE = 14
+#define MAX_SAMPLE = 14             // max samples before refilling
+
+const int HEIGHT_FROM_WATER = 120;   //in centimeters, ref to spool endstop
 
 struct Time{
     uint8_t hour;
@@ -23,5 +25,6 @@ struct Date{
 void update_time();
 void set_time_manual();
 
+/* Date current_date; */
 
 #endif

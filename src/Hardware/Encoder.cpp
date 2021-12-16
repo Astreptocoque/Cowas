@@ -42,33 +42,62 @@ int Encoder::get_distance()
 {
     return (int)(rad_per_pulse * diameter * pulses_A);
 }
-void Encoder::set_distance(int _distance)
+
+/**
+ * @brief set distance in pulses to reach
+ * 
+ * @param _distance in centimeters
+ */
+void Encoder::set_distance_to_reach(int _distance)
 {
     goal_pulses_A = _distance / (rad_per_pulse * diameter);
 }
 
-void Encoder::set_pulses_Z(encoder_direction _direction){
-    if (_direction == e_up) pulses_Z++;
-    else pulses_Z--;
+void Encoder::set_pulses_Z(encoder_direction _direction)
+{
+    if (_direction == e_up)
+        pulses_Z--;
+    else
+        pulses_Z++;
 }
 
-int Encoder::get_pulses_A(){
+int32_t Encoder::get_pulses_A()
+{
     return pulses_A;
 }
 
-int Encoder::get_pulses_Z(){
+int32_t Encoder::get_pulses_Z()
+{
     return pulses_Z;
 }
 
-encoder_direction Encoder::get_direction(){
-    return direction;
+int32_t Encoder::get_pulses_B()
+{
+    return pulses_B;
 }
 
-void Encoder::step_counter()
+void Encoder::print_states()
+{
+    output.println("Pulses A : " + String(encoder.get_pulses_A()));
+    output.println("Pulses Z : " + String(encoder.get_pulses_A()));
+    output.println("Distance : " + String(encoder.get_distance()));
+    output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
+}
+
+encoder_direction Encoder::get_direction()
+{
+    return direction;
+}
+int32_t Encoder::get_goal_pulses()
+{
+    return goal_pulses_A;
+}
+
+int32_t Encoder::step_counter()
 {
     static int A_state;
     static int A_last_state = digitalRead(pin_signal_A);
-    
+
     A_state = digitalRead(pin_signal_A);
     if (A_state != A_last_state)
     {
@@ -84,14 +113,20 @@ void Encoder::step_counter()
         }
     }
     A_last_state = A_state;
+    return pulses_A;
 }
 
-void Encoder::reset(){
+void Encoder::reset()
+{
     pulses_A = 0;
+    pulses_B = 0;
     pulses_Z = 0;
 }
 
-void ISR_encoder_z_signal(){
-    if(encoder.get_direction() == e_up) encoder.set_pulses_Z(e_up);
-    else encoder.set_pulses_Z(e_down);
+void ISR_encoder_z_signal()
+{
+    if (encoder.get_direction() == e_up)
+        encoder.set_pulses_Z(e_up);
+    else
+        encoder.set_pulses_Z(e_down);
 }

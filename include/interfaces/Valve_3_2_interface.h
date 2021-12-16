@@ -20,15 +20,13 @@ public:
     {
         ID = _ID;
         output.println("Valve " + ID+ " initiated");
-        state = I_way;
-        output.println("Valve init I way");
+        set_I_way();
     }
 
     virtual void begin(byte _pin_control)
     {
         output.println("Valve " + ID+ " initiated");
-        state = I_way;
-        output.println("Valve init I way");
+        set_I_way();
     }
 
     virtual void switch_way()
@@ -50,11 +48,11 @@ public:
         output.println("Valve " + ID + " on I way");
     }
 
-    // virtual valve_3_2_state get_state()
-    // {
-    //     output.println("Get valve state");
-    //     return state;
-    // }
+    virtual valve_3_2_state get_state()
+    {
+        output.println("Get valve " + ID + " state");
+        return state;
+    }
 };
 
 #endif

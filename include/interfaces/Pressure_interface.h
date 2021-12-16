@@ -29,14 +29,14 @@ public:
         output.println("Pressure sensor " + ID + " initiated");
     }
     virtual void read(){
-        output.println("Pressure read");
+        output.println("Pressure from sensor " + ID + " read");
     }
     virtual float getPressure(){
-        output.println("Pressure fetched");
-        return pressure;
+        output.println("Pressure from sensor " + ID + " fetched");
+        return 1;
     }
     virtual float getTemperature(){
-        output.println("Temperature fetched");
+        output.println("Temperature from sensor " + ID + " fetched");
         return temperature;
     }
 };

@@ -4,9 +4,6 @@
 #include <Arduino.h>
 #include "Serial_output.h"
 
-
-// =================== NOT WORKING
-
 extern Serial_output output;
 
 class Button_interface
@@ -19,13 +16,11 @@ protected:
 public:
     void begin(byte _input_pin)
     {
-        input_pin = _input_pin;
         output.println("Button " + ID + " initiated");
     }
 
     void begin(byte _input_pin, String _ID)
     {
-        input_pin = _input_pin;
         ID = _ID;
         output.println("Button " + ID + " initiated");
 
@@ -33,35 +28,24 @@ public:
 
     void update()
     {
-        // You can handle the debounce of the button directly
-        // in the class, so you don't have to think about it
-        // elsewhere in your code
-        output.print("Enter button state : ");
-        if (output.get_serial_type() == terminal)
-        {
-            state = output.read();
-            if (state > 1)
-                state = 1;
-        }
-        output.println(state);
+        output.println("Button " + ID + " state updated");
     }
 
     byte getState()
     {
         output.println("Get button " + ID + " value");
-        return state;
+        return 1;
     }
 
     bool isPressed()
     {
+        output.println("Asked if button " + ID + " is pressed");
         return 1;
     }
 
     void waitPressedAndReleased()
     {
-        output.print("Button pressed..."); 
-        delay(500);
-        output.println("and released");
+        output.println("Wait for button " + ID + " for pressed and released"); 
     }
 };
 
