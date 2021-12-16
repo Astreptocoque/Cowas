@@ -7,7 +7,7 @@ extern Serial_output output;
 
 class Led_interface {
   
-  private:
+  protected:
     byte control_pin;
     String ID = "no_ID";
     
@@ -20,7 +20,7 @@ class Led_interface {
     virtual void begin(byte _control_pin, String _ID){
         control_pin = _control_pin;
         ID = _ID;
-        output.println("LED " + ID + " initiated on pin");
+        output.println("LED " + ID + " initiated");
     }
     virtual void on(){
         output.println("LED " + ID + " ON");

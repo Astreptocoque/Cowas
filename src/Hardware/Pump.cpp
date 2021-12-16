@@ -14,9 +14,9 @@ void Pump::begin(byte _control_pin)
     stop();
 }
 
-void Pump::begin(byte _control_pin, String _name)
+void Pump::begin(byte _control_pin, String _ID)
 {
-    name = _name;
+    ID = _ID;
     control_pin = _control_pin;
     pinMode(control_pin, OUTPUT);
     set_power(190);

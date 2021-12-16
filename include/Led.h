@@ -5,12 +5,9 @@
 
 class Led : public Led_interface
 {
-  
-  private:
-    byte control_pin;
-    
   public:
     void begin(byte _control_pin);
+    void begin(byte _control_pin, String _ID);
     void on();
     void off();
 };

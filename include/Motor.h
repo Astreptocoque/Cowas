@@ -19,4 +19,6 @@ public:
     void stopIfFault();
 };
 
+void ISR_emergency_stop();
+
 #endif

@@ -14,7 +14,7 @@ private:
 
 public:
     void begin(byte _pin_slave_select, float _max_pressure);
-    void begin(byte _pin_slave_select, String _name, float _max_pressure);
+    void begin(byte _pin_slave_select, float _max_pressure, String _name);
     void read();
     float getPressure();
     float getTemperature();

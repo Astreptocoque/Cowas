@@ -16,6 +16,7 @@ private:
 
 public:
     void begin(byte _input_pin);
+    void begin(byte _input_pin, String _ID);
     void update();
     byte getState();
     bool isPressed();

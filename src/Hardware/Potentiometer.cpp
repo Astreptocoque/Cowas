@@ -12,8 +12,8 @@ void Potentiometer::begin(byte _input_pin){
  * @return int 
  */
 int Potentiometer::get_value(){
-    int value = analogRead(input_pin);
-    return value
+    value = analogRead(input_pin);
+    return value;
 }
 
 /**
@@ -23,7 +23,7 @@ int Potentiometer::get_value(){
  * @param _level_mapping_max max scale value
  * @return int 
  */
-int Potentiometer::get_value(int _level_mapping_min, int _level_mapping_max){
-    int value = analogRead(input_pin);
-    return map(value, 0, 255, _level_mapping_min, _level_mapping_max);
+int Potentiometer::get_value(unsigned int _level_mapping_min, unsigned int _level_mapping_max){
+    value = analogRead(input_pin);
+    return map(value, 0, 1023, _level_mapping_min, _level_mapping_max);
 }

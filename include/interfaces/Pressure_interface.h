@@ -19,13 +19,14 @@ protected:
 
 public:
     virtual void begin(byte _pin_slave_select, float _max_pressure){
-        output.println("Pressure sensor created on port " + _pin_slave_select);
         max_pressure = _max_pressure;
+        output.println("Pressure sensor " + ID + " initiated");
+
     }
     virtual void begin(byte _pin_slave_select, float _max_pressure, String _ID){
-        output.println("Pressure sensor " + ID + " initiated");
         ID = _ID;
         max_pressure = _max_pressure;
+        output.println("Pressure sensor " + ID + " initiated");
     }
     virtual void read(){
         output.println("Pressure read");

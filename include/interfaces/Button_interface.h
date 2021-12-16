@@ -19,15 +19,16 @@ protected:
 public:
     void begin(byte _input_pin)
     {
-        output.println("Button " + ID + " initiated");
         input_pin = _input_pin;
+        output.println("Button " + ID + " initiated");
     }
 
     void begin(byte _input_pin, String _ID)
     {
-        output.println("Button " + ID + " initiated");
         input_pin = _input_pin;
         ID = _ID;
+        output.println("Button " + ID + " initiated");
+
     }
 
     void update()

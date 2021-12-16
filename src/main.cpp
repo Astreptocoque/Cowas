@@ -22,6 +22,8 @@
 #include "Valve_2_2.h"
 #include "Pump.h"
 #include "Motor.h"
+#include "Encoder.h"
+#include "Potentiometer.h"
 
 #include "Led.h"
 
@@ -31,30 +33,37 @@
 #include "samples.h"
 #include "Settings.h"
 
+// ============ MAIN FUNCTION DECLARATION =======
 void step_counter();
+void stop_interrupt();
+void before_start();
+
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
 // #define VIRTUAL_HARDWARE
+
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
-#define BUTTON_PIN 5
-#define BUTTON2_PIN 9
-#define START_BUTTON_PIN 26
+
 #define BLUE_LED_PIN 22
-#define GREEN_LED_PIN 24
-#define PRESSURE1_PIN 3
-#define PRESSURE2_PIN 2
-#define VALVE1_PIN 3
-#define VALVE2_PIN 25
-#define VALVE3_PIN 23
-// #define VALVE_STERIVEX1_PIN 10
-#define VALVE_STERIVEX2_PIN 7
+#define GREEN_LED_PIN 23
+#define PRESSURE1_PIN 41
+// #define PRESSURE2_PIN 
+#define VALVE1_PIN 30
+#define VALVE2_PIN 32
+#define VALVE3_PIN 34
+#define VALVE_STERIVEX1_PIN 36
+#define VALVE_STERIVEX2_PIN 38
 #define PUMP_PIN 8
-#define ENCODER_A_PIN 13
-#define ENCODER_B_PIN 12
-#define ENCODER_Z_PIN 11
-#define BUTTON_CONTAINER_PIN 31
-// // #define SPOOL_PIN 9
+#define ENCODER_A_PIN 31
+#define ENCODER_B_PIN 33
+#define ENCODER_Z_PIN 35
+#define BUTTON_START_PIN 24
+#define BUTTON_CONTAINER_PIN 27
+#define BUTTON_SPOOL_PIN 28
+#define BUTTON_LEFT_PIN 25
+#define BUTTON_RIGHT_PIN 26
+#define POTENTIOMETER_PIN A0
 
 // ==============================================================================
 // ====> = !! Warning !! == NO CONSTRUCTOR EXPLICITELY DEFINED== !! Warning !! =
@@ -67,6 +76,8 @@ void step_counter();
 // ====> declare hardware with respective interface class
 #ifdef VIRTUAL_HARDWARE
 Serial_output output;
+Led_interface blue_led;
+Led_interface green_led;
 Pressure_interface pressure1;
 Pressure_interface pressure2;
 Valve_3_2_interface valve1;
@@ -76,11 +87,13 @@ Valve_2_2_interface valve_sterivex1;
 Valve_2_2_interface valve_sterivex2;
 Pump_interface pump;
 Motor_interface spool;
-Led_interface blue_led;
-Led_interface green_led;
-Button_interface start_button;
-Button_interface button;
+Encoder_interface encoder;
+Button_interface button_start;
+Button_interface button_left;
+Button_interface button_right;
 Button_interface button_container;
+Button_interface button_spool;
+Potentiometer_interface potentiometer;
 #endif
 
 // ============= REAL HARDWARE =================
@@ -89,8 +102,10 @@ Button_interface button_container;
 // ====> do not forget to add the object.begin(PIN) in setup()
 #ifdef REAL_HARDWARE
 Serial_output output;
+Led blue_led;
+Led green_led;
 Trustability_ABP_Gage pressure1;
-Trustability_ABP_Gage pressure2;
+// Trustability_ABP_Gage pressure2;
 Valve_3_2 valve1;
 Valve_3_2 valve2;
 Valve_3_2 valve3;
@@ -98,12 +113,13 @@ Valve_2_2 valve_sterivex1;
 Valve_2_2 valve_sterivex2;
 Pump pump;
 Motor spool;
-Button button;
-Button button2;
-Led blue_led;
-Led green_led;
-Button start_button;
+Encoder encoder;
+Button button_start;
 Button button_container;
+Button button_spool;
+Button button_left;
+Button button_right;
+Potentiometer potentiometer;
 #endif
 
 // Treads
@@ -126,23 +142,26 @@ void setup()
     SPI.begin();
 
     // ========== HARDWARE INITIALIZATION ==========
-    // pressure1.begin(PRESSURE1_PIN, "P1", 3);
+    blue_led.begin(BLUE_LED_PIN, "L1");
+    green_led.begin(GREEN_LED_PIN, "L2");
+    pressure1.begin(PRESSURE1_PIN, 3, "P1");
     // pressure2.begin(PRESSURE2_PIN);
-    // valve1.begin(VALVE1_PIN);
-    // valve2.begin(VALVE2_PIN, "V2");
-    // valve3.begin(VALVE3_PIN, "V3");
-    // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
-    button.begin(BUTTON_PIN);
-    button2.begin(BUTTON2_PIN);
-    blue_led.begin(BLUE_LED_PIN);
-    green_led.begin(GREEN_LED_PIN);
-    start_button.begin(START_BUTTON_PIN);
-    button_container.begin(BUTTON_CONTAINER_PIN);
+    valve1.begin(VALVE1_PIN, "V1");
+    valve2.begin(VALVE2_PIN, "V2");
+    valve3.begin(VALVE3_PIN, "V3");
+    valve_sterivex1.begin(VALVE_STERIVEX1_PIN, "VS1");
+    valve_sterivex2.begin(VALVE_STERIVEX2_PIN, "VS2");
+    pump.begin(PUMP_PIN, "P1");
     spool.begin();
-    // valve_sterivex1.begin(VALVE_STERIVEX1_PIN);
-    // valve_sterivex2.begin(VALVE_STERIVEX2_PIN);
-    // pump.begin(PUMP_PIN, "P1");
-    // spool.begin(SPOOL_PIN);
+    delay(500);
+    encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 360, 10);
+    button_left.begin(BUTTON_LEFT_PIN, "B_left");
+    button_right.begin(BUTTON_RIGHT_PIN, "B_right");
+    button_start.begin(BUTTON_START_PIN, "B_start");
+    button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
+    button_spool.begin(BUTTON_SPOOL_PIN, "B_spool");
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_PIN), ISR_emergency_stop, FALLING);
+    potentiometer.begin(POTENTIOMETER_PIN);
 
     pinMode(LED_BUILTIN, OUTPUT);
     // output.println("SPI initialized");
@@ -165,35 +184,15 @@ void setup()
     pinMode(ENCODER_Z_PIN, INPUT);
     aLastState = digitalRead(ENCODER_A_PIN);
 
-    // DO NOT TOUCH
+    // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========");
     output.println("========== Press left button to move spool up ==========");
     output.println("========== Press right button to move spool down ==========");
     output.println("========== Press reset button on due button to come back here ==========");
 
     green_led.on();
-    // move the motor before starting
-    while (!start_button.isPressed())
-    {
-        if (button.isPressed())
-        {
-            spool.set_speed(150, up);
-            spool.start();
-            while(button.isPressed())
-                step_counter();
-            spool.stop();
-        }
-        if (button2.isPressed())
-        {
-            spool.set_speed(100, down);
-            spool.start();
-            while(button2.isPressed())
-                step_counter();
-            spool.stop();
-        }
-        delay(10);
-    }
-    start_button.waitPressedAndReleased();
+    before_start();
+    button_start.waitPressedAndReleased();
     green_led.off();
     output.println("Programm started\n");
 }
@@ -213,13 +212,15 @@ void loop()
 
     // output.println("enter number");
     // unsigned int timem = output.waitInt();
-    //     spool.set_speed(150, up);
+    // spool.set_speed(150, up);
     // spool.start();
-    // delay(1000);
+    // delay(2000);
+    int vlaue = potentiometer.get_value(0,100);
+    output.println(vlaue);
+    delay(1000);
     // spool.stop();
 
-    button_container.waitPressedAndReleased();
-    output.println("button container pressed");
+    
 
     // button.waitPressedAndReleased();
     // spool.set_speed(150, up);
@@ -349,4 +350,32 @@ void step_counter()
     //     output.println(counter);
     //     button.waitPressedAndReleased();
     // }
+}
+
+void stop_interrupt(){
+    output.println("stop interrupt");
+}
+
+void before_start(){
+        // move the motor before starting
+    while (!button_start.isPressed())
+    {
+        if (button_left.isPressed())
+        {
+            spool.set_speed(150, up);
+            spool.start();
+            while(button_left.isPressed())
+                step_counter();
+            spool.stop();
+        }
+        if (button_right.isPressed())
+        {
+            spool.set_speed(100, down);
+            spool.start();
+            while(button_right.isPressed())
+                step_counter();
+            spool.stop();
+        }
+        delay(10);
+    }
 }

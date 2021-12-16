@@ -7,10 +7,9 @@ class Potentiometer : public Potentiometer_interface
 {
   
   private:
-    
   public:
     void begin(byte _input_pin);
     int get_value();
-    int get_value(int _level_mapping_min, int _level_mapping_max);
+    int get_value(unsigned int _level_mapping_min, unsigned int _level_mapping_max);
 };
 #endif

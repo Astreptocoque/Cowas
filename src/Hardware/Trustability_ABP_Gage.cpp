@@ -20,11 +20,11 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
 
 }
 
-void Trustability_ABP_Gage::begin(byte _pin_slave_select, String _name, float _max_pressure)
+void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, String _ID)
 {
     pin_slave_select = _pin_slave_select;
     pinMode(pin_slave_select, OUTPUT);
-    name = _name;
+    ID = _ID;
     max_pressure = _max_pressure;
 }
 
@@ -58,7 +58,7 @@ void Trustability_ABP_Gage::read()
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
 
         if(pressure > max_pressure){
-            output.println("!!! Pressure to high on sensor " + name + " !!!");
+            output.println("!!! Pressure to high on sensor " + ID + " !!!");
         }
     }
     else

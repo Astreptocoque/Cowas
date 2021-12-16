@@ -13,20 +13,20 @@ class Valve_2_2_interface
 protected:
     int pin_control;
     valve_2_2_state state; // 1 open, 0 closed
-    String name = "default";
+    String ID = "no_ID";
 
 public:
-    virtual void begin(byte _pin_control, String _name)
+    virtual void begin(byte _pin_control, String _ID)
     {
-        name = _name;
-        output.println("Valve " + name + " created on port " + _pin_control);
+        ID = _ID;
+        output.println("Valve " + ID + " initated");
         state = close_way;
         output.println("Valve init closed state");
     }
 
     virtual void begin(byte _pin_control)
     {
-        output.println("Valve " + name + " created on port " + _pin_control);
+        output.println("Valve " + ID + " initated");
         state = close_way;
         output.println("Valve init closed state");
     }
@@ -35,18 +35,18 @@ public:
     {
         if(state == open_way) state = close_way;
         else state = open_way;
-        output.println("Valve " +name +  String((state == open_way?" open":" close")));
+        output.println("Valve " +ID +  String((state == open_way?" open":" close")));
     }
 
     virtual void set_open_way()
     {
         state = open_way;
-        output.println("Valve " + name + " opened");
+        output.println("Valve " + ID + " opened");
     }
     virtual void set_close_way()
     {
         state = close_way;
-        output.println("Valve " + name + " closed");
+        output.println("Valve " + ID + " closed");
     }
 
     // virtual bool get_state()
