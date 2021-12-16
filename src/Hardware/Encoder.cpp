@@ -2,6 +2,8 @@
 #include "Encoder.h"
 #include <math.h>
 
+extern Encoder encoder;
+
 void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, const int _pulse_per_rev, const float _diameter)
 {
     pin_signal_A = _pin_signal_A;
@@ -40,7 +42,56 @@ int Encoder::get_distance()
 {
     return (int)(rad_per_pulse * diameter * pulses_A);
 }
-void Encoder::set_distance(int distance)
+void Encoder::set_distance(int _distance)
 {
-    goal_pulses_A = distance / (rad_per_pulse * diameter);
+    goal_pulses_A = _distance / (rad_per_pulse * diameter);
+}
+
+void Encoder::set_pulses_Z(encoder_direction _direction){
+    if (_direction == e_up) pulses_Z++;
+    else pulses_Z--;
+}
+
+int Encoder::get_pulses_A(){
+    return pulses_A;
+}
+
+int Encoder::get_pulses_Z(){
+    return pulses_Z;
+}
+
+encoder_direction Encoder::get_direction(){
+    return direction;
+}
+
+void Encoder::step_counter()
+{
+    static int A_state;
+    static int A_last_state = digitalRead(pin_signal_A);
+    
+    A_state = digitalRead(pin_signal_A);
+    if (A_state != A_last_state)
+    {
+        if (digitalRead(pin_signal_B) != A_state)
+        {
+            pulses_A++;
+            direction = e_down;
+        }
+        else
+        {
+            pulses_A--;
+            direction = e_up;
+        }
+    }
+    A_last_state = A_state;
+}
+
+void Encoder::reset(){
+    pulses_A = 0;
+    pulses_Z = 0;
+}
+
+void ISR_encoder_z_signal(){
+    if(encoder.get_direction() == e_up) encoder.set_pulses_Z(e_up);
+    else encoder.set_pulses_Z(e_down);
 }

@@ -7,6 +7,8 @@
 // include global custom output function
 extern Serial_output output;
 
+enum encoder_direction{e_down, e_up};
+
 class Encoder_interface
 {
 
@@ -20,6 +22,7 @@ protected:
     int pulses_A;      // total pulse counter
     int pulses_Z;      // total round counter
     int goal_pulses_A;  // pulses to reach
+    encoder_direction direction;
     String ID = "no_ID";
 
 public:

@@ -34,8 +34,6 @@
 #include "Settings.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
-void step_counter();
-void stop_interrupt();
 void before_start();
 
 // ============ EXECUTION MODE ===================
@@ -48,7 +46,7 @@ void before_start();
 #define BLUE_LED_PIN 22
 #define GREEN_LED_PIN 23
 #define PRESSURE1_PIN 41
-// #define PRESSURE2_PIN 
+// #define PRESSURE2_PIN
 #define VALVE1_PIN 30
 #define VALVE2_PIN 32
 #define VALVE3_PIN 34
@@ -154,7 +152,8 @@ void setup()
     pump.begin(PUMP_PIN, "P1");
     spool.begin();
     delay(500);
-    encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 360, 10);
+    encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
+    attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
     button_right.begin(BUTTON_RIGHT_PIN, "B_right");
     button_start.begin(BUTTON_START_PIN, "B_start");
@@ -179,11 +178,6 @@ void setup()
     // controller.add(&pressureThread);
     output.println("system initalized");
 
-    pinMode(ENCODER_A_PIN, INPUT);
-    pinMode(ENCODER_B_PIN, INPUT);
-    pinMode(ENCODER_Z_PIN, INPUT);
-    aLastState = digitalRead(ENCODER_A_PIN);
-
     // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========");
     output.println("========== Press left button to move spool up ==========");
@@ -199,34 +193,57 @@ void setup()
 
 void loop()
 {
-    //     // controller.run();
-    //     pressure1.readPressure();
-    //     output.print("Temperature : ");
-    //  //   Serial.println(pressure1.getPressure());
-    //     output.println(pressure1.getTemperature());
-    //     output.print("Pression : ");
-    //     output.println(pressure1.getPressure());
-    //     delay(1000);
 
     // update_time();
 
-    // output.println("enter number");
-    // unsigned int timem = output.waitInt();
-    // spool.set_speed(150, up);
-    // spool.start();
-    // delay(2000);
-    int vlaue = potentiometer.get_value(0,100);
-    output.println(vlaue);
-    delay(1000);
-    // spool.stop();
+    spool.set_speed(400, up);
+    spool.start();
 
-    
+    while (encoder.get_distance() > -4300)
+    {
+        encoder.step_counter();
+        if (button_left.isPressed())
+        {
+            output.println("Pulses A : " + String(encoder.get_pulses_A()));
+            output.println("Pulses Z : " + String(encoder.get_pulses_A()));
+            output.println("Distance : " + String(encoder.get_distance()));
+            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
+            button_left.waitPressedAndReleased();
+        }
+        if(button_right.isPressed()){
+            spool.stop();
+            button_right.waitPressedAndReleased();
+            spool.start();
+        }
+    }
+    spool.stop();
+
+    while (!button_right.isPressed())
+    {
+        if (button_left.isPressed())
+        {
+            output.println("Pulses A : " + String(encoder.get_pulses_A()));
+            output.println("Pulses Z : " + String(encoder.get_pulses_A()));
+            output.println("Distance : " + String(encoder.get_distance()));
+            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
+            button_left.waitPressedAndReleased();
+        }
+    }
+    button_right.waitPressedAndReleased();
+
+    green_led.on();
+    button_start.waitPressedAndReleased();
+    green_led.off();
+    // if(button_right.isPressed()){
+    //     encoder.reset();
+    //     button_right.waitPressedAndReleased();
+    // }
 
     // button.waitPressedAndReleased();
     // spool.set_speed(150, up);
     // spool.start();
     // valve1.set_I_way();
-    
+
     // // uint32_t temps = millis();
     // // while (millis() - temps < timem * 1000)
     // // {
@@ -248,132 +265,54 @@ void loop()
     // }
     // spool.stop();
     // delay(1000);
-
-    // spool.set_speed(250, up);
-    // spool.start();
-    // delay(500);
-    // spool.stop();
-
-    // spool_spool.set_speed(350,up);
-    // spool.start();
-    // delay(2000);
-    // spool.stop();
-    // delay(1000);
-    // spool.set_speed(400, down);
-    // spool.start();
-    // delay(2000);
-
-    // button.waitPressedAndReleased();
-    // pump.start();
-    // valve3.set_I_way();
-    // button.waitPressedAndReleased();
-    // pump.stop();
-    // valve2.switch_way();
-    // valve3.set_L_way();
-
-    // // PURGE
-    // output.println("==== PURGE ====");
-    // output.println("...");
-    // output.println("=== SAMPLING ===");
-    // // SAMPLING
-    // int time = 1500;
-    // valve1.L_way();
-    // delay(time);
-    // spool.start(40);
-    // delay(time);
-    // valve1.I_way();
-    // delay(time);
-    // valve2.I_way();
-    // delay(time);
-    // valve3.L_way();
-    // delay(time);
-    // output.println("=== FILL 2L CONTAINER ===");
-    // pump.start(); // DEFINE WHEN TO STOP
-    // delay(time);
-    // pump.stop();
-    // delay(time);
-    // valve2.L_way();
-    // delay(time);
-    // valve3.I_way();
-    // delay(time);
-
-    // // CHOOSE STERIVEX
-    // output.println("=== CHOOSE STERIVEX ===");
-
-    // switch(1){
-    //     case 1:
-    //         valve_sterivex1.open();
-    //     break;
-    //     case 2:
-    //         valve_sterivex2.open();
-    //     break;
-    // }
-    // output.println("=== FLUSH ===");
-
-    // delay(time);
-    // pump.start();
-    // delay(time);
-    // pump.stop();
-    // delay(time);
-
-    // // CHOOSE STERIVEX
-    // switch(1){
-    //     case 1:
-    //         valve_sterivex1.close();
-    //     break;
-    //     case 2:
-    //         valve_sterivex2.close();
-    //     break;
-    // }
-    // delay(time);
 }
 
-void step_counter()
+// void step_counter()
+// {
+//     aState = digitalRead(ENCODER_A_PIN);
+//     if (aState != aLastState)
+//     {
+//         if (digitalRead(ENCODER_B_PIN) != aState)
+//         {
+//             counter++;
+//         }
+//         else
+//         {
+//             counter--;
+//         }
+//     }
+//     aLastState = aState;
+//     if (button_left.isPressed())
+//     {
+//         output.println(counter);
+//         button_left.waitPressedAndReleased();
+//     }
+//     if (button_right.isPressed()){
+//         counter = 0;
+//         output.println(counter);
+//         button_right.waitPressedAndReleased();
+//     }
+// }
+
+void before_start()
 {
-    aState = digitalRead(ENCODER_A_PIN);
-    if (aState != aLastState)
-    {
-        if (digitalRead(ENCODER_B_PIN) != aState)
-        {
-            counter++;
-        }
-        else
-        {
-            counter--;
-        }
-        output.println(counter);
-    }
-    aLastState = aState;
-    // if (button.isPressed())
-    // {
-    //     counter = 0;
-    //     output.println(counter);
-    //     button.waitPressedAndReleased();
-    // }
-}
-
-void stop_interrupt(){
-    output.println("stop interrupt");
-}
-
-void before_start(){
-        // move the motor before starting
+    // move the motor before starting
     while (!button_start.isPressed())
     {
         if (button_left.isPressed())
         {
-            spool.set_speed(150, up);
+            spool.set_speed(200, up);
             spool.start();
-            while(button_left.isPressed())
-                step_counter();
+            while (button_left.isPressed())
+                delay(5);
             spool.stop();
         }
         if (button_right.isPressed())
         {
-            spool.set_speed(100, down);
+            spool.set_speed(200, down);
             spool.start();
-            while(button_right.isPressed())
-                step_counter();
+            while (button_right.isPressed())
+                delay(5);
             spool.stop();
         }
         delay(10);
