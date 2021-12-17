@@ -30,10 +30,9 @@
 void before_start();
 void before_start_program();
 void go_to_depth(int _depth);
-static void(* resetFunc)(void) = 0;
 // ============ EXECUTION MODE ===================
-/* #define REAL_HARDWARE
- */#define VIRTUAL_HARDWARE
+#define REAL_HARDWARE
+//  #define VIRTUAL_HARDWARE
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
@@ -107,14 +106,13 @@ Valve_2_2 valve_sterivex2;
 Pump pump;
 Motor spool;
 Encoder encoder;
-Button button_start;            // normally open
-Button button_container;        // normally ???
-Button button_spool;            // normally closed
-Button button_left;             // normally open
-Button button_right;            // normally open
+Button button_start;     // normally open
+Button button_container; // normally ???
+Button button_spool;     // normally closed
+Button button_left;      // normally open
+Button button_right;     // normally open
 Potentiometer potentiometer;
 #endif
-
 
 void setup()
 {
@@ -143,10 +141,10 @@ void setup()
     button_spool.begin(BUTTON_SPOOL_PIN, "B_spool");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_PIN), ISR_emergency_stop, FALLING);
     potentiometer.begin(POTENTIOMETER_PIN);
-    
-    output.println("system initalized");
 
-/*     // ======== PRE-STARTING EXECUTION =========
+    output.println("system initalized\n");
+
+    // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========================");
     output.println("========== Press left button to move spool up ==========================");
     output.println("========== Press right button to move spool down =======================");
@@ -156,32 +154,93 @@ void setup()
     before_start_program();
     button_start.waitPressedAndReleased();
     green_led.off();
+
+    before_start();
+    output.println("System checked\n");
+
     output.println("Programm started\n");
-    before_start(); */
+    
 }
 
 void loop()
 {
-    
-    spool.start_origin();
-    resetFunc();
+    // spool.set_speed(40, down);
+    // spool.start();
+
+    // while (encoder.get_distance() < 100)
+    // {
+    //     encoder.step_counter();
+    //     if (button_left.isPressed())
+    //     {
+    //         output.println("Pulses A : " + String(encoder.get_pulses_A()));
+    //         output.println("Pulses B : " + String(encoder.get_pulses_B()));
+    //         output.println("Pulses Z : " + String(encoder.get_pulses_Z()));
+    //         output.println("Distance : " + String(encoder.get_distance()));
+    //         output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
+    //         button_left.waitPressedAndReleased();
+    //     }
+    //     if(button_right.isPressed()){
+    //         spool.stop();
+    //         button_right.waitPressedAndReleased();
+    //         spool.start();
+    //     }
+    // }
+    // spool.stop();
+
+    spool.start(30);
+
+
+    while (!button_right.isPressed())
+    {
+        if (button_left.isPressed())
+        {
+            output.println("Pulses A : " + String(encoder.get_pulses_A()));
+            output.println("Pulses B : " + String(encoder.get_pulses_B()));
+            output.println("Pulses Z : " + String(encoder.get_pulses_Z()));
+            output.println("Distance : " + String(encoder.get_distance()));
+            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
+            button_left.waitPressedAndReleased();
+        }
+    }
+    button_right.waitPressedAndReleased();
+
+    green_led.on();
+    button_start.waitPressedAndReleased();
+    green_led.off();
+    // spool.start_origin();
+    // spool.start(33);
+    // button_start.waitPressedAndReleased();
+    // output.println(button_left.getState());
+    // output.println(button_right.getState());
+    // output.println(button_spool.getState());
+    // output.println("");
+    // button_start.waitPressedAndReleased();
+
 }
 
-
-void go_to_depth(int _depth){
-
+void go_to_depth(int _depth)
+{
 }
-
 
 void before_start_program()
 {
     // move the motor before starting
 
+    int pot_last_value = potentiometer.get_value(0, 100);
+    int pot_value = 0;
+    int speedy = 60;
     while (!button_start.isPressed())
     {
+        pot_value = potentiometer.get_value(0, 100);
+        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
+        {
+            speedy = pot_value;
+            pot_last_value = pot_value;
+            output.println("speed " + String(speedy));
+        }
         if (button_left.isPressed())
         {
-            spool.set_speed(potentiometer.get_value(0,100), up);
+            spool.set_speed(speedy, up);
             spool.start();
             while (button_left.isPressed())
                 delay(5);
@@ -189,7 +248,7 @@ void before_start_program()
         }
         if (button_right.isPressed())
         {
-            spool.set_speed(potentiometer.get_value(0,100), down);
+            spool.set_speed(speedy, down);
             spool.start();
             while (button_right.isPressed())
                 delay(5);
@@ -199,6 +258,30 @@ void before_start_program()
     }
 }
 
-void before_start(){
-    spool.start();
+void before_start()
+{
+    // check if sensor are operationnal
+    bool error = false;
+    // check spool switch 1
+    // spool.start(50, down);
+    // delay(1000);
+    // spool.stop();
+    if (button_spool.getState() == 1)
+    {
+        output.println("CHECK | Button spool working");
+    }
+    else
+    {
+        output.println("ERROR | Button spool not working");
+        error = true;
+    }
+
+    if (error)
+    {
+        output.println("FATAL ERROR AT STARTUP");
+        while (true)
+        {
+            delay(500);
+        }
+    }
 }

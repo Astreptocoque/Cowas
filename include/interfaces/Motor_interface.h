@@ -27,7 +27,7 @@ public:
     virtual void start(){
         output.println("Motor started with speed " + String(speed) + " in direction " + (direction==up?"up":"down"));
     }
-    virtual void start(uint8_t _speed, motor_direction _direction){
+    virtual void start(int _speed, motor_direction _direction){
         output.println("Motor started with speed " + String(speed) + " in direction " + (direction==up?"up":"down"));
     }
     virtual void start(int _depth){

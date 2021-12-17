@@ -20,7 +20,9 @@ public:
     void update();
     byte getState();
     bool isPressed();
+    bool isReleased();
     void waitPressedAndReleased();
+    void waitReleasedAndPressed();
 };
 
 #endif

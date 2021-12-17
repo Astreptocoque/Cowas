@@ -14,11 +14,11 @@ protected:
     int depth_goal;
 
 public:
-    bool endstop; // public for interrupt
+    bool endstop = false; // public for interrupt
     void begin();
-    void set_speed(uint8_t _speed, motor_direction _direction);
+    void set_speed(int _speed, motor_direction _direction);
     void start();
-    void start(uint8_t _speed, motor_direction _direction);
+    void start(int _speed, motor_direction _direction);
     void start(int _depth);
     void start_origin();
     void stop();

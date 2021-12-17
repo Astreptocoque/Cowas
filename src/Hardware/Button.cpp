@@ -24,18 +24,24 @@ void Button::update()
     // You can handle the debounce of the button directly
     // in the class, so you don't have to think about it
     // elsewhere in your code
-    byte newReading = digitalRead(input_pin);
+    // unsigned long timeCurrent = millis();
+    bool looping = true;
+    while (looping)
+    {
+        byte newReading = digitalRead(input_pin);
 
-    if (newReading != lastReading)
-    {
-        lastDebounceTime = millis();
+        if (newReading != lastReading)
+        {
+            lastDebounceTime = millis();
+        }
+        if (millis() - lastDebounceTime > debounceDelay)
+        {
+            // Update the 'state' attribute only if debounce is checked
+            state = newReading;
+            looping = false;
+        }
+        lastReading = newReading;
     }
-    if (millis() - lastDebounceTime > debounceDelay)
-    {
-        // Update the 'state' attribute only if debounce is checked
-        state = newReading;
-    }
-    lastReading = newReading;
 }
 
 byte Button::getState()
@@ -49,6 +55,11 @@ bool Button::isPressed()
     return (getState() == HIGH);
 }
 
+bool Button::isReleased()
+{
+    return (getState() == LOW);
+}
+
 void Button::waitPressedAndReleased()
 {
     while (!isPressed())
@@ -56,6 +67,18 @@ void Button::waitPressedAndReleased()
         delay(5);
     }
     while (isPressed())
+    {
+        delay(5);
+    }
+}
+
+void Button::waitReleasedAndPressed()
+{
+    while (isPressed())
+    {
+        delay(5);
+    }
+    while (!isPressed())
     {
         delay(5);
     }

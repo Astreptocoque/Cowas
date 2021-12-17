@@ -36,7 +36,7 @@ void Motor::begin()
  *
  * @param _speed max speed = 100, min speed = 0
  */
-void Motor::set_speed(uint8_t _speed, motor_direction _direction)
+void Motor::set_speed(int _speed, motor_direction _direction)
 {
     if (_speed > 100)
         _speed = 100;
@@ -49,22 +49,24 @@ void Motor::set_speed(uint8_t _speed, motor_direction _direction)
 void Motor::start()
 {
     // security at end stop
-    if (direction == down && !endstop)
+    output.println("endstop " + String(endstop));
+    if (direction == up && endstop)
     {
-        md.setM1Speed(speed * (direction == up ? 1 : -1));
-        Motor_interface::start();
-        endstop = false;
+        output.println("Reach end of tube, order cancelled | cannot wind up more");
     }
     else
     {
-        output.println("Reach end of tube, order cancelled | cannot wind up more");
+        // set here direction of motor
+        md.setM1Speed(speed * (direction == up ? 1 : -1));
+        Motor_interface::start();
+        endstop = false;
     }
 }
 
 /**
  * @brief user manual function
  */
-void Motor::start(uint8_t _speed, motor_direction _direction)
+void Motor::start(int _speed, motor_direction _direction)
 {
     set_speed(_speed, _direction);
     start();
@@ -85,20 +87,33 @@ void Motor::start(int _depth)
 
     depth_goal = _depth;
     // set distance to unroll in absolute pulses
-    encoder.set_distance_to_reach(depth_goal - depth_current + HEIGHT_FROM_WATER);
-
+    int distance = depth_goal - depth_current + HEIGHT_FROM_WATER;
+    output.println("Distance " + String(distance));
+    encoder.set_distance_to_reach(distance);
+    // if positive, then system is diving
+    if(distance > 0){
+        set_speed(SPEED_DOWN, down);
+    }
+    else if(distance < 0){
+        set_speed(SPEED_UP, up);
+    }else{
+        set_speed(0, down);
+    }
+    
     // INFO | function can be accelerated and made more precise with interrupts or ATMEL hardware encoder core
     bool run = true;
     start();
+    output.println("enter loop");
     while (run)
     {
-        if ((direction == down && encoder.step_counter() >= encoder.get_pulses_A()) 
-           || (direction == up && encoder.step_counter() <= encoder.get_pulses_A()))
+        if ((direction == down && encoder.get_pulses_A() >= encoder.get_goal_pulses()) 
+           || (direction == up && encoder.get_pulses_A() <= encoder.get_goal_pulses())
+           || endstop)
         {
             run = false;
         }
     }
-
+    output.println("exit loop");
     if (_depth <= 0)
         start_origin();
 }
@@ -114,8 +129,8 @@ void Motor::start_origin()
     {
         set_speed(40, up);
         start();
-        while (!button_spool.isPressed())
-            stop(); // should be useless as interrupt is taking care of stopping the motor
+        while (button_spool.getState() == 1);
+        stop(); // should be useless as interrupt is taking care of stopping the motor
         encoder.reset();
     }
     else
@@ -148,6 +163,6 @@ void Motor::stopIfFault()
  */
 void ISR_emergency_stop()
 {
-    md.setM1Brake(400);
     spool.endstop = true;
+    md.setM1Brake(400);
 }

@@ -6,7 +6,9 @@
 
 #define MAX_SAMPLE = 14             // max samples before refilling
 
-const int HEIGHT_FROM_WATER = 120;   //in centimeters, ref to spool endstop
+const int HEIGHT_FROM_WATER = 34;   //in centimeters, ref to spool endstop
+const int SPEED_UP = 80;
+const int SPEED_DOWN = 50;
 
 struct Time{
     uint8_t hour;

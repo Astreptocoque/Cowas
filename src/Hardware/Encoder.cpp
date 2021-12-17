@@ -79,7 +79,8 @@ int32_t Encoder::get_pulses_B()
 void Encoder::print_states()
 {
     output.println("Pulses A : " + String(encoder.get_pulses_A()));
-    output.println("Pulses Z : " + String(encoder.get_pulses_A()));
+    output.println("Pulses B : " + String(encoder.get_pulses_B()));
+    output.println("Pulses Z : " + String(encoder.get_pulses_Z()));
     output.println("Distance : " + String(encoder.get_distance()));
     output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
 }
