@@ -30,6 +30,12 @@
 void before_start();
 void before_start_program();
 void go_to_depth(int _depth);
+void step_dive();
+void step_purge();
+void step_fill_container();
+void step_sampling();
+void step_flush_water();
+void step_rewind();
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
 //  #define VIRTUAL_HARDWARE
@@ -39,7 +45,7 @@ void go_to_depth(int _depth);
 
 #define BLUE_LED_PIN 22
 #define GREEN_LED_PIN 23
-#define PRESSURE1_PIN 41
+#define PRESSURE1_PIN 3
 // #define PRESSURE2_PIN
 #define VALVE1_PIN 30
 #define VALVE2_PIN 32
@@ -133,13 +139,14 @@ void setup()
     pump.begin(PUMP_PIN, "P1");
     spool.begin();
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
-    attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
+    // attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
     button_right.begin(BUTTON_RIGHT_PIN, "B_right");
     button_start.begin(BUTTON_START_PIN, "B_start");
     button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
     button_spool.begin(BUTTON_SPOOL_PIN, "B_spool");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_PIN), ISR_emergency_stop, FALLING);
+    spool.endstop = false;
     potentiometer.begin(POTENTIOMETER_PIN);
 
     output.println("system initalized\n");
@@ -186,9 +193,28 @@ void loop()
     //     }
     // }
     // spool.stop();
+    spool.start_origin();
+    // delay(2000);
+    // button_left.waitPressedAndReleased();
+    // output.println("=========== go 5 cm");
+    // spool.start(1200);
+    // delay(1000);
+    // button_left.waitPressedAndReleased();
+    // output.println("=========== go 30 cm");
+    // spool.start(30);
+    // delay(1000);
+    // button_left.waitPressedAndReleased();
+    // output.println("=========== go 100 cm");
+    // spool.start(100);
+    // delay(1000);
+    // button_left.waitPressedAndReleased();
+    // output.println("=========== go 1200 cm");
+    // spool.start(1200);
+    // delay(1000);
+    // output.println("=========== go origin cm");
+    // spool.start(-1);
 
-    spool.start(30);
-
+    output.println("####### end of trajectory #######");
 
     while (!button_right.isPressed())
     {
@@ -207,6 +233,9 @@ void loop()
     green_led.on();
     button_start.waitPressedAndReleased();
     green_led.off();
+
+
+
     // spool.start_origin();
     // spool.start(33);
     // button_start.waitPressedAndReleased();
@@ -263,18 +292,26 @@ void before_start()
     // check if sensor are operationnal
     bool error = false;
     // check spool switch 1
-    // spool.start(50, down);
-    // delay(1000);
-    // spool.stop();
+    spool.start(50, down);
+    delay(200);
+    spool.stop();
     if (button_spool.getState() == 1)
     {
         output.println("CHECK | Button spool working");
-    }
-    else
-    {
+    }else{
         output.println("ERROR | Button spool not working");
         error = true;
     }
+
+    //check temperature
+    pressure1.read();
+    output.println(pressure1.getTemperature());
+    if(pressure1.getTemperature() > 4){
+        output.println("CHECK | Temperature okay");
+    }else{
+        output.println("ERROR | Temperature too low");
+    }
+
 
     if (error)
     {
@@ -284,4 +321,28 @@ void before_start()
             delay(500);
         }
     }
+}
+
+void step_dive(){
+
+}
+
+void step_purge(){
+
+}
+
+void step_fill_container(){
+
+}
+
+void step_sampling(){
+
+}
+
+void step_flush_water(){
+
+}
+
+void step_rewind(){
+
 }

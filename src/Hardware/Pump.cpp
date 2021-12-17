@@ -36,6 +36,15 @@ void Pump::start(){
     Pump_interface::start();
 }
 
+void Pump::start(int time_ms){
+    start();
+    int current_time = millis();
+    while(millis() - current_time < time_ms){
+        delay(5);
+    }
+    stop();
+}
+
 void Pump::stop(){
     analogWrite(control_pin, 0);
     Pump_interface::stop();

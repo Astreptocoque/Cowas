@@ -14,10 +14,11 @@ class Motor_interface
 protected:
     byte control_pin;
     int speed; // refers to power
-    motor_direction direction;
     String ID = "no_ID";
 
 public:
+    motor_direction direction;
+
     virtual void begin(){
         output.println("Motor " + ID + " initiated");
     }

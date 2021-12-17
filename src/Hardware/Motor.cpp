@@ -21,6 +21,7 @@ DualVNH5019MotorShield md(INA1, INB1, PWM1, EN1DIAG1, CS1, INA2, INB2, PWM2, EN2
 extern Encoder encoder;
 extern Motor spool;
 extern Button button_spool;
+extern Button button_left;
 
 /**
  * @brief Constructor for a diaphragm Motor
@@ -56,10 +57,10 @@ void Motor::start()
     }
     else
     {
+        endstop = false;
         // set here direction of motor
         md.setM1Speed(speed * (direction == up ? 1 : -1));
         Motor_interface::start();
-        endstop = false;
     }
 }
 
@@ -87,7 +88,7 @@ void Motor::start(int _depth)
 
     depth_goal = _depth;
     // set distance to unroll in absolute pulses
-    int distance = depth_goal - depth_current + HEIGHT_FROM_WATER;
+    int distance = depth_goal + HEIGHT_FROM_WATER; //depth_goal - depth_current + HEIGHT_FROM_WATER;
     output.println("Distance " + String(distance));
     encoder.set_distance_to_reach(distance);
     // if positive, then system is diving
@@ -99,23 +100,52 @@ void Motor::start(int _depth)
     }else{
         set_speed(0, down);
     }
+    // output.println(encoder.get_goal_pulses());
+    // output.println(encoder.get_pulses_A());
     
     // INFO | function can be accelerated and made more precise with interrupts or ATMEL hardware encoder core
     bool run = true;
-    start();
+    
     output.println("enter loop");
-    while (run)
-    {
-        if ((direction == down && encoder.get_pulses_A() >= encoder.get_goal_pulses()) 
-           || (direction == up && encoder.get_pulses_A() <= encoder.get_goal_pulses())
-           || endstop)
+    int i = 0;
+    int32_t goal_pulses = encoder.get_goal_pulses();
+    int32_t pulses;
+    start();
+
+    if(direction == down){
+        while(encoder.get_distance() < distance){
+            encoder.step_counter();
+            if (button_left.isPressed())
         {
-            run = false;
+            output.println("Pulses A : " + String(encoder.get_pulses_A()));
+            output.println("Distance : " + String(encoder.get_distance()));
+            button_left.waitPressedAndReleased();
+        }}
+    }else{
+        while(encoder.get_distance() > encoder.get_distance() + distance){
+            encoder.step_counter();
         }
     }
+    stop();
+    // while (run)
+    // {
+    //     encoder.step_counter();
+    //     pulses = encoder.get_pulses_A();
+    //     if(i==500){
+    //         output.println(pulses);
+    //         i=0;
+    //     }
+    //     if ((direction == down && pulses >= goal_pulses) 
+    //        || (direction == up && pulses <= goal_pulses)
+    //        || endstop)
+    //     {
+    //         run = false;
+    //     }
+    //     i++;
+    // }
     output.println("exit loop");
-    if (_depth <= 0)
-        start_origin();
+    // if (_depth <= 0)
+    //     start_origin();
 }
 
 /**
@@ -127,7 +157,7 @@ void Motor::start_origin()
     // check that sensor is working
     if (button_spool.getState() == 1)
     {
-        set_speed(40, up);
+        set_speed(100, up);
         start();
         while (button_spool.getState() == 1);
         stop(); // should be useless as interrupt is taking care of stopping the motor
@@ -163,6 +193,8 @@ void Motor::stopIfFault()
  */
 void ISR_emergency_stop()
 {
-    spool.endstop = true;
-    md.setM1Brake(400);
+    if(spool.direction == up){
+        spool.endstop = true;
+        md.setM1Brake(400);
+    }
 }
