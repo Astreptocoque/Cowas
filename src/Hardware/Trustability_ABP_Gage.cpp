@@ -1,16 +1,12 @@
 #include "Trustability_ABP_Gage.h"
 #include <SPI.h>
 #include <Arduino.h>
-#include "Led.h"
+
 
 #define BAR_FACTORa 7.63e-4
 #define BAR_FACTORb 1.25
 #define TEMP_FACTOREa 9.77e-2
 #define TEMP_FACTOREb 50
-
-extern Led blue_led;
-extern Trustability_ABP_Gage pressure1;
-extern Trustability_ABP_Gage pressure2;
 
 /**
  * @brief Constructor for a pressure sensor
@@ -31,6 +27,7 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, S
     pinMode(pin_slave_select, OUTPUT);
     ID = _ID;
     max_pressure = _max_pressure;
+    SPIPressure = new SPISettings(800000, MSBFIRST, SPI_MODE0);
 }
 
 /**
@@ -39,10 +36,10 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, S
  */
 void Trustability_ABP_Gage::read()
 {
-    SPISettings SPIPressure(800000, MSBFIRST, SPI_MODE0);
+    // SPISettings SPIPressure(800000, MSBFIRST, SPI_MODE0);
 
     // SPI communication API
-    SPI.beginTransaction(SPIPressure);
+    SPI.beginTransaction(*SPIPressure);
     digitalWrite(pin_slave_select, LOW);
     byte byte1 = SPI.transfer(0); // control & pressure 14 bits
     byte byte2 = SPI.transfer(0); // pressure 14 bits
@@ -61,7 +58,6 @@ void Trustability_ABP_Gage::read()
 
         pressure = output_pressure * BAR_FACTORa - BAR_FACTORb;
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
-
         if(pressure > max_pressure){
             output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }
@@ -98,22 +94,3 @@ void ISR_pressure_checking(){
 
 }
 
-/**
- * @brief Pressure checking, every 1 seconds
- *        System function, place wherever
- *        No need to call
- * 
- */
-void TC3_Handler(){
-    TC_GetStatus(TC1, 0);
-    pressure1.getPressure();
-    // if(pressure > pressure1.getMaxPressure()){
-        // output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
-    // }
-    // pressure = pressure2.getPressure();
-    // if(pressure > pressure2.getMaxPressure()){
-    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
-    // }
-
-    blue_led.switch_state();
-}

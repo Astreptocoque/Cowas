@@ -1,5 +1,13 @@
 #include <Arduino.h>
 #include "Pump.h"
+#include "Trustability_ABP_Gage.h"
+#include "Led.h"
+
+extern Trustability_ABP_Gage pressure1;
+extern Trustability_ABP_Gage pressure2;
+extern Led blue_led;
+extern Pump pump;
+
 
 /**
  * @brief Constructor for a diaphragm pump
@@ -31,6 +39,10 @@ void Pump::set_power(int _power){
     power = _power;
 }
 
+int Pump::get_power(){
+    return power;
+}
+
 void Pump::start(){
     analogWrite(control_pin, power);
     Pump_interface::start();
@@ -49,4 +61,25 @@ void Pump::stop(){
     analogWrite(control_pin, 0);
     Pump_interface::stop();
     
+}
+
+/**
+ * @brief Pressure checking, every 1 seconds
+ *        System function, place wherever
+ *        No need to call
+ * 
+ */
+void TC3_Handler(){
+    TC_GetStatus(TC1, 0);
+    float pressure = pressure1.getPressure();
+    if(pressure > pressure1.getMaxPressure()){
+        // simple decremental function to reduce pressure
+        pump.set_power(pump.get_power() - 5);
+    }
+    // pressure = pressure2.getPressure();
+    // if(pressure > pressure2.getMaxPressure()){
+    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
+    // }
+
+    blue_led.switch_state();
 }

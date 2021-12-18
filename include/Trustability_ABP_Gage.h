@@ -11,7 +11,7 @@ class Trustability_ABP_Gage : public Pressure_interface
 {
 
 private:
-
+    SPISettings *SPIPressure;
 public:
     void begin(byte _pin_slave_select, float _max_pressure);
     void begin(byte _pin_slave_select, float _max_pressure, String _name);
@@ -20,6 +20,7 @@ public:
     float getTemperature();
     float getMaxPressure();
     String getID();
+
 
     
 };

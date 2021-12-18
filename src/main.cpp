@@ -187,10 +187,9 @@ void loop()
 
 void tests(){
     
-    timerStart(timer_control_pressure1);
-    delay(5000);
-    timerStop(timer_control_pressure1);
-    delay(5000);
+    output.println(pressure1.getPressure());
+    output.println(pressure1.getTemperature());
+    delay(500);
     
 }
 
@@ -222,20 +221,6 @@ void depths_test()
     spool.start(-1);
 
     output.println("####### end of trajectory #######");
-
-    while (!button_right.isPressed())
-    {
-        if (button_left.isPressed())
-        {
-            output.println("Pulses A : " + String(encoder.get_pulses_A()));
-            output.println("Pulses B : " + String(encoder.get_pulses_B()));
-            output.println("Pulses Z : " + String(encoder.get_pulses_Z()));
-            output.println("Distance : " + String(encoder.get_distance()));
-            output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
-            button_left.waitPressedAndReleased();
-        }
-    }
-    button_right.waitPressedAndReleased();
 
     green_led.on();
     button_start.waitPressedAndReleased();
