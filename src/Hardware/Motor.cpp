@@ -98,10 +98,7 @@ void Motor::start(int _depth)
     else
         set_speed(0, down);
 
-    // INFO | function can be accelerated and made more precise with interrupts or ATMEL hardware encoder core
-
-    output.println("enter loop");
-    int i = 0;
+    // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
 
     start();
 
@@ -114,7 +111,6 @@ void Motor::start(int _depth)
             encoder.step_counter();
     stop();
 
-    output.println("exit loop");
 
     // update state
     depth_current = depth_goal;
@@ -131,7 +127,7 @@ void Motor::start_origin()
     // check that sensor is working
     if (button_spool.getState() == 1)
     {
-        set_speed(100, up);
+        set_speed(30, up);
         start();
         while (button_spool.getState() == 1)
             ;
@@ -148,7 +144,7 @@ void Motor::start_origin()
 
 void Motor::stop()
 {
-    md.setM1Brake(400);
+    md.setM1Brake(300);
     Motor_interface::stop();
 }
 

@@ -153,7 +153,7 @@ void setup()
 
     output.println("system initalized\n");
 
-  /*   // ======== PRE-STARTING EXECUTION =========
+    // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========================");
     output.println("========== Press left button to move spool up ==========================");
     output.println("========== Press right button to move spool down =======================");
@@ -167,36 +167,40 @@ void setup()
     before_start();
     output.println("System checked\n");
 
-    output.println("Programm started\n"); */
+    output.println("Programm started\n");
     
 }
 
 void loop()
 {
-  main_program();
-  // main_program_test();
+//   main_program();
+  main_program_test();
 }
 
 void main_program_test()
 {
      
     spool.start_origin();
-    button_left.waitPressedAndReleased();
-    output.println("=========== go 100 cm");
-    spool.start(1200);
+    button_start.waitPressedAndReleased();
+    output.println("=========== go 10 cm");
+    spool.start(10);
     delay(1000);
-    button_left.waitPressedAndReleased();
+    button_start.waitPressedAndReleased();
     output.println("=========== go 30 cm");
     spool.start(30);
     delay(1000);
-    button_left.waitPressedAndReleased();
-    output.println("=========== go 100 cm");
-    spool.start(100);
+    button_start.waitPressedAndReleased();
+    output.println("=========== go 40 cm");
+    spool.start(40);
     delay(1000);
-    button_left.waitPressedAndReleased();
-    output.println("=========== go 1200 cm");
-    spool.start(1200);
+    button_start.waitPressedAndReleased();
+    output.println("=========== go 30 cm");
+    spool.start(30);
     delay(1000);
+    button_start.waitPressedAndReleased();
+    output.println("=========== go origin cm");
+    spool.start(0);
+    button_start.waitPressedAndReleased();
     output.println("=========== go origin cm");
     spool.start(-1);
 
@@ -269,7 +273,7 @@ void before_start()
     bool error = false;
     
     // check spool switch 1
-    spool.start(50, down);
+    spool.start(20, down);
     delay(200);
     spool.stop();
     if (button_spool.getState() == 1)
