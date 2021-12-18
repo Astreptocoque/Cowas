@@ -104,6 +104,8 @@ void Motor::start(int _depth)
     int i = 0;
 
     start();
+
+    // loop take ~6 us.
     if (direction == down)
         while (encoder.get_distance() < distance)
             encoder.step_counter();
@@ -113,7 +115,7 @@ void Motor::start(int _depth)
     stop();
 
     output.println("exit loop");
-    
+
     // update state
     depth_current = depth_goal;
     if (_depth <= 0)
