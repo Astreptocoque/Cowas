@@ -13,7 +13,6 @@ protected:
 
 public:
     bool endstop = false; // public for interrupt
-    // bool direction;
     void begin();
     void set_speed(int _speed, motor_direction _direction);
     void start();

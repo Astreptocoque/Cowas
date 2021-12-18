@@ -32,10 +32,10 @@ public:
         output.println("Motor started with speed " + String(speed) + " in direction " + (direction==up?"up":"down"));
     }
     virtual void start(int _depth){
-        output.println("Motor started to go at " + String(_depth) + " depth");
+        output.println("Motor started to go at " + String(_depth)) ;
     }
     virtual void start_origin(){
-        output.println("Motor started to go slowly at origin");
+        output.println("Motor started to go at origin");
     }
     virtual void stop(){
         output.println("Motor stopped");

@@ -50,7 +50,6 @@ void Motor::set_speed(int _speed, motor_direction _direction)
 void Motor::start()
 {
     // security at end stop
-    output.println("endstop " + String(endstop));
     if (direction == up && endstop)
     {
         output.println("Reach end of tube, order cancelled | cannot wind up more");
@@ -98,10 +97,11 @@ void Motor::start(int _depth)
     else
         set_speed(0, down);
 
+    Motor_interface::start(_depth);
+
     // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
 
     start();
-
     // loop take ~6 us.
     if (direction == down)
         while (encoder.get_distance() < distance)
@@ -127,7 +127,11 @@ void Motor::start_origin()
     // check that sensor is working
     if (button_spool.getState() == 1)
     {
+        
         set_speed(30, up);
+
+        Motor_interface::start_origin();
+
         start();
         while (button_spool.getState() == 1)
             ;
