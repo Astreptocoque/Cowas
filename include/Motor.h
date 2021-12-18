@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include "interfaces/Motor_interface.h"
 
-const int DISTANCE_FROM_STOP = 15;
-
 class Motor : public Motor_interface
 {
 

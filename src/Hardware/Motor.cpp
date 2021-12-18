@@ -86,66 +86,38 @@ void Motor::start(int _depth)
     if (_depth <= 0)
         _depth = -HEIGHT_FROM_WATER + DISTANCE_FROM_STOP;
 
-    depth_goal = _depth;
-    // set distance to unroll in absolute pulses
-    int distance = depth_goal + HEIGHT_FROM_WATER; //depth_goal - depth_current + HEIGHT_FROM_WATER;
-    output.println("Distance " + String(distance));
+    depth_goal = _depth;                           // distance from water level
+    int distance = depth_goal + HEIGHT_FROM_WATER; // absolute distance from sensor
     encoder.set_distance_to_reach(distance);
-    // if positive, then system is diving
-    if(distance > 0){
+
+    // movement setup depending of absolute depth
+    if (depth_goal > depth_current)
         set_speed(SPEED_DOWN, down);
-    }
-    else if(distance < 0){
+    else if (depth_goal < depth_current)
         set_speed(SPEED_UP, up);
-    }else{
+    else
         set_speed(0, down);
-    }
-    // output.println(encoder.get_goal_pulses());
-    // output.println(encoder.get_pulses_A());
-    
+
     // INFO | function can be accelerated and made more precise with interrupts or ATMEL hardware encoder core
-    bool run = true;
-    
+
     output.println("enter loop");
     int i = 0;
-    int32_t goal_pulses = encoder.get_goal_pulses();
-    int32_t pulses;
-    start();
 
-    if(direction == down){
-        while(encoder.get_distance() < distance){
+    start();
+    if (direction == down)
+        while (encoder.get_distance() < distance)
             encoder.step_counter();
-            if (button_left.isPressed())
-        {
-            output.println("Pulses A : " + String(encoder.get_pulses_A()));
-            output.println("Distance : " + String(encoder.get_distance()));
-            button_left.waitPressedAndReleased();
-        }}
-    }else{
-        while(encoder.get_distance() > encoder.get_distance() + distance){
+    else
+        while (encoder.get_distance() > distance)
             encoder.step_counter();
-        }
-    }
     stop();
-    // while (run)
-    // {
-    //     encoder.step_counter();
-    //     pulses = encoder.get_pulses_A();
-    //     if(i==500){
-    //         output.println(pulses);
-    //         i=0;
-    //     }
-    //     if ((direction == down && pulses >= goal_pulses) 
-    //        || (direction == up && pulses <= goal_pulses)
-    //        || endstop)
-    //     {
-    //         run = false;
-    //     }
-    //     i++;
-    // }
+
     output.println("exit loop");
-    // if (_depth <= 0)
-    //     start_origin();
+    
+    // update state
+    depth_current = depth_goal;
+    if (_depth <= 0)
+        start_origin();
 }
 
 /**
@@ -159,9 +131,11 @@ void Motor::start_origin()
     {
         set_speed(100, up);
         start();
-        while (button_spool.getState() == 1);
+        while (button_spool.getState() == 1)
+            ;
         stop(); // should be useless as interrupt is taking care of stopping the motor
         encoder.reset();
+        depth_current = -HEIGHT_FROM_WATER;
     }
     else
     {
@@ -193,7 +167,8 @@ void Motor::stopIfFault()
  */
 void ISR_emergency_stop()
 {
-    if(spool.direction == up){
+    if (spool.direction == up)
+    {
         spool.endstop = true;
         md.setM1Brake(400);
     }
