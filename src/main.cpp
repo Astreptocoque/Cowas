@@ -29,7 +29,8 @@
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
 void before_start_program();
-void go_to_depth(int _depth);
+void main_program_test();
+void main_program();
 void step_dive();
 void step_purge();
 void step_fill_container();
@@ -39,6 +40,7 @@ void step_rewind();
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
 //  #define VIRTUAL_HARDWARE
+#define SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
@@ -151,7 +153,7 @@ void setup()
 
     output.println("system initalized\n");
 
-    // ======== PRE-STARTING EXECUTION =========
+  /*   // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========================");
     output.println("========== Press left button to move spool up ==========================");
     output.println("========== Press right button to move spool down =======================");
@@ -165,54 +167,38 @@ void setup()
     before_start();
     output.println("System checked\n");
 
-    output.println("Programm started\n");
+    output.println("Programm started\n"); */
     
 }
 
 void loop()
 {
-    // spool.set_speed(40, down);
-    // spool.start();
+  main_program();
+  // main_program_test();
+}
 
-    // while (encoder.get_distance() < 100)
-    // {
-    //     encoder.step_counter();
-    //     if (button_left.isPressed())
-    //     {
-    //         output.println("Pulses A : " + String(encoder.get_pulses_A()));
-    //         output.println("Pulses B : " + String(encoder.get_pulses_B()));
-    //         output.println("Pulses Z : " + String(encoder.get_pulses_Z()));
-    //         output.println("Distance : " + String(encoder.get_distance()));
-    //         output.println("Direction : " + String(encoder.get_direction() == e_up ? "up" : "down"));
-    //         button_left.waitPressedAndReleased();
-    //     }
-    //     if(button_right.isPressed()){
-    //         spool.stop();
-    //         button_right.waitPressedAndReleased();
-    //         spool.start();
-    //     }
-    // }
-    // spool.stop();
+void main_program_test()
+{
+     
     spool.start_origin();
-    // delay(2000);
-    // button_left.waitPressedAndReleased();
-    // output.println("=========== go 5 cm");
-    // spool.start(1200);
-    // delay(1000);
-    // button_left.waitPressedAndReleased();
-    // output.println("=========== go 30 cm");
-    // spool.start(30);
-    // delay(1000);
-    // button_left.waitPressedAndReleased();
-    // output.println("=========== go 100 cm");
-    // spool.start(100);
-    // delay(1000);
-    // button_left.waitPressedAndReleased();
-    // output.println("=========== go 1200 cm");
-    // spool.start(1200);
-    // delay(1000);
-    // output.println("=========== go origin cm");
-    // spool.start(-1);
+    button_left.waitPressedAndReleased();
+    output.println("=========== go 100 cm");
+    spool.start(1200);
+    delay(1000);
+    button_left.waitPressedAndReleased();
+    output.println("=========== go 30 cm");
+    spool.start(30);
+    delay(1000);
+    button_left.waitPressedAndReleased();
+    output.println("=========== go 100 cm");
+    spool.start(100);
+    delay(1000);
+    button_left.waitPressedAndReleased();
+    output.println("=========== go 1200 cm");
+    spool.start(1200);
+    delay(1000);
+    output.println("=========== go origin cm");
+    spool.start(-1);
 
     output.println("####### end of trajectory #######");
 
@@ -233,22 +219,11 @@ void loop()
     green_led.on();
     button_start.waitPressedAndReleased();
     green_led.off();
-
-
-
-    // spool.start_origin();
-    // spool.start(33);
-    // button_start.waitPressedAndReleased();
-    // output.println(button_left.getState());
-    // output.println(button_right.getState());
-    // output.println(button_spool.getState());
-    // output.println("");
-    // button_start.waitPressedAndReleased();
-
 }
 
-void go_to_depth(int _depth)
+void main_program()
 {
+    spool.start(30);
 }
 
 void before_start_program()
@@ -287,41 +262,49 @@ void before_start_program()
     }
 }
 
+#ifdef SYSTEM_CHECKUP
 void before_start()
 {
     // check if sensor are operationnal
     bool error = false;
+    
     // check spool switch 1
     spool.start(50, down);
     delay(200);
     spool.stop();
     if (button_spool.getState() == 1)
-    {
         output.println("CHECK | Button spool working");
-    }else{
+    else{
         output.println("ERROR | Button spool not working");
         error = true;
     }
 
+/*     // check container switch
+    if (button_container.getState() == 1)
+        output.println("CHECK | Button container working");
+    else{
+        output.println("ERROR | Button container not working");
+        error = true;
+    } */
+
     //check temperature
     pressure1.read();
-    output.println(pressure1.getTemperature());
-    if(pressure1.getTemperature() > 4){
-        output.println("CHECK | Temperature okay");
+    if(pressure1.getTemperature() > 0){
+        output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
     }else{
-        output.println("ERROR | Temperature too low");
+        output.println("ERROR | Temperature too low (" + String(pressure1.getTemperature()) + ")");
+        error = true;
     }
 
 
     if (error)
     {
-        output.println("FATAL ERROR AT STARTUP");
+        output.println("FATAL ERROR AT STARTUP ");
         while (true)
-        {
             delay(500);
-        }
     }
 }
+#endif
 
 void step_dive(){
 
