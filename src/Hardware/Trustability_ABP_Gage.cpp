@@ -1,11 +1,16 @@
 #include "Trustability_ABP_Gage.h"
 #include <SPI.h>
 #include <Arduino.h>
+#include "Led.h"
 
 #define BAR_FACTORa 7.63e-4
 #define BAR_FACTORb 1.25
 #define TEMP_FACTOREa 9.77e-2
 #define TEMP_FACTOREb 50
+
+extern Led blue_led;
+extern Trustability_ABP_Gage pressure1;
+extern Trustability_ABP_Gage pressure2;
 
 /**
  * @brief Constructor for a pressure sensor
@@ -58,7 +63,7 @@ void Trustability_ABP_Gage::read()
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
 
         if(pressure > max_pressure){
-            output.println("!!! Pressure to high on sensor " + ID + " !!!");
+            output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }
     }
     else
@@ -69,14 +74,46 @@ void Trustability_ABP_Gage::read()
 
 float Trustability_ABP_Gage::getPressure()
 {
+    read();
     return pressure;
 }
 
 float Trustability_ABP_Gage::getTemperature()
 {
+    read();
     return temperature;
+}
+
+float Trustability_ABP_Gage::getMaxPressure()
+{
+    return max_pressure;
+}
+
+String Trustability_ABP_Gage::getID()
+{
+    return ID;
 }
 
 void ISR_pressure_checking(){
 
+}
+
+/**
+ * @brief Pressure checking, every 1 seconds
+ *        System function, place wherever
+ *        No need to call
+ * 
+ */
+void TC3_Handler(){
+    TC_GetStatus(TC1, 0);
+    pressure1.getPressure();
+    // if(pressure > pressure1.getMaxPressure()){
+        // output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
+    // }
+    // pressure = pressure2.getPressure();
+    // if(pressure > pressure2.getMaxPressure()){
+    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
+    // }
+
+    blue_led.switch_state();
 }

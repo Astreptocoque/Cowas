@@ -39,6 +39,10 @@ public:
         output.println("Temperature from sensor " + ID + " fetched");
         return temperature;
     }
+    virtual float getMaxPressure(){
+        output.println("Pressure max from sensor " + ID + " is " + max_pressure + " bar");
+        return max_pressure;
+    }
 };
 
 #endif

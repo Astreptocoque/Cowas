@@ -9,6 +9,7 @@ class Led_interface {
   
   protected:
     byte control_pin;
+    bool state;
     String ID = "no_ID";
     
   public:
@@ -26,5 +27,9 @@ class Led_interface {
     virtual void off(){
         output.println("LED " + ID + " OFF");
     }
+    virtual void switch_state(){
+        output.println("LED " + ID + " switched");
+
+        }
 };
 #endif

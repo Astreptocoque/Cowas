@@ -21,7 +21,6 @@ DualVNH5019MotorShield md(INA1, INB1, PWM1, EN1DIAG1, CS1, INA2, INB2, PWM2, EN2
 extern Encoder encoder;
 extern Motor spool;
 extern Button button_spool;
-extern Button button_left;
 
 /**
  * @brief Constructor for a diaphragm Motor
@@ -169,9 +168,10 @@ void Motor::stopIfFault()
  */
 void ISR_emergency_stop()
 {
-    if (spool.direction == up)
+    if (spool.direction == up && spool.endstop == false)
     {
         spool.endstop = true;
         md.setM1Brake(400);
+        output.println("Endstop touched");
     }
 }

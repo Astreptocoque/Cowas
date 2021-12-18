@@ -25,11 +25,13 @@
 #include "samples.h"
 #include "Settings.h"
 #include "Critical_error.h"
+#include "Timer.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
 void before_start_program();
-void main_program_test();
+void depths_test();
+void tests();
 void main_program();
 void step_dive();
 void step_purge();
@@ -120,6 +122,8 @@ Button button_spool;     // normally closed
 Button button_left;      // normally open
 Button button_right;     // normally open
 Potentiometer potentiometer;
+struct Timer timer_control_pressure1;
+
 #endif
 
 void setup()
@@ -128,6 +132,8 @@ void setup()
     // ========== SYSTEM INITIALIZATION ============
     output.begin(terminal);
     SPI.begin();
+    timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
+
     // ========== HARDWARE INITIALIZATION ==========
     blue_led.begin(BLUE_LED_PIN, "blue");
     green_led.begin(GREEN_LED_PIN, "green");
@@ -167,6 +173,7 @@ void setup()
     before_start();
     output.println("System checked\n");
 
+
     output.println("Programm started\n");
     
 }
@@ -174,10 +181,20 @@ void setup()
 void loop()
 {
 //   main_program();
-  main_program_test();
+//   depths_test();
+  tests();
 }
 
-void main_program_test()
+void tests(){
+    
+    timerStart(timer_control_pressure1);
+    delay(5000);
+    timerStop(timer_control_pressure1);
+    delay(5000);
+    
+}
+
+void depths_test()
 {
      
     spool.start_origin();
@@ -292,7 +309,6 @@ void before_start()
     } */
 
     //check temperature
-    pressure1.read();
     if(pressure1.getTemperature() > 0){
         output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
     }else{

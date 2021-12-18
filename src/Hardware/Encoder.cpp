@@ -94,6 +94,15 @@ int32_t Encoder::get_goal_pulses()
     return goal_pulses_A;
 }
 
+/**
+ * @brief Step counter of rotary encoder
+ *        As we work at very low speed, this is enough.
+ *        Function can be accelerated with direct microprocessor control as Arduino Due
+ *        integrate an inbuilt quadrature encoder
+ *        See datasheet page 871 or "36.6.14 Quadrature Decoder"
+ * 
+ * @return int32_t the value of the step. equivalent to get_pulses_A
+ */
 int32_t Encoder::step_counter()
 {
     static int A_state;

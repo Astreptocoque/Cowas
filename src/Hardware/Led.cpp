@@ -19,9 +19,17 @@ void Led::begin(byte _control_pin, String _ID)
 void Led::on()
 {
     digitalWrite(control_pin, HIGH);
+    state = 1;
 }
 
 void Led::off()
 {
     digitalWrite(control_pin, LOW);
+    state = 0;
+}
+
+void Led::switch_state()
+{
+    state = !state;
+    digitalWrite(control_pin, state);
 }

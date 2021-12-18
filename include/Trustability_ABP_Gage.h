@@ -18,9 +18,12 @@ public:
     void read();
     float getPressure();
     float getTemperature();
+    float getMaxPressure();
+    String getID();
+
     
 };
 
 void ISR_pressure_checking();
-
+void TC3_Handler();
 #endif

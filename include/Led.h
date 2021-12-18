@@ -10,5 +10,6 @@ class Led : public Led_interface
     void begin(byte _control_pin, String _ID);
     void on();
     void off();
+    void switch_state();
 };
 #endif
