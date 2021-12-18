@@ -66,6 +66,7 @@ void step_rewind();
 #define BUTTON_LEFT_PIN 25
 #define BUTTON_RIGHT_PIN 26
 #define POTENTIOMETER_PIN A0
+#define SD_CARD_PIN 4 // need to change in Serial_output.h
 
 // ==============================================================================
 // ====> NO CONSTRUCTOR EXPLICITELY DEFINED
@@ -130,7 +131,7 @@ void setup()
 {
 
     // ========== SYSTEM INITIALIZATION ============
-    output.begin(terminal);
+    output.begin(sdCard);
     SPI.begin();
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
 

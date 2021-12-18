@@ -4,14 +4,16 @@
 using namespace std;
 
 #include <Arduino.h>
+#include <SD.h>
 
-enum serial_type_enum{terminal, SD};
+enum serial_type_enum{terminal, sdCard, both};
 
 class Serial_output
 {
 
 private:
     serial_type_enum serial_type;
+    File dataFile;
 
 public:
     // Serial_output(uint8_t _serial_type);
@@ -36,10 +38,20 @@ void begin(serial_type_enum _serial_type){
             delay(100);
             Serial.println("Serial initialized");
             break;
+        case sdCard:
+            SD.begin(4); // slave select
+            break;
+        case both:
+            Serial.begin(9600);
+            delay(100);
+            Serial.println("Serial initialized");
+            SD.begin(4);
+            delay(100);
+            Serial.println("SD card initialized");
+            break;
         default:
             Serial.begin(9600);
             Serial.println("Error initalizing serial");
-        case SD:
             break;
     }
 }
@@ -51,7 +63,22 @@ void print(T output)
         case terminal:
             Serial.print(output);
             break;
-        case SD:
+        case sdCard:
+            dataFile = SD.open("datalog.txt", FILE_WRITE);
+            if(dataFile){
+                dataFile.print(String(output));
+                dataFile.close();
+            }
+            break;
+        case both:
+            dataFile = SD.open("datalog.txt", FILE_WRITE);
+            if(dataFile){
+                dataFile.print(String(output));
+                dataFile.close();
+            }
+            Serial.print(output);
+            break;
+        default:
             break;
     }
 }
@@ -63,7 +90,20 @@ void println(T output)
         case terminal:
             Serial.println(output);
             break;
-        case SD:
+        case sdCard:
+            dataFile = SD.open("datalog.txt", FILE_WRITE);
+            if(dataFile){
+                dataFile.println(String(output));
+                dataFile.close();
+            }
+            break;
+        case both:
+            dataFile = SD.open("datalog.txt", FILE_WRITE);
+            if(dataFile){
+                dataFile.println(String(output));
+                dataFile.close();
+            }
+            Serial.println(output);
             break;
     }
 }
@@ -76,8 +116,10 @@ int read(){
             if (data >= 48 && data <= 57) data = data-48;
             else data = 0;
             break;
-        case SD:
+        case sdCard:
             data = 0;
+            break;
+        case both:
             break;
         default:
             data = 0;
@@ -91,7 +133,9 @@ int available(){
         case terminal:
             data = Serial.available();
             break;
-        case SD:
+        case sdCard:
+            break;
+        case both:
             break;
         default:
             data = 0;

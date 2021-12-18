@@ -47,8 +47,6 @@ void timerStart(struct Timer pTimer) {
 }
 
 void timerStop(struct Timer pTimer){
-    Tc *tc = pTimer.timer_clock;
-    uint32_t _channel = pTimer.channel;
     IRQn_Type _irq = pTimer.irq;
 
     pmc_disable_periph_clk((uint32_t)_irq);
