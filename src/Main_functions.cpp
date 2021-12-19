@@ -17,6 +17,8 @@
 #include "Serial_device.h"
 #include "Main_functions.h"
 
+#define DELAY_ACTIONS 500
+
 extern Serial_output output;
 extern Serial_device serial;
 extern Led blue_led;
@@ -46,6 +48,7 @@ extern struct Timer timer_control_pressure1;
 void step_dive(int _depth)
 {
     valve_1.set_open_way();
+    delay(DELAY_ACTIONS);
     spool.set_speed(SPEED_DOWN, down);
     spool.start(_depth);
     valve_1.set_close_way();
@@ -54,6 +57,7 @@ void step_dive(int _depth)
 void step_fill_container()
 {
     valve_23.set_I_way();
+    delay(DELAY_ACTIONS);
     pump.set_power(100);
     pump.start();
     while(button_container.getState() == 1);
@@ -66,9 +70,10 @@ void step_purge()
     // add loop for sterivex array
     valve_stx_1_in.set_close_way();
     valve_stx_2_in.set_close_way();
-
     valve_23.set_L_way();
     valve_purge.set_open_way();
+    delay(DELAY_ACTIONS);
+
     pump.set_power(100);
 
     // monitor pressure in parallel
@@ -99,6 +104,7 @@ void step_sampling(int num_sterivex)
         valve_stx_1_out.set_L_way();
         valve_stx_2_out.set_I_way();
     }
+    delay(DELAY_ACTIONS);
 
     pump.set_power(50);
 
@@ -120,6 +126,7 @@ void step_rewind()
 {
     valve_1.set_open_way();
     valve_23.set_L_way();
+    delay(DELAY_ACTIONS);
 
     spool.set_speed(SPEED_UP, up);
     spool.start(-1);
@@ -138,7 +145,8 @@ void step_dry(int num_sterivex)
         valve_stx_1_out.set_I_way();
         valve_stx_2_out.set_L_way();
     }
-
+    delay(DELAY_ACTIONS);
+    
     // TODO : function interrupt for pressure2
     uint32_t currentTime = millis();
     while(millis() - currentTime < DRYING_TIME){
