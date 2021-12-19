@@ -27,21 +27,14 @@
 #include "Critical_error.h"
 #include "Timer.h"
 #include "Serial_device.h"
+#include "Tests.h"
+#include "Main_functions.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
 void before_start_program();
-void test_depth();
-void tests();
-void test_pressure();
-void test_hardware_general();
 void main_program();
-void step_dive();
-void step_purge();
-void step_fill_container();
-void step_sampling();
-void step_flush_water();
-void step_rewind();
+
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
 //  #define VIRTUAL_HARDWARE
@@ -54,9 +47,8 @@ void step_rewind();
 #define GREEN_LED_PIN 23
 #define PRESSURE1_PIN 3
 #define PRESSURE2_PIN 5
-#define VALVE1_PIN 44
-#define VALVE2_PIN 46
-#define VALVE3_PIN 48
+#define VALVE_1_PIN 44
+#define VALVE_23_PIN 46
 #define VALVE_STX_1_IN 36
 #define VALVE_STX_2_IN 38
 #define VALVE_STX_1_OUT 32
@@ -68,11 +60,12 @@ void step_rewind();
 #define ENCODER_Z_PIN 35
 #define BUTTON_START_PIN 24
 #define BUTTON_CONTAINER_PIN 27
-#define BUTTON_SPOOL_PIN 28
+#define BUTTON_SPOOL_UP 28
+#define BUTTON_SPOOL_DOWN 29
 #define BUTTON_LEFT_PIN 25
 #define BUTTON_RIGHT_PIN 26
 #define POTENTIOMETER_PIN A0
-#define SD_CARD_PIN 5 // need to change in Serial_output.h
+#define SD_CARD_PIN 4 // need to change in Serial_output.h
 
 // ==============================================================================
 // ====> NO CONSTRUCTOR EXPLICITELY DEFINED
@@ -101,7 +94,7 @@ Button_interface button_start;
 Button_interface button_left;
 Button_interface button_right;
 Button_interface button_container;
-Button_interface button_spool;
+Button_interface button_spool_up;
 Potentiometer_interface potentiometer;
 #endif
 
@@ -116,9 +109,8 @@ Led blue_led;
 Led green_led;
 Trustability_ABP_Gage pressure1;
 Trustability_ABP_Gage pressure2;
-Valve_3_2 valve1;
-Valve_3_2 valve2;
-Valve_3_2 valve3;
+Valve_2_2 valve_1;
+Valve_3_2 valve_23;
 Valve_2_2 valve_stx_1_in;
 Valve_2_2 valve_stx_2_in;
 Valve_3_2 valve_stx_1_out;
@@ -129,7 +121,8 @@ Motor spool;
 Encoder encoder;
 Button button_start;     // normally open
 Button button_container; // normally ???
-Button button_spool;     // normally closed
+Button button_spool_up;     // normally closed
+Button button_spool_down;
 Button button_left;      // normally open
 Button button_right;     // normally open
 Potentiometer potentiometer;
@@ -151,9 +144,8 @@ void setup()
     green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
     pressure2.begin(PRESSURE2_PIN, 3, "P2");
-    valve1.begin(VALVE1_PIN, "V1");
-    valve2.begin(VALVE2_PIN, "V2");
-    valve3.begin(VALVE3_PIN, "V3");
+    valve_1.begin(VALVE_1_PIN, "V1");
+    valve_23.begin(VALVE_23_PIN, "V_23");
     valve_stx_1_in.begin(VALVE_STX_1_IN, "V_S1_in");
     valve_stx_2_in.begin(VALVE_STX_2_IN, "V_S2_in");
     valve_stx_1_out.begin(VALVE_STX_1_OUT, "V_S1_out");
@@ -167,9 +159,12 @@ void setup()
     button_right.begin(BUTTON_RIGHT_PIN, "B_right");
     button_start.begin(BUTTON_START_PIN, "B_start");
     button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
-    button_spool.begin(BUTTON_SPOOL_PIN, "B_spool");
-    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_PIN), ISR_emergency_stop, FALLING);
-    spool.endstop = false;
+    button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
+    button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_down, FALLING);
+    spool.endstop_up = false;
+    spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
 
     output.println("system initalized\n");
@@ -205,166 +200,6 @@ void loop()
     //   tests();
 }
 
-void tests()
-{
-
-    if (serial.available())
-    {
-        output.println(serial.receive());
-    }
-
-    // output.println(pressure1.getPressure());
-    // output.println(pressure1.getTemperature());
-    // delay(500);
-}
-
-void test_hardware_general(){
-
-    output.println("Valve stx 1 in");
-    button_left.waitPressedAndReleased();
-    valve_stx_1_in.switch_way();
-    delay(500);
-    button_left.waitPressedAndReleased();
-    valve_stx_1_in.switch_way();
-
-    output.println("Valve stx 2 in");
-    button_left.waitPressedAndReleased();
-    valve_stx_2_in.switch_way();
-    delay(500);
-    button_left.waitPressedAndReleased();
-    valve_stx_2_in.switch_way();
-
-    output.println("Valve stx 1 out");
-    button_left.waitPressedAndReleased();
-    valve_stx_1_out.switch_way();
-    delay(500);
-    button_left.waitPressedAndReleased();
-    valve_stx_1_out.switch_way();
-
-    output.println("Valve stx 2 out");
-    button_left.waitPressedAndReleased();
-    valve_stx_2_out.switch_way();
-    delay(500);
-    button_left.waitPressedAndReleased();
-    valve_stx_2_out.switch_way();
-
-    output.println("Pump vaccum");
-    button_left.waitPressedAndReleased();
-    pump_vacuum.start();
-    delay(500);
-    button_left.waitPressedAndReleased();
-    pump_vacuum.stop();
-    // output.println("Valve stx 1 in");
-    // button_left.waitPressedAndReleased();
-    // valve_stx_1_in.set_open_way();
-    // delay(500);
-    // button_left.waitPressedAndReleased();
-    // valve_stx_1_in.set_close_way();
-
-    // output.println("Valve stx 2 in");
-    // button_left.waitPressedAndReleased();
-    // valve_stx_2_in.set_open_way();
-    // delay(500);
-    // button_left.waitPressedAndReleased();
-    // valve_stx_2_in.set_close_way();
-
-    // output.println("Valve stx 1 out");
-    // button_left.waitPressedAndReleased();
-    // valve_stx_1_out.set_I_way();
-    // delay(500);
-    // button_left.waitPressedAndReleased();
-    // valve_stx_1_out.set_L_way();
-
-    // output.println("Valve stx 2 out");
-    // button_left.waitPressedAndReleased();
-    // valve_stx_2_out.set_I_way();
-    // delay(500);
-    // button_left.waitPressedAndReleased();
-    // valve_stx_2_out.set_L_way();
-
-    // output.println("Pump vaccum");
-    // button_left.waitPressedAndReleased();
-    // pump_vacuum.start();
-    // delay(500);
-    // button_left.waitPressedAndReleased();
-    // pump_vacuum.stop();
-    
-}
-
-void test_serial_device(){
-    if (Serial1.available())
-    {
-        output.println(Serial1.read());
-        output.println("");
-    }
-}
-
-void test_pressure(){
-
-    int pot_last_value = potentiometer.get_value(0, 100);
-    int pot_value = 0;
-    int speedy = 60;
-    while (!button_start.isPressed())
-    {
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        {
-            speedy = pot_value;
-            pot_last_value = pot_value;
-            output.println("speed " + String(speedy));
-        }
-        if (button_left.isPressed())
-        {
-            button_left.waitPressedAndReleased();
-            pump.set_power(speedy);
-            pump.start();
-            
-        }
-        if (button_right.isPressed())
-        {
-           pump.stop();
-            button_right.waitPressedAndReleased();
-
-        }
-
-        output.println("P1 " + String(pressure1.getPressure()) + "  |   P2 " + String(pressure2.getPressure()));
-        delay(200);
-    }
-}
-
-void test_depth()
-{
-
-    spool.start_origin();
-    button_start.waitPressedAndReleased();
-    output.println("=========== go 10 cm");
-    spool.start(10);
-    delay(1000);
-    button_start.waitPressedAndReleased();
-    output.println("=========== go 30 cm");
-    spool.start(30);
-    delay(1000);
-    button_start.waitPressedAndReleased();
-    output.println("=========== go 40 cm");
-    spool.start(40);
-    delay(1000);
-    button_start.waitPressedAndReleased();
-    output.println("=========== go 30 cm");
-    spool.start(30);
-    delay(1000);
-    button_start.waitPressedAndReleased();
-    output.println("=========== go origin cm");
-    spool.start(0);
-    button_start.waitPressedAndReleased();
-    output.println("=========== go origin cm");
-    spool.start(-1);
-
-    output.println("####### end of trajectory #######");
-
-    green_led.on();
-    button_start.waitPressedAndReleased();
-    green_led.off();
-}
 
 void main_program()
 {
@@ -417,7 +252,7 @@ void before_start()
     spool.start(20, down);
     delay(200);
     spool.stop();
-    if (button_spool.getState() == 1)
+    if (button_spool_up.getState() == 1)
         output.println("CHECK | Button spool working");
     else
     {
@@ -453,26 +288,3 @@ void before_start()
 }
 #endif
 
-void step_dive()
-{
-}
-
-void step_purge()
-{
-}
-
-void step_fill_container()
-{
-}
-
-void step_sampling()
-{
-}
-
-void step_flush_water()
-{
-}
-
-void step_rewind()
-{
-}

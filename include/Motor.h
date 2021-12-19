@@ -12,7 +12,8 @@ protected:
     int depth_goal;
 
 public:
-    bool endstop = false; // public for interrupt
+    bool endstop_down = false; // public for interrupt
+    bool endstop_up = false;
     void begin();
     void set_speed(int _speed, motor_direction _direction);
     void start();
@@ -23,6 +24,7 @@ public:
     void stopIfFault();
 };
 
-void ISR_emergency_stop();
+void ISR_emergency_stop_down();
+void ISR_emergency_stop_up();
 
 #endif

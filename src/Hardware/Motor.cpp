@@ -14,13 +14,14 @@ unsigned char CS1 = A11;     // Non attributed// OUTPUT - motor 1 current sense
 unsigned char INA2 = 52;     // Non attributed// INPUT - motor 2 direction input A
 unsigned char INB2 = 50;     // Non attributed// INPUT - motor 2 direction input B
 unsigned char PWM2 = 48;     // Non attributed// INPUT - motor 2 speed input
-unsigned char EN2DIAG2 = 46; // Non attributed// OUTPUT - motor 2 enable input/fault output
+unsigned char EN2DIAG2 = 47; // Non attributed// OUTPUT - motor 2 enable input/fault output
 unsigned char CS2 = A10;     // Non attributed// OUTPUT - motor 2 current sense
 
 DualVNH5019MotorShield md(INA1, INB1, PWM1, EN1DIAG1, CS1, INA2, INB2, PWM2, EN2DIAG2, CS2);
 extern Encoder encoder;
 extern Motor spool;
-extern Button button_spool;
+extern Button button_spool_up;
+extern Button button_spool_down;
 
 /**
  * @brief Constructor for a diaphragm Motor
@@ -49,13 +50,14 @@ void Motor::set_speed(int _speed, motor_direction _direction)
 void Motor::start()
 {
     // security at end stop
-    if (direction == up && endstop)
+    if ((direction == up && endstop_up) || (direction == down && endstop_down))
     {
         output.println("Reach end of tube, order cancelled | cannot wind up more");
     }
     else
     {
-        endstop = false;
+        endstop_up = false;
+        endstop_down = false;
         // set here direction of motor
         md.setM1Speed(speed * (direction == up ? 1 : -1));
         Motor_interface::start();
@@ -126,7 +128,7 @@ void Motor::start(int _depth)
 void Motor::start_origin()
 {
     // check that sensor is working
-    if (button_spool.getState() == 1)
+    if (button_spool_up.getState() == 1)
     {
         
         set_speed(30, up);
@@ -134,7 +136,7 @@ void Motor::start_origin()
         Motor_interface::start_origin();
 
         start();
-        while (button_spool.getState() == 1)
+        while (button_spool_up.getState() == 1)
             ;
         stop(); // should be useless as interrupt is taking care of stopping the motor
         encoder.reset();
@@ -168,12 +170,27 @@ void Motor::stopIfFault()
  * Do not serial print here, cause crash
  *
  */
-void ISR_emergency_stop()
+void ISR_emergency_stop_up()
 {
-    if (spool.direction == up && spool.endstop == false)
+    if (spool.direction == up && spool.endstop_up == false)
     {
-        spool.endstop = true;
+        spool.endstop_up = true;
         md.setM1Brake(400);
-        output.println("Endstop touched");
+        output.println("Endstop up touched");
+    }
+}
+
+/**
+ * @brief Interrupt function
+ * Do not serial print here, cause crash
+ *
+ */
+void ISR_emergency_stop_down()
+{
+    if (spool.direction == down && spool.endstop_down == false)
+    {
+        spool.endstop_down = true;
+        md.setM1Brake(400);
+        output.println("Endstop down touched");
     }
 }
