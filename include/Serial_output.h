@@ -37,6 +37,8 @@ public:
  */
     void begin(serial_type_enum _serial_type)
     {
+                    
+        int i = 0;
         serial_type = _serial_type;
         bool validated = false;
         switch (serial_type)
@@ -49,7 +51,8 @@ public:
         case sdCard:
             validated = SD.begin(PIN_SS_SD_CARD);
             delay(100);
-            if (validated){
+            if (validated)
+            {
                 Serial.println("SD card initialized");
             }
             else
@@ -61,14 +64,20 @@ public:
             Serial.begin(9600);
             delay(100);
             Serial.println("Serial initialized");
-            validated = SD.begin(PIN_SS_SD_CARD);
-            delay(100);
-            if (validated){
-                Serial.println("SD card initialized");
-            }
-            else
+            while (i < 3 || validated)
             {
-                Serial.println("SD card failed initalization");
+                validated = SD.begin(PIN_SS_SD_CARD);
+                delay(100);
+                if (validated)
+                {
+                    Serial.println("SD card initialized");
+                }
+                else
+                {
+                    Serial.println("SD card failed initalization");
+                    Serial.println("Try " + String(i+1));
+                    i++;
+                }
             }
             break;
         default:

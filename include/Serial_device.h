@@ -8,6 +8,9 @@ class Serial_device{
 
     public:
         void begin();
+        void start_communication();
+        struct Date receive_time();
+        void validate();
         template<typename T>
         void send(T output);
         // template<typename T>

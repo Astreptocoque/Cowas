@@ -37,6 +37,5 @@ struct Date{
 void update_time();
 void set_time_manual();
 
-/* Date current_date; */
 
 #endif

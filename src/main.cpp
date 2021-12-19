@@ -105,7 +105,7 @@ Potentiometer_interface potentiometer;
 // ====> do not forget to add the object.begin(PIN) in setup()
 #ifdef REAL_HARDWARE
 Serial_output output;
-Serial_device serial;
+Serial_device esp8266;
 Led blue_led;
 Led green_led;
 Trustability_ABP_Gage pressure1;
@@ -137,7 +137,7 @@ void setup()
 
     // ========== SYSTEM INITIALIZATION ============
     output.begin(both);
-    // serial.begin();
+    esp8266.begin(); 
     SPI.begin();
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
 
@@ -165,12 +165,13 @@ void setup()
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_down, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
 
     output.println("system initalized\n");
+
 
     // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========================");
@@ -182,6 +183,14 @@ void setup()
     before_start_program();
     button_start.waitPressedAndReleased();
     green_led.off();
+
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
+    esp8266.validate();
+
+    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+
 
 #ifdef SYSTEM_CHECKUP
     before_start();

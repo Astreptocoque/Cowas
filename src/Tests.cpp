@@ -58,6 +58,13 @@ void tests()
 
 void test_hardware_general(){
 
+    output.println("Valve purge");
+    button_left.waitPressedAndReleased();
+    valve_purge.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_purge.switch_way();
+
     output.println("Valve stx 1 in");
     button_left.waitPressedAndReleased();
     valve_stx_1_in.switch_way();
