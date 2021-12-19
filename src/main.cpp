@@ -22,16 +22,19 @@
 #include "Led.h"
 #include <SPI.h>
 #include "Serial_output.h"
-#include "samples.h"
+#include "sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
 #include "Timer.h"
+#include "Serial_device.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
 void before_start_program();
-void depths_test();
+void test_depth();
 void tests();
+void test_pressure();
+void test_hardware_general();
 void main_program();
 void step_dive();
 void step_purge();
@@ -42,7 +45,7 @@ void step_rewind();
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
 //  #define VIRTUAL_HARDWARE
-#define SYSTEM_CHECKUP
+// #define SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
@@ -50,13 +53,16 @@ void step_rewind();
 #define BLUE_LED_PIN 22
 #define GREEN_LED_PIN 23
 #define PRESSURE1_PIN 3
-// #define PRESSURE2_PIN
-#define VALVE1_PIN 30
-#define VALVE2_PIN 32
-#define VALVE3_PIN 34
-#define VALVE_STERIVEX1_PIN 36
-#define VALVE_STERIVEX2_PIN 38
+#define PRESSURE2_PIN 5
+#define VALVE1_PIN 44
+#define VALVE2_PIN 46
+#define VALVE3_PIN 48
+#define VALVE_STX_1_IN 36
+#define VALVE_STX_2_IN 38
+#define VALVE_STX_1_OUT 32
+#define VALVE_STX_2_OUT 40
 #define PUMP_PIN 8
+#define PUMP_VACUUM 34
 #define ENCODER_A_PIN 31
 #define ENCODER_B_PIN 33
 #define ENCODER_Z_PIN 35
@@ -66,7 +72,7 @@ void step_rewind();
 #define BUTTON_LEFT_PIN 25
 #define BUTTON_RIGHT_PIN 26
 #define POTENTIOMETER_PIN A0
-#define SD_CARD_PIN 4 // need to change in Serial_output.h
+#define SD_CARD_PIN 5 // need to change in Serial_output.h
 
 // ==============================================================================
 // ====> NO CONSTRUCTOR EXPLICITELY DEFINED
@@ -105,16 +111,20 @@ Potentiometer_interface potentiometer;
 // ====> do not forget to add the object.begin(PIN) in setup()
 #ifdef REAL_HARDWARE
 Serial_output output;
+Serial_device serial;
 Led blue_led;
 Led green_led;
 Trustability_ABP_Gage pressure1;
-// Trustability_ABP_Gage pressure2;
+Trustability_ABP_Gage pressure2;
 Valve_3_2 valve1;
 Valve_3_2 valve2;
 Valve_3_2 valve3;
-Valve_2_2 valve_sterivex1;
-Valve_2_2 valve_sterivex2;
+Valve_2_2 valve_stx_1_in;
+Valve_2_2 valve_stx_2_in;
+Valve_3_2 valve_stx_1_out;
+Valve_3_2 valve_stx_2_out;
 Pump pump;
+Pump pump_vacuum;
 Motor spool;
 Encoder encoder;
 Button button_start;     // normally open
@@ -131,7 +141,8 @@ void setup()
 {
 
     // ========== SYSTEM INITIALIZATION ============
-    output.begin(sdCard);
+    output.begin(both);
+    // serial.begin();
     SPI.begin();
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
 
@@ -139,13 +150,16 @@ void setup()
     blue_led.begin(BLUE_LED_PIN, "blue");
     green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
-    // pressure2.begin(PRESSURE2_PIN);
+    pressure2.begin(PRESSURE2_PIN, 3, "P2");
     valve1.begin(VALVE1_PIN, "V1");
     valve2.begin(VALVE2_PIN, "V2");
     valve3.begin(VALVE3_PIN, "V3");
-    valve_sterivex1.begin(VALVE_STERIVEX1_PIN, "VS1");
-    valve_sterivex2.begin(VALVE_STERIVEX2_PIN, "VS2");
-    pump.begin(PUMP_PIN, "P1");
+    valve_stx_1_in.begin(VALVE_STX_1_IN, "V_S1_in");
+    valve_stx_2_in.begin(VALVE_STX_2_IN, "V_S2_in");
+    valve_stx_1_out.begin(VALVE_STX_1_OUT, "V_S1_out");
+    valve_stx_2_out.begin(VALVE_STX_2_OUT, "V_S2_out");
+    pump.begin(PUMP_PIN, true, "P1");
+    pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
     // attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
@@ -171,32 +185,156 @@ void setup()
     button_start.waitPressedAndReleased();
     green_led.off();
 
+#ifdef SYSTEM_CHECKUP
     before_start();
     output.println("System checked\n");
-
+#endif
 
     output.println("Programm started\n");
-    
+
+    // Sample sample(13, 15, 30);
+    // Serial1.begin(115200);
 }
 
 void loop()
 {
-//   main_program();
-//   depths_test();
-  tests();
+    test_hardware_general();
+    // test_pressure();
+    //   main_program();
+    //   test_depth();
+    //   tests();
 }
 
-void tests(){
-    
-    output.println(pressure1.getPressure());
-    output.println(pressure1.getTemperature());
-    delay(500);
-    
-}
-
-void depths_test()
+void tests()
 {
-     
+
+    if (serial.available())
+    {
+        output.println(serial.receive());
+    }
+
+    // output.println(pressure1.getPressure());
+    // output.println(pressure1.getTemperature());
+    // delay(500);
+}
+
+void test_hardware_general(){
+
+    output.println("Valve stx 1 in");
+    button_left.waitPressedAndReleased();
+    valve_stx_1_in.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_stx_1_in.switch_way();
+
+    output.println("Valve stx 2 in");
+    button_left.waitPressedAndReleased();
+    valve_stx_2_in.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_stx_2_in.switch_way();
+
+    output.println("Valve stx 1 out");
+    button_left.waitPressedAndReleased();
+    valve_stx_1_out.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_stx_1_out.switch_way();
+
+    output.println("Valve stx 2 out");
+    button_left.waitPressedAndReleased();
+    valve_stx_2_out.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_stx_2_out.switch_way();
+
+    output.println("Pump vaccum");
+    button_left.waitPressedAndReleased();
+    pump_vacuum.start();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    pump_vacuum.stop();
+    // output.println("Valve stx 1 in");
+    // button_left.waitPressedAndReleased();
+    // valve_stx_1_in.set_open_way();
+    // delay(500);
+    // button_left.waitPressedAndReleased();
+    // valve_stx_1_in.set_close_way();
+
+    // output.println("Valve stx 2 in");
+    // button_left.waitPressedAndReleased();
+    // valve_stx_2_in.set_open_way();
+    // delay(500);
+    // button_left.waitPressedAndReleased();
+    // valve_stx_2_in.set_close_way();
+
+    // output.println("Valve stx 1 out");
+    // button_left.waitPressedAndReleased();
+    // valve_stx_1_out.set_I_way();
+    // delay(500);
+    // button_left.waitPressedAndReleased();
+    // valve_stx_1_out.set_L_way();
+
+    // output.println("Valve stx 2 out");
+    // button_left.waitPressedAndReleased();
+    // valve_stx_2_out.set_I_way();
+    // delay(500);
+    // button_left.waitPressedAndReleased();
+    // valve_stx_2_out.set_L_way();
+
+    // output.println("Pump vaccum");
+    // button_left.waitPressedAndReleased();
+    // pump_vacuum.start();
+    // delay(500);
+    // button_left.waitPressedAndReleased();
+    // pump_vacuum.stop();
+    
+}
+
+void test_serial_device(){
+    if (Serial1.available())
+    {
+        output.println(Serial1.read());
+        output.println("");
+    }
+}
+
+void test_pressure(){
+
+    int pot_last_value = potentiometer.get_value(0, 100);
+    int pot_value = 0;
+    int speedy = 60;
+    while (!button_start.isPressed())
+    {
+        pot_value = potentiometer.get_value(0, 100);
+        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
+        {
+            speedy = pot_value;
+            pot_last_value = pot_value;
+            output.println("speed " + String(speedy));
+        }
+        if (button_left.isPressed())
+        {
+            button_left.waitPressedAndReleased();
+            pump.set_power(speedy);
+            pump.start();
+            
+        }
+        if (button_right.isPressed())
+        {
+           pump.stop();
+            button_right.waitPressedAndReleased();
+
+        }
+
+        output.println("P1 " + String(pressure1.getPressure()) + "  |   P2 " + String(pressure2.getPressure()));
+        delay(200);
+    }
+}
+
+void test_depth()
+{
+
     spool.start_origin();
     button_start.waitPressedAndReleased();
     output.println("=========== go 10 cm");
@@ -274,19 +412,20 @@ void before_start()
 {
     // check if sensor are operationnal
     bool error = false;
-    
+
     // check spool switch 1
     spool.start(20, down);
     delay(200);
     spool.stop();
     if (button_spool.getState() == 1)
         output.println("CHECK | Button spool working");
-    else{
+    else
+    {
         output.println("ERROR | Button spool not working");
         error = true;
     }
 
-/*     // check container switch
+    /*     // check container switch
     if (button_container.getState() == 1)
         output.println("CHECK | Button container working");
     else{
@@ -295,13 +434,15 @@ void before_start()
     } */
 
     //check temperature
-    if(pressure1.getTemperature() > 0){
+    if (pressure1.getTemperature() > 0)
+    {
         output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
-    }else{
+    }
+    else
+    {
         output.println("ERROR | Temperature too low (" + String(pressure1.getTemperature()) + ")");
         error = true;
     }
-
 
     if (error)
     {
@@ -312,26 +453,26 @@ void before_start()
 }
 #endif
 
-void step_dive(){
-
+void step_dive()
+{
 }
 
-void step_purge(){
-
+void step_purge()
+{
 }
 
-void step_fill_container(){
-
+void step_fill_container()
+{
 }
 
-void step_sampling(){
-
+void step_sampling()
+{
 }
 
-void step_flush_water(){
-
+void step_flush_water()
+{
 }
 
-void step_rewind(){
-
+void step_rewind()
+{
 }

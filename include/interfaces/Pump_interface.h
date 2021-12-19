@@ -12,13 +12,14 @@ class Pump_interface
 protected:
     byte control_pin;
     int power; // refers to power
+    bool pwm; // if pump is controlled by pwm or only HIGH/LOW
     String ID = "no_ID";
 
 public:
-    virtual void begin(byte _control_pin){
+    virtual void begin(byte _control_pin, bool _pwm){
         output.println("Pump " + ID + " initiated");
     }
-    virtual void begin(byte _control_pin, String _ID){
+    virtual void begin(byte _control_pin, bool _PWM, String _ID){
         ID = _ID;
         output.println("Pump " + ID + " initiated");
     }

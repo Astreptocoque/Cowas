@@ -14,18 +14,20 @@ extern Pump pump;
  * @param control_pin Output connection on the board
  *
  */
-void Pump::begin(byte _control_pin)
+void Pump::begin(byte _control_pin, bool _pwm)
 {
     control_pin = _control_pin;
+    pwm = _pwm;
     pinMode(control_pin, INPUT);
     set_power(190); // after 190, flow doesn't increase
     stop();
 }
 
-void Pump::begin(byte _control_pin, String _ID)
+void Pump::begin(byte _control_pin, bool _pwm, String _ID)
 {
     ID = _ID;
     control_pin = _control_pin;
+    pwm = _pwm;
     pinMode(control_pin, OUTPUT);
     set_power(190);
     stop();
@@ -44,13 +46,16 @@ int Pump::get_power(){
 }
 
 void Pump::start(){
-    analogWrite(control_pin, power);
+    if(pwm)
+        analogWrite(control_pin, power);
+    else
+        digitalWrite(control_pin, HIGH);
     Pump_interface::start();
 }
 
-void Pump::start(int time_ms){
+void Pump::start(uint32_t time_ms){
     start();
-    int current_time = millis();
+    uint32_t current_time = millis();
     while(millis() - current_time < time_ms){
         delay(5);
     }
@@ -58,9 +63,11 @@ void Pump::start(int time_ms){
 }
 
 void Pump::stop(){
-    analogWrite(control_pin, 0);
-    Pump_interface::stop();
-    
+    if(pwm)
+        analogWrite(control_pin, 0);
+    else
+        digitalWrite(control_pin, 0);
+    Pump_interface::stop();   
 }
 
 /**

@@ -32,10 +32,10 @@ void Valve_2_2::set_close_way(){
 }
 void Valve_2_2::switch_way()
 {
-    if(state == open_way) state = close_way;
-    else state = open_way;
-    digitalWrite(pin_control, state);
-    Valve_2_2_interface::switch_way();
+    if(state == open_way) 
+        set_close_way();
+    else
+        set_open_way();
 }
 valve_2_2_state Valve_2_2::get_state(){
     return state;

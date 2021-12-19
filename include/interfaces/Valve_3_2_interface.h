@@ -19,13 +19,13 @@ public:
     virtual void begin(byte _pin_control, String _ID)
     {
         ID = _ID;
-        output.println("Valve " + ID+ " initiated");
+        output.println("Valve " + ID + " initiated");
         set_I_way();
     }
 
     virtual void begin(byte _pin_control)
     {
-        output.println("Valve " + ID+ " initiated");
+        output.println("Valve " + ID + " initiated");
         set_I_way();
     }
 
@@ -33,7 +33,7 @@ public:
     {
         if(state == L_way) state = I_way; 
         else state = L_way;
-        output.println("Valve " +ID+ " on " + String((state == I_way?"I":"L")) + " way");
+        output.println("Valve " + ID + " on " + String((state == I_way?"I":"L")) + " way");
 
     }
 

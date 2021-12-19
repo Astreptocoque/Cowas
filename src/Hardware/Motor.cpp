@@ -83,6 +83,8 @@ void Motor::start(int _depth)
     // if complete rewind, set a security distance to stop, then use start_origin function
     if (_depth <= 0)
         _depth = -HEIGHT_FROM_WATER + DISTANCE_FROM_STOP;
+    if(_depth > TUBE_LENGTH)
+        _depth = -HEIGHT_FROM_WATER + TUBE_LENGTH;
 
     depth_goal = _depth;                           // distance from water level
     int distance = depth_goal + HEIGHT_FROM_WATER; // absolute distance from sensor
