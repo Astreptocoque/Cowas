@@ -14,6 +14,11 @@ const uint8_t SPEED_DOWN = 30;          // speed when moving down (slower than u
 const int TUBE_LENGTH = 4900;           // length of tube
 // SYSTEM CONSTANTS
 const int UPDATE_TIME = 5;              // refresh frequency for action i.e. sampling
+const float EMPTY_WATER_THRESHOLD = 0.2;
+const uint32_t DEBOUCHE_CHIOTTE = 10*1000;
+const float VACUUM_TO_ACHIEVE = 0.13;   // vacuum to achieve
+const float VACUUM_MINIMUM = 0.17;      // vacuum before restarting vacuum pump
+const uint32_t DRYING_TIME = 30*1000;    // time for pumping hysteris and heating
 
 struct Time{
     uint8_t hour;

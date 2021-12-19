@@ -49,6 +49,7 @@ void main_program();
 #define PRESSURE2_PIN 5
 #define VALVE_1_PIN 44
 #define VALVE_23_PIN 46
+#define VALVE_PURGE 45
 #define VALVE_STX_1_IN 36
 #define VALVE_STX_2_IN 38
 #define VALVE_STX_1_OUT 32
@@ -111,6 +112,7 @@ Trustability_ABP_Gage pressure1;
 Trustability_ABP_Gage pressure2;
 Valve_2_2 valve_1;
 Valve_3_2 valve_23;
+Valve_2_2 valve_purge;
 Valve_2_2 valve_stx_1_in;
 Valve_2_2 valve_stx_2_in;
 Valve_3_2 valve_stx_1_out;
@@ -146,6 +148,7 @@ void setup()
     pressure2.begin(PRESSURE2_PIN, 3, "P2");
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
+    valve_purge.begin(VALVE_PURGE, "V_purge");
     valve_stx_1_in.begin(VALVE_STX_1_IN, "V_S1_in");
     valve_stx_2_in.begin(VALVE_STX_2_IN, "V_S2_in");
     valve_stx_1_out.begin(VALVE_STX_1_OUT, "V_S1_out");

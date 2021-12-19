@@ -25,6 +25,7 @@ extern Trustability_ABP_Gage pressure1;
 extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
+extern Valve_2_2 valve_purge;
 extern Valve_2_2 valve_stx_1_in;
 extern Valve_2_2 valve_stx_2_in;
 extern Valve_3_2 valve_stx_1_out;
