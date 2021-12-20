@@ -129,6 +129,7 @@ Button button_left;      // normally open
 Button button_right;     // normally open
 Potentiometer potentiometer;
 struct Timer timer_control_pressure1;
+struct Timer timer_control_pressure2;
 
 #endif
 
@@ -140,7 +141,7 @@ void setup()
     esp8266.begin(); 
     SPI.begin();
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
-
+    timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};
     // ========== HARDWARE INITIALIZATION ==========
     blue_led.begin(BLUE_LED_PIN, "blue");
     green_led.begin(GREEN_LED_PIN, "green");
@@ -184,12 +185,12 @@ void setup()
     button_start.waitPressedAndReleased();
     green_led.off();
 
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    esp8266.validate();
+    // struct Date current_date;
+    // esp8266.start_communication();
+    // current_date = esp8266.receive_time();
+    // esp8266.validate();
 
-    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+    // output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
 
 
 #ifdef SYSTEM_CHECKUP
@@ -206,6 +207,18 @@ void setup()
 void loop()
 {
     test_hardware_general();
+
+    // TESTS 1
+    test_1_depth_20m();
+    test_1_depth_40m();
+    test_1_depth_40m_direct();
+
+    // TESTS 2
+    test_2_remplissage_container_1m();
+    test_2_remplissage_container_40m();
+
+    // TESTS 3
+    test_3_sterivex_1();
     // test_pressure();
     //   main_program();
     //   test_depth();

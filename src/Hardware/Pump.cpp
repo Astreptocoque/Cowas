@@ -80,7 +80,25 @@ void TC3_Handler(){
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
     float pressure = pressure1.getPressure();
+    output.println(pressure);
     if(pressure > pressure1.getMaxPressure()){
+        // simple decremental function to reduce pressure
+        pump.set_power(pump.get_power() - 5);
+    }
+    // pressure = pressure2.getPressure();
+    // if(pressure > pressure2.getMaxPressure()){
+    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
+    // }
+
+    blue_led.switch_state();
+}
+
+void TC4_Handler(){
+    TC_GetStatus(TC1, 0);
+    // print if too high is included in .getPressure()
+    float pressure = pressure2.getPressure();
+    output.println(pressure);
+    if(pressure > pressure2.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
     }
