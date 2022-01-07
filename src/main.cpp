@@ -54,7 +54,7 @@ void main_program();
 #define VALVE_STX_2_IN 38
 #define VALVE_STX_1_OUT 32
 #define VALVE_STX_2_OUT 40
-#define PUMP_PIN 8
+#define PUMP_PIN 6
 #define PUMP_VACUUM 34
 #define ENCODER_A_PIN 31
 #define ENCODER_B_PIN 33
@@ -137,7 +137,7 @@ void setup()
 {
 
     // ========== SYSTEM INITIALIZATION ============
-    output.begin(both);
+    output.begin(terminal);
     esp8266.begin(); 
     SPI.begin();
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
@@ -164,9 +164,9 @@ void setup()
     button_start.begin(BUTTON_START_PIN, "B_start");
     button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
-    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
@@ -180,17 +180,19 @@ void setup()
     output.println("========== Press right button to move spool down =======================");
     output.println("========== Press reset button on due button to come back here ==========");
 
-    green_led.on();
-    before_start_program();
-    button_start.waitPressedAndReleased();
-    green_led.off();
+    // green_led.on();
+    // before_start_program();
+    // button_start.waitPressedAndReleased();
+    // green_led.off();
 
-    // struct Date current_date;
-    // esp8266.start_communication();
-    // current_date = esp8266.receive_time();
-    // esp8266.validate();
+    output.println("Get date");
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
+    esp8266.validate();
 
-    // output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+
+    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
 
 
 #ifdef SYSTEM_CHECKUP
@@ -206,19 +208,22 @@ void setup()
 
 void loop()
 {
-    test_hardware_general();
+
+
+
+    // test_hardware_general();
 
     // TESTS 1
-    test_1_depth_20m();
-    test_1_depth_40m();
-    test_1_depth_40m_direct();
+    // test_1_depth_20m();
+    // test_1_depth_40m();
+    // test_1_depth_40m_direct();
 
     // TESTS 2
-    test_2_remplissage_container_1m();
-    test_2_remplissage_container_40m();
+    // test_2_remplissage_container_1m();
+    // test_2_remplissage_container_40m();
 
     // TESTS 3
-    test_3_sterivex_1();
+    // test_3_sterivex_1();
     // test_pressure();
     //   main_program();
     //   test_depth();
@@ -228,7 +233,7 @@ void loop()
 
 void main_program()
 {
-    spool.start(30);
+    
 }
 
 void before_start_program()

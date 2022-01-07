@@ -38,7 +38,8 @@ void Pump::set_flow(int _flow){
 }
 
 void Pump::set_power(int _power){
-    power = map(_power, 0, 255, 0, 100);
+    power = map(_power, 0, 100, 0, 255);
+    power=_power;
 }
 
 int Pump::get_power(){
@@ -80,7 +81,7 @@ void TC3_Handler(){
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
     float pressure = pressure1.getPressure();
-    output.println(pressure);
+    // output.println(pressure);
     if(pressure > pressure1.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
@@ -97,7 +98,7 @@ void TC4_Handler(){
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
     float pressure = pressure2.getPressure();
-    output.println(pressure);
+    // output.println(pressure);
     if(pressure > pressure2.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);

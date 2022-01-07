@@ -109,6 +109,9 @@ void Motor::start(int _depth)
     if (direction == down)
         while (encoder.get_distance() < distance)
             encoder.step_counter();
+            if(depth_current%500==0){
+                output.println(depth_current);
+            }
     else
         while (encoder.get_distance() > distance)
             encoder.step_counter();
@@ -144,8 +147,10 @@ void Motor::start_origin()
     }
     else
     {
-        output.println("Error with spool button | sensor not working");
-        critical_error(1);
+        // output.println("Error with spool button | sensor not working");
+        // critical_error(1);
+        encoder.reset();
+        depth_current = -HEIGHT_FROM_WATER;
     }
 }
 

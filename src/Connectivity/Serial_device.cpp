@@ -23,6 +23,13 @@ void Serial_device::start_communication(){
 }
 
 struct Date Serial_device::receive_time(){
+
+    while(true){
+        if(Serial1.available() > 0){
+            Serial.println(Serial1.parseInt());
+        }
+    }
+
     struct Date date;
     while(Serial1.available() == 0);
     date.time.hour = Serial1.parseInt();

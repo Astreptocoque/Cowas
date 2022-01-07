@@ -61,6 +61,23 @@ void tests()
 void test_hardware_general()
 {
 
+    for(int i = 0; i < 10; i++){
+    output.println("Valve 1");
+    button_left.waitPressedAndReleased();
+    valve_1.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_1.switch_way();
+    }
+
+    for(int i = 0; i < 10; i++){
+    output.println("Valve 23");
+    button_left.waitPressedAndReleased();
+    valve_23.switch_way();
+    delay(500);
+    button_left.waitPressedAndReleased();
+    valve_23.switch_way();
+    }
     output.println("Valve purge");
     button_left.waitPressedAndReleased();
     valve_purge.switch_way();
@@ -273,16 +290,16 @@ void test_1_depth_40m()
 
 void test_1_depth_40m_direct()
 {
-    output.println("TEST 1 - ALTIMETRE 40 direct");
+    output.println("TEST 1 - ALTIMETRE 19m direct");
     uint32_t lastTime = 0;
 
     spool.start_origin();
     blue_led.on();
-    output.println("=========== go 40m");
+    output.println("=========== go 19m");
     button_start.waitPressedAndReleased();
     blue_led.off();
     lastTime = millis();
-    spool.start(40000);
+    spool.start(19000);
     output.println(millis()-lastTime);
 
     blue_led.on();
@@ -294,7 +311,7 @@ void test_1_depth_40m_direct()
     output.println(millis()-lastTime);
 
     green_led.on();
-    output.println("END OF TEST 1 40 meters direct");
+    output.println("END OF TEST 1 19 meters direct");
     button_start.waitPressedAndReleased();
     green_led.off();
 }
@@ -306,7 +323,7 @@ void test_2_remplissage_container_1m(){
     spool.start(100);
     valve_23.set_I_way();
     delay(200);
-    pump.set_power(100);
+    pump.set_power(255);
     timerStart(timer_control_pressure2);
     pump.start();
     while(button_container.getState() == 1);

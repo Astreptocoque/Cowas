@@ -59,12 +59,12 @@ public:
             {
                 Serial.println("SD card failed initalization");
             }
-            break;
+            break; 
         case both:
             Serial.begin(9600);
             delay(100);
             Serial.println("Serial initialized");
-            while (i < 3 || validated)
+            while (i < 3 && !validated)
             {
                 validated = SD.begin(PIN_SS_SD_CARD);
                 delay(100);

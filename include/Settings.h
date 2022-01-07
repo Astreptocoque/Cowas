@@ -7,11 +7,11 @@
 #define MAX_SAMPLE 14             // max samples before refilling
 
 // SPOOL CONSTANTS
-const int HEIGHT_FROM_WATER = 46;       // in centimeters, ref to spool endstop
+const int HEIGHT_FROM_WATER = 115;       // in centimeters, ref to spool endstop
 const uint8_t DISTANCE_FROM_STOP = 5;   // security distance to come back to origin
-const uint8_t SPEED_UP = 80;            // speed when moving up (can be fast, but take water resistance into account)
-const uint8_t SPEED_DOWN = 30;          // speed when moving down (slower than up, weight has to sink)
-const int TUBE_LENGTH = 4900;           // length of tube
+const uint8_t SPEED_UP = 100;            // speed when moving up (can be fast, but take water resistance into account)
+const uint8_t SPEED_DOWN = 100;          // speed when moving down (slower than up, weight has to sink)
+const int TUBE_LENGTH = 49000;           // length of tube
 // SYSTEM CONSTANTS
 const int UPDATE_TIME = 5;              // refresh frequency for action i.e. sampling
 const float EMPTY_WATER_THRESHOLD = 0.2;
