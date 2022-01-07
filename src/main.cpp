@@ -180,28 +180,32 @@ void setup()
     output.println("========== Press right button to move spool down =======================");
     output.println("========== Press reset button on due button to come back here ==========");
 
-    // green_led.on();
+    green_led.on();
+    blue_led.on();
+    output.println("lumière allumee");
     // before_start_program();
-    // button_start.waitPressedAndReleased();
-    // green_led.off();
-
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    esp8266.validate();
+    button_start.waitPressedAndReleased();
+    green_led.off();
+    blue_led.off();
+    output.println("lumière éteinte");
 
 
-    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+    // output.println("Get date");
+    // struct Date current_date;
+    // esp8266.start_communication();
+    // current_date = esp8266.receive_time();
+    // esp8266.validate();
+
+
+    // output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
 
 
 #ifdef SYSTEM_CHECKUP
     before_start();
     output.println("System checked\n");
 #endif
-
+    pinMode(8, OUTPUT);
     output.println("Programm started\n");
-
     // Sample sample(13, 15, 30);
     // Serial1.begin(115200);
 }
@@ -210,7 +214,11 @@ void loop()
 {
 
 
-
+    // step_fill_container();
+    digitalWrite(8, HIGH);
+    step_fill_container();
+    step_purge();
+    button_start.waitPressedAndReleased();
     // test_hardware_general();
 
     // TESTS 1

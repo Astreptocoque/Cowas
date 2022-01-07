@@ -39,7 +39,6 @@ void Pump::set_flow(int _flow){
 
 void Pump::set_power(int _power){
     power = map(_power, 0, 100, 0, 255);
-    power=_power;
 }
 
 int Pump::get_power(){

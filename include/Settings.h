@@ -19,6 +19,7 @@ const uint32_t DEBOUCHE_CHIOTTE = 10*1000;
 const float VACUUM_TO_ACHIEVE = 0.13;   // vacuum to achieve
 const float VACUUM_MINIMUM = 0.17;      // vacuum before restarting vacuum pump
 const uint32_t DRYING_TIME = 30*1000;    // time for pumping hysteris and heating
+const uint32_t PURGE_TIME = 330000;      // time to empty the bottle
 
 struct Time{
     uint8_t hour;

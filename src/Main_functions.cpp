@@ -77,11 +77,13 @@ void step_purge()
     pump.set_power(100);
 
     // monitor pressure in parallel
-    timerStart(timer_control_pressure1);
+    // timerStart(timer_control_pressure1);
     pump.start();
-    while(pressure1.getPressure() > EMPTY_WATER_THRESHOLD);
+    uint32_t time1 = millis();
+    // while(pressure1.getPressure() > EMPTY_WATER_THRESHOLD && millis()-time1 < 40000);
+    while(millis()-time1 < 20000000);
     pump.start(DEBOUCHE_CHIOTTE); // auto-stop
-    timerStop(timer_control_pressure1);
+    // timerStop(timer_control_pressure1);
 
     valve_purge.set_close_way();
 
