@@ -1,8 +1,10 @@
 #include "Serial_device.h"
 #include "Serial_output.h"
 #include "Settings.h"
+#include "GPIO.h"
 
 extern Serial_output output;
+extern GPIO wifi_message;
 
 void Serial_device::begin(){
     Serial1.begin(115200);
@@ -11,24 +13,15 @@ void Serial_device::begin(){
 }
 
 void Serial_device::start_communication(){
-    Serial1.print("1");
-    while(Serial1.available() == 0);
-    int data = Serial.parseInt();
-    output.println(data);
-    output.println(Serial.read());
-    if(data != 2){
-        output.println("Serial with esp8266 failed");
+    // wait message line to be pulled high
+    while(wifi_message.read() == 0){
+        delay(10);
     }
-    Serial1.print("3");
+
+    Serial1.print("1234");
 }
 
 struct Date Serial_device::receive_time(){
-
-    while(true){
-        if(Serial1.available() > 0){
-            Serial.println(Serial1.parseInt());
-        }
-    }
 
     struct Date date;
     while(Serial1.available() == 0);

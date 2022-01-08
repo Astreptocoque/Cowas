@@ -5,7 +5,7 @@
 
 extern Trustability_ABP_Gage pressure1;
 extern Trustability_ABP_Gage pressure2;
-extern Led blue_led;
+extern Led status_led;
 extern Pump pump;
 
 
@@ -90,7 +90,7 @@ void TC3_Handler(){
     //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
     // }
 
-    blue_led.switch_state();
+    status_led.switch_state();
 }
 
 void TC4_Handler(){
@@ -107,5 +107,5 @@ void TC4_Handler(){
     //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
     // }
 
-    blue_led.switch_state();
+    status_led.switch_state();
 }

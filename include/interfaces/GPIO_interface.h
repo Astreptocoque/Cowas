@@ -30,9 +30,9 @@ class GPIO_interface {
     virtual void off(){
         output.println("GPIO " + ID + " OFF");
     }
-    virtual void read(){
+    virtual byte read(){
         output.println("GPIO " + ID + " read");
-
-        }
+        return 1;
+    }
 };
 #endif

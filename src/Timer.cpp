@@ -1,8 +1,6 @@
 
 #include "Timer.h"  
 
-// 
-
 // ===== Timer list =====
 // ISR/IRQ	TC	Channel	Due pins
 // TC0	TC0	0	2, 13
@@ -16,8 +14,6 @@
 // TC8	TC2	2	11, 12
 
 // TC3_HANDLER() located in pressure sensor class
-
-
 
 /**
  * @brief Timer interrupt

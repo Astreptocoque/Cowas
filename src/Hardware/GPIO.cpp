@@ -30,8 +30,8 @@ void GPIO::off()
     state = 0;
 }
 
-void GPIO::read()
+byte GPIO::read()
 {
-    state = !state;
-    digitalRead(pin);
+    state = digitalRead(pin);
+    return state;
 }

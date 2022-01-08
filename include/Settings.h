@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "Serial_output.h"
 
+
 #define MAX_SAMPLE 14             // max samples before refilling
 
 // SPOOL CONSTANTS

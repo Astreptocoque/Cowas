@@ -5,13 +5,14 @@ using namespace std;
 
 #include <Arduino.h>
 #include <SD.h>
+
 #define PIN_SS_SD_CARD 4
 
 enum serial_type_enum
 {
     terminal,
     sdCard,
-    both
+    terminalANDsdCard
 };
 
 class Serial_output
@@ -22,126 +23,68 @@ private:
     File dataFile;
 
 public:
-    // Serial_output(uint8_t _serial_type);
-    // template<typename T>
-    // void print(T output, bool line_break);
-    // template<typename T>
-    // void Serial_output::print(T output);
-    // template<typename T>
-    // void Serial_output::println(T output);
 
-    /**
+/**
  * @brief Choose output of arduino
- * @param _serial_type 1 is serial monitor, 2 is sd card
+ * @param _serial_type Terminal, SDCard or both
  *
  */
     void begin(serial_type_enum _serial_type)
     {
-                    
-        int i = 0;
+
         serial_type = _serial_type;
         bool validated = false;
-        switch (serial_type)
+        if (serial_type == terminal || serial_type == terminalANDsdCard)
         {
-        case terminal: // serial monitor
             Serial.begin(9600);
             delay(100);
             Serial.println("Serial initialized");
-            break;
-        case sdCard:
+        }
+        if (serial_type == sdCard || serial_type == terminalANDsdCard)
+        {
             validated = SD.begin(PIN_SS_SD_CARD);
             delay(100);
             if (validated)
-            {
                 Serial.println("SD card initialized");
-            }
             else
-            {
                 Serial.println("SD card failed initalization");
-            }
-            break; 
-        case both:
-            Serial.begin(9600);
-            delay(100);
-            Serial.println("Serial initialized");
-            while (i < 3 && !validated)
-            {
-                validated = SD.begin(PIN_SS_SD_CARD);
-                delay(100);
-                if (validated)
-                {
-                    Serial.println("SD card initialized");
-                }
-                else
-                {
-                    Serial.println("SD card failed initalization");
-                    Serial.println("Try " + String(i+1));
-                    i++;
-                }
-            }
-            break;
-        default:
-            Serial.begin(9600);
-            Serial.println("Error initalizing serial");
-            break;
         }
     }
 
+    // enable to create multiple declaration from the code types used
+    // templates prohibit to create a declaration and implementation files.
+    // compiler takes it into account
     template <typename T>
     void print(T output)
     {
-        switch (serial_type)
+        if (serial_type == terminal || serial_type == terminalANDsdCard)
+            Serial.print(output);
+
+        if (serial_type == sdCard || serial_type == terminalANDsdCard)
         {
-        case terminal:
-            Serial.print(output);
-            break;
-        case sdCard:
             dataFile = SD.open("datalog.txt", FILE_WRITE);
             if (dataFile)
             {
                 dataFile.print(String(output));
                 dataFile.close();
             }
-            break;
-        case both:
-            dataFile = SD.open("datalog.txt", FILE_WRITE);
-            if (dataFile)
-            {
-                dataFile.print(String(output));
-                dataFile.close();
-            }
-            Serial.print(output);
-            break;
-        default:
-            break;
         }
     }
 
     template <typename T>
     void println(T output)
     {
-        switch (serial_type)
+        if (serial_type == terminal || serial_type == terminalANDsdCard)
+            Serial.println(output);
+
+        if (serial_type == sdCard || serial_type == terminalANDsdCard)
         {
-        case terminal:
-            Serial.println(output);
-            break;
-        case sdCard:
             dataFile = SD.open("datalog.txt", FILE_WRITE);
             if (dataFile)
             {
                 dataFile.println(String(output));
                 dataFile.close();
             }
-            break;
-        case both:
-            dataFile = SD.open("datalog.txt", FILE_WRITE);
-            if (dataFile)
-            {
-                dataFile.println(String(output));
-                dataFile.close();
-            }
-            Serial.println(output);
-            break;
         }
     }
 
@@ -160,7 +103,7 @@ public:
         case sdCard:
             data = 0;
             break;
-        case both:
+        case terminalANDsdCard:
             break;
         default:
             data = 0;
@@ -178,7 +121,7 @@ public:
             break;
         case sdCard:
             break;
-        case both:
+        case terminalANDsdCard:
             break;
         default:
             data = 0;

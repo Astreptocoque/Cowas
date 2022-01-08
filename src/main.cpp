@@ -29,6 +29,7 @@
 #include "Serial_device.h"
 #include "Tests.h"
 #include "Main_functions.h"
+#include "GPIO.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
@@ -37,13 +38,11 @@ void main_program();
 
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
-//  #define VIRTUAL_HARDWARE
 // #define SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
-
-#define BLUE_LED_PIN 22
+#define STATUS_LED_PIN 22
 #define GREEN_LED_PIN 23
 #define PRESSURE1_PIN 3
 #define PRESSURE2_PIN 5
@@ -67,69 +66,38 @@ void main_program();
 #define BUTTON_RIGHT_PIN 26
 #define POTENTIOMETER_PIN A0
 #define SD_CARD_PIN 4 // need to change in Serial_output.h
-
-// ==============================================================================
-// ====> NO CONSTRUCTOR EXPLICITELY DEFINED
-// ====> because nothing works before setup() is called, so initializing code before it
-// ====> in constructor won't work.
-// ====> Workaround : use a begin() function as all arduino libraries do.
-
-// ============= VIRTUAL TESTING =================
-// ====> write here the hardware to test the code virtualy in the terminal output
-// ====> declare hardware with respective interface class
-#ifdef VIRTUAL_HARDWARE
-Serial_output output;
-Led_interface blue_led;
-Led_interface green_led;
-Pressure_interface pressure1;
-Pressure_interface pressure2;
-Valve_3_2_interface valve1;
-Valve_3_2_interface valve2;
-Valve_3_2_interface valve3;
-Valve_2_2_interface valve_sterivex1;
-Valve_2_2_interface valve_sterivex2;
-Pump_interface pump;
-Motor_interface spool;
-Encoder_interface encoder;
-Button_interface button_start;
-Button_interface button_left;
-Button_interface button_right;
-Button_interface button_container;
-Button_interface button_spool_up;
-Potentiometer_interface potentiometer;
-#endif
+#define ESP8266_COMM_PIN 12 // communication signal pin with wifi card
 
 // ============= REAL HARDWARE =================
-// ====> write here the hardware to test with the real machine
-// ====> declare hardware with respective hardware class
-// ====> do not forget to add the object.begin(PIN) in setup()
+// ====> do not forget to add the object.begin() in setup()
 #ifdef REAL_HARDWARE
-Serial_output output;
-Serial_device esp8266;
-Led blue_led;
-Led green_led;
-Trustability_ABP_Gage pressure1;
-Trustability_ABP_Gage pressure2;
-Valve_2_2 valve_1;
-Valve_3_2 valve_23;
-Valve_2_2 valve_purge;
-Valve_2_2 valve_stx_1_in;
-Valve_2_2 valve_stx_2_in;
-Valve_3_2 valve_stx_1_out;
-Valve_3_2 valve_stx_2_out;
-Pump pump;
-Pump pump_vacuum;
-Motor spool;
-Encoder encoder;
-Button button_start;     // normally open
-Button button_container; // normally ???
-Button button_spool_up;     // normally closed
-Button button_spool_down;
-Button button_left;      // normally open
-Button button_right;     // normally open
-Potentiometer potentiometer;
-struct Timer timer_control_pressure1;
-struct Timer timer_control_pressure2;
+Serial_output output;                   // custom print function to handle multiple outputs
+Serial_device esp8266;                  // enable communication with wifi card
+Led status_led;                         // general purpose LED
+Led green_led;                          // general purpose LED, used for start signals
+Trustability_ABP_Gage pressure1;        // see schematics
+Trustability_ABP_Gage pressure2;        // see schematics
+Valve_2_2 valve_1;                      // see schematics
+Valve_3_2 valve_23;                     // see schematics
+Valve_2_2 valve_purge;                  // see schematics
+Valve_2_2 valve_stx_1_in;               // see schematics
+Valve_2_2 valve_stx_2_in;               // see schematics
+Valve_3_2 valve_stx_1_out;              // see schematics
+Valve_3_2 valve_stx_2_out;              // see schematics
+Pump pump;                              // see schematics
+Pump pump_vacuum;                       // see schematics
+Motor spool;                            // see schematics
+Encoder encoder;                        // see schematics
+Button button_start;                    // User button. Normally open
+Button button_container;                // Control button. Normally closed
+Button button_spool_up;                 // Control button. Normally closed
+Button button_spool_down;               // Control button. Normally closed
+Button button_left;                     // User button. Normally open
+Button button_right;                    // User button. Normally open
+Potentiometer potentiometer;            // User rotary knob
+struct Timer timer_control_pressure1;   // Timer for interrupts with pressure sensor 1
+struct Timer timer_control_pressure2;   // Timer for interrupts with pressure sensor 2
+GPIO wifi_message;                      // Input for message line report from wifi card
 
 #endif
 
@@ -137,13 +105,15 @@ void setup()
 {
 
     // ========== SYSTEM INITIALIZATION ============
-    output.begin(terminal);
-    esp8266.begin(); 
     SPI.begin();
+    output.begin(terminal);     // choose output of logs
+    esp8266.begin();            // connect to wifi card
+
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
     timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};
+
     // ========== HARDWARE INITIALIZATION ==========
-    blue_led.begin(BLUE_LED_PIN, "blue");
+    status_led.begin(STATUS_LED_PIN, "blue");
     green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
     pressure2.begin(PRESSURE2_PIN, 3, "P2");
@@ -170,6 +140,7 @@ void setup()
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
+    wifi_message.begin(ESP8266_COMM_PIN, INPUT);
 
     output.println("system initalized\n");
 
@@ -181,30 +152,26 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
 
     green_led.on();
-    blue_led.on();
-    output.println("lumière allumee");
-    // before_start_program();
+    status_led.on();
+    output.println("Before start program");
+    before_start_program();
     button_start.waitPressedAndReleased();
     green_led.off();
-    blue_led.off();
-    output.println("lumière éteinte");
+    status_led.off();
 
 
-    // output.println("Get date");
-    // struct Date current_date;
-    // esp8266.start_communication();
-    // current_date = esp8266.receive_time();
+    output.println("Get date");
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
     // esp8266.validate();
-
-
-    // output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
 
 
 #ifdef SYSTEM_CHECKUP
     before_start();
     output.println("System checked\n");
 #endif
-    pinMode(8, OUTPUT);
     output.println("Programm started\n");
     // Sample sample(13, 15, 30);
     // Serial1.begin(115200);
@@ -215,7 +182,6 @@ void loop()
 
 
     // step_fill_container();
-    digitalWrite(8, HIGH);
     step_fill_container();
     step_purge();
     button_start.waitPressedAndReleased();
