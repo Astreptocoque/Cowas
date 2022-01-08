@@ -14,9 +14,7 @@ void Button::begin(byte _input_pin)
 void Button::begin(byte _input_pin, String _ID)
 {
     ID = _ID;
-    input_pin = _input_pin;
-    pinMode(input_pin, INPUT);
-    update();
+    begin(_input_pin);
 }
 
 void Button::update()

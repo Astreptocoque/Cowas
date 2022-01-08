@@ -28,16 +28,10 @@ void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, 
 }
 void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, const int _pulse_per_rev, const float _diameter, String _ID)
 {
-    pin_signal_A = _pin_signal_A;
-    pin_signal_B = _pin_signal_B;
-    pin_signal_Z = _pin_signal_Z;
-    pulse_per_rev = _pulse_per_rev;
-    diameter = _diameter;
     ID = _ID;
-    pinMode(pin_signal_A, INPUT);
-    pinMode(pin_signal_B, INPUT);
-    pinMode(pin_signal_Z, INPUT);
+    begin(_pin_signal_A, _pin_signal_B, _pin_signal_Z, _pulse_per_rev, _diameter);
 }
+
 int Encoder::get_distance()
 {
     return (int)(rad_per_pulse * diameter * pulses_A);

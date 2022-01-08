@@ -38,35 +38,33 @@ void main_program();
 
 // ============ EXECUTION MODE ===================
 #define REAL_HARDWARE
-// #define SYSTEM_CHECKUP
+// #define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // ====> define here the pins
-#define STATUS_LED_PIN 22
-#define GREEN_LED_PIN 23
-#define PRESSURE1_PIN 3
-#define PRESSURE2_PIN 5
-#define VALVE_1_PIN 44
-#define VALVE_23_PIN 46
-#define VALVE_PURGE 45
-#define VALVE_STX_1_IN 36
-#define VALVE_STX_2_IN 38
-#define VALVE_STX_1_OUT 32
-#define VALVE_STX_2_OUT 40
-#define PUMP_PIN 6
-#define PUMP_VACUUM 34
-#define ENCODER_A_PIN 31
-#define ENCODER_B_PIN 33
-#define ENCODER_Z_PIN 35
-#define BUTTON_START_PIN 24
-#define BUTTON_CONTAINER_PIN 27
-#define BUTTON_SPOOL_UP 28
-#define BUTTON_SPOOL_DOWN 29
-#define BUTTON_LEFT_PIN 25
-#define BUTTON_RIGHT_PIN 26
-#define POTENTIOMETER_PIN A0
-#define SD_CARD_PIN 4 // need to change in Serial_output.h
-#define ESP8266_COMM_PIN 12 // communication signal pin with wifi card
+const uint8_t  STATUS_LED_PIN = 22;
+const uint8_t  GREEN_LED_PIN = 23;
+const uint8_t  PRESSURE1_PIN = 3;
+const uint8_t  PRESSURE2_PIN = 5;
+const uint8_t  VALVE_1_PIN = 44;
+const uint8_t  VALVE_23_PIN = 46;
+const uint8_t  VALVE_PURGE = 45;
+const uint8_t  PUMP_PIN = 6;
+const uint8_t  PUMP_VACUUM = 34;
+const uint8_t  ENCODER_A_PIN = 31;
+const uint8_t  ENCODER_B_PIN = 33;
+const uint8_t  ENCODER_Z_PIN = 35;
+const uint8_t  BUTTON_START_PIN = 24;
+const uint8_t  BUTTON_CONTAINER_PIN = 27;
+const uint8_t  BUTTON_SPOOL_UP = 28;
+const uint8_t  BUTTON_SPOOL_DOWN = 29;
+const uint8_t  BUTTON_LEFT_PIN = 25;
+const uint8_t  BUTTON_RIGHT_PIN = 26;
+const uint8_t  POTENTIOMETER_PIN = A0;
+const uint8_t  SD_CARD_PIN = 4; // need to change in Serial_output.h
+const uint8_t  ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
+const uint8_t VALVE_STX_IN_PIN[NUMBER_SAMPLES] = {36, 38};
+const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40};
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
@@ -80,10 +78,8 @@ Trustability_ABP_Gage pressure2;        // see schematics
 Valve_2_2 valve_1;                      // see schematics
 Valve_3_2 valve_23;                     // see schematics
 Valve_2_2 valve_purge;                  // see schematics
-Valve_2_2 valve_stx_1_in;               // see schematics
-Valve_2_2 valve_stx_2_in;               // see schematics
-Valve_3_2 valve_stx_1_out;              // see schematics
-Valve_3_2 valve_stx_2_out;              // see schematics
+Valve_2_2 valve_stx_in[MAX_SAMPLE];     // see schematics
+Valve_3_2 valve_stx_out[MAX_SAMPLE];    // see schematics
 Pump pump;                              // see schematics
 Pump pump_vacuum;                       // see schematics
 Motor spool;                            // see schematics
@@ -120,10 +116,10 @@ void setup()
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_purge.begin(VALVE_PURGE, "V_purge");
-    valve_stx_1_in.begin(VALVE_STX_1_IN, "V_S1_in");
-    valve_stx_2_in.begin(VALVE_STX_2_IN, "V_S2_in");
-    valve_stx_1_out.begin(VALVE_STX_1_OUT, "V_S1_out");
-    valve_stx_2_out.begin(VALVE_STX_2_OUT, "V_S2_out");
+    for(uint8_t i = 0; i < NUMBER_SAMPLES; i++){
+        valve_stx_in[i].begin(VALVE_STX_IN_PIN[i], "Vstx_in_" + String(i));
+        valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
+    }
     pump.begin(PUMP_PIN, true, "P1");
     pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();

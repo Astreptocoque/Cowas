@@ -74,8 +74,8 @@ void Motor::start(int _speed, motor_direction _direction)
 }
 
 /**
- * @brief go to a given depth
- *        negative number to go out of water
+ * @brief go to a given depth.
+ *        Negative number to go out of water
  *
  * @param _depth in centimeters
  */
