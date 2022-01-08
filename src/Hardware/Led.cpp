@@ -11,9 +11,7 @@ void Led::begin(byte _control_pin)
 void Led::begin(byte _control_pin, String _ID)
 {
     ID = _ID;
-    control_pin = _control_pin;
-    pinMode(control_pin, OUTPUT);
-    off();
+    begin(_control_pin);
 }
 
 void Led::on()

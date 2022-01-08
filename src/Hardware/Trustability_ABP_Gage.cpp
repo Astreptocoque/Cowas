@@ -18,16 +18,13 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
     pin_slave_select = _pin_slave_select;
     pinMode(pin_slave_select, OUTPUT);
     max_pressure = _max_pressure;
-
+    SPIPressure = new SPISettings(800000, MSBFIRST, SPI_MODE0);
 }
 
 void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, String _ID)
 {
-    pin_slave_select = _pin_slave_select;
-    pinMode(pin_slave_select, OUTPUT);
     ID = _ID;
-    max_pressure = _max_pressure;
-    SPIPressure = new SPISettings(800000, MSBFIRST, SPI_MODE0);
+    begin(_pin_slave_select, _max_pressure);
 }
 
 /**

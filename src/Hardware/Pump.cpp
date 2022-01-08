@@ -26,11 +26,7 @@ void Pump::begin(byte _control_pin, bool _pwm)
 void Pump::begin(byte _control_pin, bool _pwm, String _ID)
 {
     ID = _ID;
-    control_pin = _control_pin;
-    pwm = _pwm;
-    pinMode(control_pin, OUTPUT);
-    set_power(190);
-    stop();
+    begin(_control_pin, _pwm);
 }
 
 void Pump::set_flow(int _flow){

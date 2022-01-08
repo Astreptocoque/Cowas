@@ -9,13 +9,10 @@ void GPIO::begin(byte _pin, byte _mode)
     off();
 }
 
-void GPIO::begin(byte _control_pin, byte _mode, String _ID)
+void GPIO::begin(byte _pin, byte _mode, String _ID)
 {
     ID = _ID;
-    pin = _control_pin;
-    mode = _mode;
-    pinMode(pin, (_mode == input_mode ? INPUT:OUTPUT));
-    off();
+    begin(_pin, _mode);
 }
 
 void GPIO::on()

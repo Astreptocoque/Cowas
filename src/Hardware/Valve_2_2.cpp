@@ -1,5 +1,14 @@
 #include "Valve_2_2.h"
 
+
+
+void Valve_2_2::begin(byte _pin_control)
+{
+    pin_control = _pin_control;
+    pinMode(pin_control, OUTPUT);
+    set_close_way();
+}
+
 /**
  * @brief Constructor for a valve 2 port 2 ways
  * @param pin_control Output connection on the board
@@ -8,16 +17,7 @@
 void Valve_2_2::begin(byte _pin_control, String _ID)
 {
     ID = _ID;
-    pin_control = _pin_control;
-    pinMode(pin_control, OUTPUT);
-    set_close_way();
-}
-
-void Valve_2_2::begin(byte _pin_control)
-{
-    pin_control = _pin_control;
-    pinMode(pin_control, OUTPUT);
-    set_close_way();
+    begin(_pin_control);
 }
 
 void Valve_2_2::set_open_way(){
