@@ -27,10 +27,11 @@ const float VACUUM_MINIMUM = 0.17;              // vacuum before restarting vacu
 const uint32_t DRYING_TIME = 30*1000;           // time for pumping hysteris and heating
 
 // System variables
-const int UPDATE_TIME = 5;                  // refresh frequency for action i.e. sampling
+const int UPDATE_TIME = 5;                      // refresh frequency for action i.e. sampling
 const float EMPTY_WATER_THRESHOLD = 0.2;
 const uint32_t DEBOUCHE_CHIOTTE = 10*1000;      // 
-
+const uint32_t PREPARATION_TIME = 60*1000*30;   // system needs 30 minutes preparation before sampling
+const uint8_t PURGE_NUMBER = 2;                 // number of water container purge before sampling
 
 struct Time{
     uint8_t hour;

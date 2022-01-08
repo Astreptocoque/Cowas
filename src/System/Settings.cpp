@@ -19,8 +19,6 @@ void update_time()
     currentMillis = millis();
     elapsedTimeUpdateMillis = currentMillis - lastTimeUpdateMillis;
 
-
-
     seconds = elapsedTimeUpdateMillis/1000;
     minutes = elapsedTimeUpdateMillis/60000;
     hours = elapsedTimeUpdateMillis/3600000;

@@ -16,11 +16,11 @@
 #include "Timer.h"
 #include "Serial_device.h"
 #include "Tests.h"
-#include "Main_functions.h"
+#include "Step_functions.h"
 
 extern Serial_output output;
 extern Serial_device serial;
-extern Led blue_led;
+extern Led status_led;
 extern Led green_led;
 extern Trustability_ABP_Gage pressure1;
 extern Trustability_ABP_Gage pressure2;
@@ -170,26 +170,26 @@ void test_1_depth_20m()
 
 
     spool.start_origin();
-    blue_led.on();
+    status_led.on();
     output.println("=========== go 30cm");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(30);
     output.println(millis()-lastTime);
 
-    blue_led.on();
+    status_led.on();
     output.println("=========== go 1m");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(100);
     output.println(millis()-lastTime);
 
-    blue_led.on();
+    status_led.on();
     output.println("=========== go 2m");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(200);
     output.println(millis()-lastTime);
@@ -197,10 +197,10 @@ void test_1_depth_20m()
     int i = 1;
     while (i < 5)
     {
-        blue_led.on();
+        status_led.on();
         output.println("=========== go " + String(i*5) + "m");
         button_start.waitPressedAndReleased();
-        blue_led.off();
+        status_led.off();
         lastTime = millis();
         spool.start(i*5*100);
         output.println(millis()-lastTime);
@@ -210,20 +210,20 @@ void test_1_depth_20m()
     i = 4;
     while (i > 0)
     {
-        blue_led.on();
+        status_led.on();
         output.println("=========== go " + String(i*5) + "m");
         button_start.waitPressedAndReleased();
-        blue_led.off();
+        status_led.off();
         lastTime = millis();
         spool.start(i*5*100);
         output.println(millis()-lastTime);
         i--;
     }
 
-    blue_led.on();
+    status_led.on();
     output.println("=========== go origin");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(-1);
     output.println(millis()-lastTime);
@@ -240,10 +240,10 @@ void test_1_depth_40m()
     uint32_t lastTime = 0;
 
     spool.start_origin();
-    blue_led.on();
+    status_led.on();
     output.println("=========== go 20m");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(2000);
     output.println(millis()-lastTime);
@@ -251,10 +251,10 @@ void test_1_depth_40m()
     int i = 5;
     while (i < 10)
     {
-        blue_led.on();
+        status_led.on();
         output.println("=========== go " + String(i*5) + "m");
         button_start.waitPressedAndReleased();
-        blue_led.off();
+        status_led.off();
         lastTime = millis();
         spool.start(i*5*100);
         output.println(millis()-lastTime);
@@ -264,20 +264,20 @@ void test_1_depth_40m()
     i = 9;
     while (i > 3)
     {
-        blue_led.on();
+        status_led.on();
         output.println("=========== go " + String(i*5) + "m");
         button_start.waitPressedAndReleased();
-        blue_led.off();
+        status_led.off();
         lastTime = millis();
         spool.start(i*5*100);
         output.println(millis()-lastTime);
         i--;
     }
 
-    blue_led.on();
+    status_led.on();
     output.println("=========== go origin");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(-1);
     output.println(millis()-lastTime);
@@ -294,18 +294,18 @@ void test_1_depth_40m_direct()
     uint32_t lastTime = 0;
 
     spool.start_origin();
-    blue_led.on();
+    status_led.on();
     output.println("=========== go 19m");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(19000);
     output.println(millis()-lastTime);
 
-    blue_led.on();
+    status_led.on();
     output.println("=========== go origin");
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
     lastTime = millis();
     spool.start(-1);
     output.println(millis()-lastTime);
@@ -376,9 +376,9 @@ void test_3_sterivex_1(){
     output.println("Temps " + String(millis()-lastTime));
 
     output.println("Control manuel pompe");
-    blue_led.on();
+    status_led.on();
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
 
     // mnaual contorl
     int pot_last_value = potentiometer.get_value(0, 100);
@@ -434,9 +434,9 @@ void test_3_sterivex_2(){
     output.println("Temps " + String(millis()-lastTime));
 
     output.println("Control manuel pompe");
-    blue_led.on();
+    status_led.on();
     button_start.waitPressedAndReleased();
-    blue_led.off();
+    status_led.off();
 
     // mnaual contorl
     int pot_last_value = potentiometer.get_value(0, 100);

@@ -15,7 +15,7 @@
 #include "Critical_error.h"
 #include "Timer.h"
 #include "Serial_device.h"
-#include "Main_functions.h"
+#include "Step_functions.h"
 
 #define DELAY_ACTIONS 500
 

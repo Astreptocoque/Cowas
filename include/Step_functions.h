@@ -1,5 +1,5 @@
-#ifndef MAIN_FUNCTIONS_H
-#define MAIN_FUNCTIONS_H
+#ifndef STEP_FUNCTION_H
+#define STEP_FUNCTION_H
 
 #include <Arduino.h>
 

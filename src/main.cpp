@@ -10,6 +10,7 @@
  * 
  */
 
+// #include <list>                     // include before arduino.h, otherwise error
 #include <Arduino.h>
 #include "Button.h"
 #include "Trustability_ABP_Gage.h"
@@ -22,14 +23,15 @@
 #include "Led.h"
 #include <SPI.h>
 #include "Serial_output.h"
-#include "sample.h"
+#include "Sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
 #include "Timer.h"
 #include "Serial_device.h"
 #include "Tests.h"
-#include "Main_functions.h"
+#include "Step_functions.h"
 #include "GPIO.h"
+// #include "Samples.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void before_start();
@@ -37,7 +39,6 @@ void before_start_program();
 void main_program();
 
 // ============ EXECUTION MODE ===================
-#define REAL_HARDWARE
 // #define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
@@ -68,7 +69,6 @@ const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40};
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
-#ifdef REAL_HARDWARE
 Serial_output output;                   // custom print function to handle multiple outputs
 Serial_device esp8266;                  // enable communication with wifi card
 Led status_led;                         // general purpose LED
@@ -95,7 +95,6 @@ struct Timer timer_control_pressure1;   // Timer for interrupts with pressure se
 struct Timer timer_control_pressure2;   // Timer for interrupts with pressure sensor 2
 GPIO wifi_message;                      // Input for message line report from wifi card
 
-#endif
 
 void setup()
 {
@@ -163,6 +162,11 @@ void setup()
     // esp8266.validate();
     output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
 
+    // add to test samples
+    add_sample(18, 30, 0, 40);
+    add_sample(19, 30, 1, 20);
+    add_sample(19, 30, 0, 10, 4);
+    display_samples();
 
 #ifdef SYSTEM_CHECKUP
     before_start();
@@ -203,6 +207,18 @@ void loop()
 
 void main_program()
 {
+
+
+    // COWAS sampling
+    step_dive(10);
+    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+        step_fill_container();
+        step_purge();
+    }
+    step_fill_container();
+    step_sampling(1);
+    step_rewind();
+    step_dry(1);
     
 }
 
