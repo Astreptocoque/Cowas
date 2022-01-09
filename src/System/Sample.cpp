@@ -5,7 +5,8 @@
 
 extern Serial_output output;
 
-std::list<Sample> samples; // list of samples
+std::list<Sample> samples;          // list of samples
+uint8_t next_sample_place = 0;      // next sample on real system to be used    
 
 Sample::Sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth)
 {
@@ -55,6 +56,10 @@ uint8_t Sample::get_minutes()
 uint8_t Sample::get_month()
 {
     return date.month;
+}
+
+uint16_t Sample::get_year(){
+    return date.year;
 }
 
 time_t Sample::get_epoch()
@@ -126,6 +131,33 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month
     return index;
 }
 
+time_t get_next_sample_time(){
+
+    auto it = samples.begin();
+
+    return it->get_epoch();
+}
+
+Sample get_next_sample(){
+
+    auto it = samples.begin();
+    Sample sample(it->get_hour(), it->get_minutes(), it->get_day(), it->get_month(), it->get_year(), it->get_depth());
+    return sample;
+}
+
+uint8_t get_next_sample_place(){
+    return next_sample_place;
+}
+
+void validate_sample(){
+    // log the sample
+    display_next_sample();
+     // set next sample on real hardware
+    next_sample_place++;
+    // delete the sample from the known list
+    samples.pop_front();
+}
+
 void display_samples(){
     auto it = samples.begin();
     for(uint8_t i = 0; i < samples.size(); i++){
@@ -136,10 +168,28 @@ void display_samples(){
         String day = String(it->get_day());
         String minutes = String(it->get_minutes());
         String month = String(it->get_month());
+        String year = String(it->get_year());
         String depth = String(it->get_depth());
         String frequency = String(it->get_frequency());
 
-        output.println(hour + "h" + minutes + " on " + day + "." + month + " at depth " + depth + "cm and day frequency " + frequency);
+        output.println(hour + "h" + minutes + " on " + day + "." + month + "." + year + " at depth " + depth + "cm and day frequency " + frequency);
     }
 }
+
+void display_next_sample(){
+    auto it = samples.begin();
+    output.print("Sample on place" + String(next_sample_place) + " executed : ");
+
+    String hour = String(it->get_hour());
+    String day = String(it->get_day());
+    String minutes = String(it->get_minutes());
+    String month = String(it->get_month());
+    String year = String(it->get_year());
+    String depth = String(it->get_depth());
+    String frequency = String(it->get_frequency());
+
+    output.println(hour + "h" + minutes + " on " + day + "." + month + "." + year + " at depth " + depth + "cm and day frequency " + frequency);
+    
+}
+
 

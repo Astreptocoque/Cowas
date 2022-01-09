@@ -29,9 +29,10 @@ const uint32_t DRYING_TIME = 30*1000;           // time for pumping hysteris and
 // System variables
 const int UPDATE_TIME = 5;                      // refresh frequency for action i.e. sampling
 const float EMPTY_WATER_THRESHOLD = 0.2;
-const uint32_t DEBOUCHE_CHIOTTE = 10*1000;      // 
-const uint32_t PREPARATION_TIME = 60*1000*30;   // system needs 30 minutes preparation before sampling
+const uint32_t DEBOUCHE_CHIOTTE = 10*1000;      // milliseconds
+const uint32_t PREPARATION_TIME = 60*30;         // seconds. system needs 30 minutes preparation before sampling
 const uint8_t PURGE_NUMBER = 2;                 // number of water container purge before sampling
+const uint32_t SYNC_TIME = 32400;               // every 9 hours
 
 struct Time{
     uint8_t hour;
@@ -45,11 +46,5 @@ struct Date{
     time_t epoch;
     struct Time time;
 };
-
-
-
-void update_time();
-void set_time_manual();
-
 
 #endif

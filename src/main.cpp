@@ -35,7 +35,7 @@
 // #include "Samples.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
-void before_start();
+void system_checkup();
 void before_start_program();
 void main_program();
 
@@ -154,6 +154,8 @@ void setup()
     current_date = esp8266.receive_time();
     // esp8266.validate();
     setTime(current_date.epoch);
+    // setSyncInterval(SYNC_TIME);
+    // setSyncProvider(esp8266.receive_time());
     time_t t = now();
     output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
 
@@ -172,7 +174,7 @@ void setup()
     status_led.off();
 
 #ifdef SYSTEM_CHECKUP
-    before_start();
+    system_checkup();
     output.println("System checked\n");
 #endif
     output.println("Programm started\n");
@@ -211,17 +213,28 @@ void loop()
 void main_program()
 {
 
+    // DO wifi and communication stuffs
 
-    // COWAS sampling
-    step_dive(10);
-    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+    // when time occurs for a sample to be done
+    if(now() > get_next_sample_time() - PREPARATION_TIME){
+
+        Sample sample = get_next_sample();
+
+        // COWAS sampling
+        
+
+        step_dive(sample.get_depth());
+        for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+            step_fill_container();
+            step_purge();
+        }
         step_fill_container();
-        step_purge();
+        step_sampling(get_next_sample_place());
+        step_rewind();
+        step_dry(get_next_sample_place());
+        validate_sample();
+
     }
-    step_fill_container();
-    step_sampling(1);
-    step_rewind();
-    step_dry(1);
     
 }
 
@@ -262,7 +275,7 @@ void before_start_program()
 }
 
 #ifdef SYSTEM_CHECKUP
-void before_start()
+void system_checkup()
 {
     // check if sensor are operationnal
     bool error = false;
