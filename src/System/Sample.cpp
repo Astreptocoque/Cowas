@@ -1,34 +1,45 @@
 #include <list>
 #include "Sample.h"
 #include "Serial_output.h"
+#include "TimeLib.h"
 
 extern Serial_output output;
 
 std::list<Sample> samples; // list of samples
 
-Sample::Sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth)
+Sample::Sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth)
 {
     date.time.hour = _hour;
     date.time.minutes = _minutes;
-    from_day = _from_day;
+    date.day = _day;
+    date.month = _month;
+    date.year = _year;
+
+    // set epoch time, seconds from 1970
+    tmElements_t tm;
+    tm.Day = _day;
+    tm.Hour = _hour;
+    tm.Minute = _minutes;
+    tm.Month = _month;
+    tm.Second = 0;
+    tm.Year = _year;
+    date.epoch = makeTime(tm);
+
     type = unique;
     frequency = 0;
     depth = _depth;
 }
 
-Sample::Sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth, uint8_t _frequency)
+Sample::Sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
-    date.time.hour = _hour;
-    date.time.minutes = _minutes;
-    from_day = _from_day;
+    Sample(_hour, _minutes, _day, _month, _year, _depth);
     type = repeated;
     frequency = _frequency;
-    depth = _depth;
 }
 
 uint8_t Sample::get_day()
 {
-    return from_day;
+    return date.day;
 }
 
 uint8_t Sample::get_hour()
@@ -39,6 +50,16 @@ uint8_t Sample::get_hour()
 uint8_t Sample::get_minutes()
 {
     return date.time.minutes;
+}
+
+uint8_t Sample::get_month()
+{
+    return date.month;
+}
+
+time_t Sample::get_epoch()
+{
+    return date.epoch;
 }
 
 uint16_t Sample::get_depth()
@@ -56,14 +77,10 @@ void Sample::set_frequency(uint8_t _frequency)
     frequency = _frequency;
 }
 
-// Sample::~Sample(){
-//     output.println("Sample deleted");
-// }
-
-uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth)
+uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth)
 {
 
-    Sample sample(_hour, _minutes, _from_day, _depth);
+    Sample sample(_hour, _minutes, _day, _month, _year, _depth);
     uint8_t sample_nb = samples.size();
     bool inserted = false;
     uint8_t i = 0;
@@ -79,7 +96,7 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t 
         {
             advance(it, i);
             // insert sample before next samples in time if nearer in time
-            if (it->get_day() >= _from_day && it->get_hour() >= _hour && it->get_minutes() > _minutes)
+            if (it->get_epoch() > sample.get_epoch())
             {
                 samples.insert(it, sample);
                 inserted = true;
@@ -96,10 +113,10 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t 
     return i;
 }
 
-uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth, uint8_t _frequency)
+uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
     // add a sample without frequency
-    uint8_t index = add_sample(_hour, _minutes, _from_day, _depth, _frequency);
+    uint8_t index = add_sample(_hour, _minutes, _day, _month, _year, _depth, _frequency);
     
     // add the frequency to the new added sample at index
     auto it = samples.begin();

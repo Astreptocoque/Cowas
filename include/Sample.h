@@ -22,20 +22,21 @@ private:
     Sampling_type type;     // if sample is regular or unique
    
 public:
-    Sample(uint8_t _hour, uint8_t _minutes, uint8_t from_day, uint16_t _depth);
-    Sample(uint8_t _hour, uint8_t _minutes, uint8_t from_day, uint16_t _depth, uint8_t _frequency);
-    // ~Sample();
+    Sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth);
+    Sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency);
     uint8_t get_day();
     uint8_t get_hour();
     uint8_t get_minutes();
-    uint16_t Sample::get_depth();
-    uint8_t Sample::get_frequency();
+    uint8_t get_month();
+    time_t get_epoch();
+    uint16_t get_depth();
+    uint8_t get_frequency();
     void set_frequency(uint8_t _frequency);
 
 };
 
-uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth);
-uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _from_day, uint16_t _depth, uint8_t _frequency);
+uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth);
+uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency);
 void display_samples();
 
 #endif

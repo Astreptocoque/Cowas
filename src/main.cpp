@@ -31,6 +31,7 @@
 #include "Tests.h"
 #include "Step_functions.h"
 #include "GPIO.h"
+#include "TimeLib.h"
 // #include "Samples.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
@@ -160,12 +161,14 @@ void setup()
     esp8266.start_communication();
     current_date = esp8266.receive_time();
     // esp8266.validate();
-    output.println("It is " + String(current_date.time.hour) + "h" + String(current_date.time.minutes) + "m, day " + String(current_date.day));
+    setTime(current_date.epoch);
+    time_t t = now();
+    output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
 
     // add to test samples
-    add_sample(18, 30, 0, 40);
-    add_sample(19, 30, 1, 20);
-    add_sample(19, 30, 0, 10, 4);
+    add_sample(18, 30, 12, 1, 2022, 40);
+    add_sample(19, 30, 13, 1, 2022, 20);
+    add_sample(19, 30, 12, 1, 2022, 10, 4);
     display_samples();
 
 #ifdef SYSTEM_CHECKUP

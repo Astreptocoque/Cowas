@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "Serial_output.h"
-
+#include "TimeLib.h"
 
 #define MAX_SAMPLE 2             // max samples before refilling
 #define NUMBER_SAMPLES 2
@@ -42,6 +42,7 @@ struct Date{
     int year;
     uint8_t day;
     uint8_t month;
+    time_t epoch;
     struct Time time;
 };
 

@@ -6,8 +6,6 @@
 extern Serial_output output;
 extern GPIO wifi_message;
 
-time_t T = now();
-
 void Serial_device::begin(){
     Serial1.begin(115200);
     delay(100);
@@ -32,7 +30,10 @@ struct Date Serial_device::receive_time(){
     date.time.minutes = Serial1.parseInt();
     while(Serial1.available() == 0);
     date.day = Serial1.parseInt(); 
+    while(Serial1.available() == 0);
+    date.epoch = Serial1.parseInt();
     return date;
+    
 }
 
 void Serial_device::validate(){
