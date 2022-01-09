@@ -147,14 +147,6 @@ void setup()
     output.println("========== Press right button to move spool down =======================");
     output.println("========== Press reset button on due button to come back here ==========");
 
-    green_led.on();
-    status_led.on();
-    output.println("Before start program");
-    before_start_program();
-    button_start.waitPressedAndReleased();
-    green_led.off();
-    status_led.off();
-
 
     output.println("Get date");
     struct Date current_date;
@@ -170,6 +162,14 @@ void setup()
     add_sample(19, 30, 13, 1, 2022, 20);
     add_sample(19, 30, 12, 1, 2022, 10, 4);
     display_samples();
+
+    green_led.on();
+    status_led.on();
+    output.println("Before start program");
+    before_start_program();
+    button_start.waitPressedAndReleased();
+    green_led.off();
+    status_led.off();
 
 #ifdef SYSTEM_CHECKUP
     before_start();

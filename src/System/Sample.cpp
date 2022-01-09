@@ -135,10 +135,11 @@ void display_samples(){
         String hour = String(it->get_hour());
         String day = String(it->get_day());
         String minutes = String(it->get_minutes());
+        String month = String(it->get_month());
         String depth = String(it->get_depth());
         String frequency = String(it->get_frequency());
 
-        output.println(hour + "h" + minutes + " in " + day + " days at depth " + depth + "cm and frequency " + frequency);
+        output.println(hour + "h" + minutes + " on " + day + "." + month + " at depth " + depth + "cm and day frequency " + frequency);
     }
 }
 
