@@ -6,6 +6,8 @@
 extern Serial_output output;
 extern GPIO wifi_message;
 
+time_t T = now();
+
 void Serial_device::begin(){
     Serial1.begin(115200);
     delay(100);
