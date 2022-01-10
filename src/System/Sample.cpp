@@ -22,10 +22,9 @@ Sample::Sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, ui
     tm.Hour = _hour;
     tm.Minute = _minutes;
     tm.Month = _month;
-    tm.Second = 0;
-    tm.Year = _year;
+    tm.Second = 1;
+    tm.Year = _year-1970; // see makeTime function
     date.epoch = makeTime(tm);
-
     type = unique;
     frequency = 0;
     depth = _depth;
@@ -36,6 +35,20 @@ Sample::Sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, u
     Sample(_hour, _minutes, _day, _month, _year, _depth);
     type = repeated;
     frequency = _frequency;
+}
+
+Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency){
+    date.time.hour = hour(_epoch);
+    date.time.minutes = minute(_epoch);
+    date.day = day(_epoch);
+    date.month = month(_epoch);
+    date.year = year(_epoch);
+    depth = _depth;
+    frequency = _frequency;
+    if(frequency == 0)
+        type = unique;
+    else
+        type = repeated;
 }
 
 uint8_t Sample::get_day()
@@ -86,27 +99,21 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month
 {
     Sample sample(_hour, _minutes, _day, _month, _year, _depth);
     uint8_t sample_nb = samples.size();
-    output.println("nb samples : " + String(sample_nb));
     bool inserted = false;
     uint8_t i = 0;
     if (samples.size() == 0){
         samples.push_back(sample);
-        output.println("1");
     }else
     {
         // initializing list iterator to beginning
         auto it = samples.begin();
-        output.println("2");
 
         while (i < sample_nb && !inserted)
         {
             advance(it, i);
             // insert sample before next samples in time if nearer in time
-            output.println((uint32_t)it->get_epoch());
-            output.println((uint32_t)sample.get_epoch());
             if (it->get_epoch() > sample.get_epoch())
             {
-                output.println("2,1");
                 samples.insert(it, sample);
                 inserted = true;
             }
@@ -115,7 +122,6 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month
         }
         // if sample was not inserted -> furstest away in time, then insert at the end
         if(!inserted){
-            output.println("2,2");
             samples.push_back(sample);
         }
     }
@@ -126,23 +132,52 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month
 
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
-    output.println("sample avec frquency");
-    output.flush();
+
     // add a sample without frequency
     uint8_t index = add_sample(_hour, _minutes, _day, _month, _year, _depth);
     
     // add the frequency to the new added sample at index
     auto it = samples.begin();
-    output.print("index ");
-    output.println(index);
-    output.flush();
     advance(it, index);
-    output.println("b");
-    output.flush();
     it->set_frequency(_frequency);
-    output.println("c");
-output.flush();
+
     return index;
+}
+
+uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
+{
+
+    Sample sample(_epoch, _depth, _frequency);
+    uint8_t sample_nb = samples.size();
+    bool inserted = false;
+    uint8_t i = 0;
+    if (samples.size() == 0){
+        samples.push_back(sample);
+    }else
+    {
+        // initializing list iterator to beginning
+        auto it = samples.begin();
+
+        while (i < sample_nb && !inserted)
+        {
+            advance(it, i);
+            // insert sample before next samples in time if nearer in time
+            if (it->get_epoch() > sample.get_epoch())
+            {
+                samples.insert(it, sample);
+                inserted = true;
+            }
+            else
+                i++;
+        }
+        // if sample was not inserted -> furstest away in time, then insert at the end
+        if(!inserted){
+            samples.push_back(sample);
+        }
+    }
+
+    // return position of inserted sample
+    return i;
 }
 
 time_t get_next_sample_time(){
@@ -171,11 +206,24 @@ uint8_t get_next_sample_place(){
 
 void validate_sample(){
     // log the sample
+    output.println("Sample done");
     display_sample(0);
      // set next sample on real hardware
     next_sample_place++;
-    // delete the sample from the known list
-    samples.pop_front();
+
+    auto it = samples.begin();
+    if(it->get_frequency() > 0){
+        Sample sample = get_sample(0);
+        
+        // delete the sample from the known list
+        samples.pop_front();
+
+        add_sample(sample.get_epoch() + sample.get_frequency() * SECS_PER_DAY, sample.get_depth(), sample.get_frequency());
+        
+    }else{
+        // delete the sample from the known list
+        samples.pop_front();
+    }
 }
 
 void display_samples(){
@@ -206,7 +254,7 @@ void display_sample(uint8_t number){
         number = list_size-1;
     }
     advance(it, number);
-    output.print("Sample on place " + String(next_sample_place) + " printed : ");
+    output.print("Sample on place " + String(next_sample_place) + " scheduled at : ");
 
     String hour = String(it->get_hour());
     String day = String(it->get_day());

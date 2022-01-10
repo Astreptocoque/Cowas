@@ -25,6 +25,7 @@ private:
 public:
     Sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth);
     Sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency);
+    Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency);
     void use();
     uint8_t get_day();
     uint8_t get_hour();
@@ -40,6 +41,7 @@ public:
 
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth);
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency);
+uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency);
 time_t get_next_sample_time();
 Sample get_sample(uint8_t number);
 uint8_t get_next_sample_place();

@@ -28,7 +28,7 @@ void GPIO::off()
     state = 0;
 }
 
-byte GPIO::read()
+bool GPIO::read()
 {
     state = digitalRead(pin);
     return state;

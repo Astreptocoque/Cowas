@@ -164,9 +164,8 @@ void setup()
     add_sample(20, 25, 12, 1, 2022, 60);
     add_sample(19, 30, 13, 1, 2022, 20);
     add_sample(19, 30, 12, 1, 2022, 10, 4);
-    add_sample(15, 30, 10, 1, 2022, 40, 4);
     add_sample(15, 30, 13, 1, 2022, 40, 4);
-
+    add_sample(18, 03, 10, 1, 2022, 40, 5);
     display_samples();
 
     green_led.on();
@@ -182,13 +181,11 @@ void setup()
     output.println("System checked\n");
 #endif
     output.println("Programm started\n");
-    // Sample sample(13, 15, 30);
-    // Serial1.begin(115200);
 }
 
 void loop()
 {
-
+    main_program();
 
     // step_fill_container();
     // step_fill_container();
@@ -216,30 +213,41 @@ void loop()
 
 void main_program()
 {
-
+    static bool next_sample_information = true;
     // DO wifi and communication stuffs
 
+    
+    // one time print of the next sample informatin for logging
+    if(next_sample_information){
+        output.println("Next sample");
+        display_sample(0);
+        output.println("");
+        next_sample_information = false;
+        display_samples();
+    }
+    
     // when time occurs for a sample to be done
     if(now() > get_next_sample_time() - PREPARATION_TIME){
         // get first sample in list
-        Sample sample = get_sample(0);
-
+        // Sample sample = get_sample(0);
+        output.println("It's sampling time !");
+      
         // COWAS sampling
-        
-
-        step_dive(sample.get_depth());
-        for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-            step_fill_container();
-            step_purge();
-        }
-        step_fill_container();
-        step_sampling(get_next_sample_place()-1);
-        display_sample(get_next_sample_place()-1);
-        step_rewind();
-        step_dry(get_next_sample_place()-1);
+        // step_dive(sample.get_depth());
+        // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+        //     step_fill_container();
+        //     step_purge();
+        // }
+        // step_fill_container();
+        // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
+        // display_sample(get_next_sample_place()-1);
+        // step_rewind();
+        // step_dry(get_next_sample_place()-1);
         validate_sample();
+        next_sample_information = true;
 
     }
+    delay(1000);
     
 }
 
