@@ -148,24 +148,25 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    // esp8266.validate();
-    setTime(current_date.epoch);
+    // output.println("Get date");
+    // struct Date current_date;
+    // esp8266.start_communication();
+    // current_date = esp8266.receive_time();
+    // // esp8266.validate();
+    // setTime(current_date.epoch);
     // // setSyncInterval(SYNC_TIME);
     // // setSyncProvider(esp8266.receive_time());
     time_t t = now();
     output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
     output.flush();
-    // add to test samples
-    add_sample(18, 30, 12, 1, 2022, 40);
-    add_sample(20, 25, 12, 1, 2022, 60);
-    add_sample(19, 30, 13, 1, 2022, 20);
+    //add to test samples
+    add_sample(18, 30, 12, 1, 2022, 40, 0);
+    add_sample(20, 25, 12, 1, 2022, 60, 0);
+    add_sample(19, 30, 13, 1, 2022, 20, 0);
     add_sample(19, 30, 12, 1, 2022, 10, 4);
     add_sample(15, 30, 13, 1, 2022, 40, 4);
     add_sample(18, 03, 10, 1, 2022, 40, 5);
+    add_sample(18, 30, 12, 1, 2022, 40, 0);
     display_samples();
 
     green_led.on();

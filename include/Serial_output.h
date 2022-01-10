@@ -148,6 +148,10 @@ public:
         return data;
     }
 
+    /**
+     * @brief Wait until all serial buffer is sent
+     * 
+     */
     void flush()
     {
         if (serial_type == terminal || serial_type == terminalANDsdCard)

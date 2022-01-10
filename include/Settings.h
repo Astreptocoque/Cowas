@@ -36,7 +36,7 @@ const uint32_t SYNC_TIME = 32400;               // every 9 hours
 
 struct Time{
     uint8_t hour;
-    uint8_t minutes;
+    uint8_t minute;
 };
 
 struct Date{
