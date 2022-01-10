@@ -6,7 +6,8 @@ void GPIO::begin(byte _pin, byte _mode)
     pin = _pin;
     mode = _mode;
     pinMode(pin, (_mode == input_mode ? INPUT:OUTPUT));
-    off();
+    if(mode == output_mode)
+        off();
 }
 
 void GPIO::begin(byte _pin, byte _mode, String _ID)
@@ -27,7 +28,7 @@ void GPIO::off()
     state = 0;
 }
 
-byte GPIO::read()
+bool GPIO::read()
 {
     state = digitalRead(pin);
     return state;

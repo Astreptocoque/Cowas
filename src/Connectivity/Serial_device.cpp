@@ -15,8 +15,14 @@ void Serial_device::begin(){
 void Serial_device::start_communication(){
     // wait message line to be pulled high
     while(wifi_message.read() == 0){
-        delay(10);
+        delay(500);
     }
+    
+    // allows to delete any data in the buffer
+    while(Serial1.available() > 0){
+        Serial1.read();
+    }
+    Serial1.flush();
 
     Serial1.print("1234");
 }
@@ -24,13 +30,23 @@ void Serial_device::start_communication(){
 struct Date Serial_device::receive_time(){
 
     struct Date date;
+    // while(Serial1.available() == 0);
+    // date.time.hour = Serial1.parseInt();
+    // output.println(date.time.hour);
+    // while(Serial1.available() == 0);
+    // date.time.minutes = Serial1.parseInt();
+    // output.println(date.time.minutes);
+    // while(Serial1.available() == 0);
+    // date.day = Serial1.parseInt(); 
+    // output.println(date.day);
     while(Serial1.available() == 0);
-    date.time.hour = Serial1.parseInt();
-    while(Serial1.available() == 0);
-    date.time.minutes = Serial1.parseInt();
-    while(Serial1.available() == 0);
-    date.day = Serial1.parseInt(); 
+    Serial1.setTimeout(2000);
+    // output.println(Serial1.readString());
+    date.epoch = (time_t) Serial1.parseInt();
+    output.println((uint32_t)date.epoch);
+    output.flush();
     return date;
+    
 }
 
 void Serial_device::validate(){
