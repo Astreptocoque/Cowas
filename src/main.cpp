@@ -43,8 +43,10 @@ void main_program();
 // #define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
+// See in settings
+// ============ PIN DEFINITIONS ==================
 // ====> define here the pins
-const uint8_t  STATUS_LED_PIN = 22;
+/* const uint8_t  STATUS_LED_PIN = 22;
 const uint8_t  GREEN_LED_PIN = 23;
 const uint8_t  PRESSURE1_PIN = 3;
 const uint8_t  PRESSURE2_PIN = 5;
@@ -66,7 +68,7 @@ const uint8_t  POTENTIOMETER_PIN = A0;
 const uint8_t  SD_CARD_PIN = 4; // need to change in Serial_output.h
 const uint8_t  ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
 const uint8_t VALVE_STX_IN_PIN[NUMBER_SAMPLES] = {36, 38};
-const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40};
+const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40}; */
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()

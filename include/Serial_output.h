@@ -5,8 +5,7 @@ using namespace std;
 
 #include <Arduino.h>
 #include <SD.h>
-
-#define PIN_SS_SD_CARD 4
+#include "Settings.h"
 
 enum serial_type_enum
 {
@@ -42,7 +41,7 @@ public:
         }
         if (serial_type == sdCard || serial_type == terminalANDsdCard)
         {
-            validated = SD.begin(PIN_SS_SD_CARD);
+            validated = SD.begin(SD_CARD_SS_PIN);
             delay(100);
             if (validated)
                 Serial.println("SD card initialized");

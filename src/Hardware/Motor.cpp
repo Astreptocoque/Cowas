@@ -6,16 +6,16 @@
 #include "Button.h"
 #include "Critical_error.h"
 
-unsigned char INA1 = 53;     // INPUT - motor 1 direction input A
-unsigned char INB1 = 51;     // INPUT - motor 1 direction input B
-unsigned char PWM1 = 2;      // INPUT - motor 1 speed input
-unsigned char EN1DIAG1 = 49; // Non attributed OUTPUT - motor 1 enable input/fault output
-unsigned char CS1 = A11;     // Non attributed// OUTPUT - motor 1 current sense
-unsigned char INA2 = 52;     // Non attributed// INPUT - motor 2 direction input A
-unsigned char INB2 = 50;     // Non attributed// INPUT - motor 2 direction input B
-unsigned char PWM2 = 48;     // Non attributed// INPUT - motor 2 speed input
-unsigned char EN2DIAG2 = 47; // Non attributed// OUTPUT - motor 2 enable input/fault output
-unsigned char CS2 = A10;     // Non attributed// OUTPUT - motor 2 current sense
+unsigned char INA1 = MOTOR_INA1_PIN;     // INPUT - motor 1 direction input A
+unsigned char INB1 = MOTOR_INB1_PIN;     // INPUT - motor 1 direction input B
+unsigned char PWM1 = MOTOR_PWM1_PIN;      // INPUT - motor 1 speed input
+unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN; // Non attributed OUTPUT - motor 1 enable input/fault output
+unsigned char CS1 = MOTOR_CS1_PIN;     // Non attributed// OUTPUT - motor 1 current sense
+unsigned char INA2 = MOTOR_INA2_PIN;     // Non attributed// INPUT - motor 2 direction input A
+unsigned char INB2 = MOTOR_INB2_PIN;     // Non attributed// INPUT - motor 2 direction input B
+unsigned char PWM2 = MOTOR_PW2_PIN;     // Non attributed// INPUT - motor 2 speed input
+unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN; // Non attributed// OUTPUT - motor 2 enable input/fault output
+unsigned char CS2 = MOTOR_CS2_PIN;     // Non attributed// OUTPUT - motor 2 current sense
 
 DualVNH5019MotorShield md(INA1, INB1, PWM1, EN1DIAG1, CS1, INA2, INB2, PWM2, EN2DIAG2, CS2);
 extern Encoder encoder;
