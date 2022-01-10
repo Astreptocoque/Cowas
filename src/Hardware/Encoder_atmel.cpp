@@ -78,6 +78,7 @@ int32_t Encoder_atmel::get_goal_pulses()
 int32_t Encoder_atmel::step_counter()
 {
     pulses_A = (uint32_t)(REG_TC0_CV0);
+    return pulses_A;
 }
 
 void Encoder_atmel::reset()
