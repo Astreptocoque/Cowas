@@ -150,7 +150,7 @@ public:
 
     void flush()
     {
-        if (serial_type == terminal)
+        if (serial_type == terminal || serial_type == terminalANDsdCard)
         {
             Serial.flush();
         }

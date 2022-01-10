@@ -146,7 +146,7 @@ void setup()
     output.println("========== Press left button to move spool up ==========================");
     output.println("========== Press right button to move spool down =======================");
     output.println("========== Press reset button on due button to come back here ==========");
-
+    output.flush();
 
     output.println("Get date");
     struct Date current_date;
@@ -154,15 +154,19 @@ void setup()
     current_date = esp8266.receive_time();
     // esp8266.validate();
     setTime(current_date.epoch);
-    // setSyncInterval(SYNC_TIME);
-    // setSyncProvider(esp8266.receive_time());
+    // // setSyncInterval(SYNC_TIME);
+    // // setSyncProvider(esp8266.receive_time());
     time_t t = now();
     output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
-
+    output.flush();
     // add to test samples
     add_sample(18, 30, 12, 1, 2022, 40);
+    add_sample(20, 25, 12, 1, 2022, 60);
     add_sample(19, 30, 13, 1, 2022, 20);
     add_sample(19, 30, 12, 1, 2022, 10, 4);
+    add_sample(15, 30, 10, 1, 2022, 40, 4);
+    add_sample(15, 30, 13, 1, 2022, 40, 4);
+
     display_samples();
 
     green_led.on();
@@ -187,9 +191,9 @@ void loop()
 
 
     // step_fill_container();
-    step_fill_container();
-    step_purge();
-    button_start.waitPressedAndReleased();
+    // step_fill_container();
+    // step_purge();
+    // button_start.waitPressedAndReleased();
     // test_hardware_general();
 
     // TESTS 1
@@ -217,8 +221,8 @@ void main_program()
 
     // when time occurs for a sample to be done
     if(now() > get_next_sample_time() - PREPARATION_TIME){
-
-        Sample sample = get_next_sample();
+        // get first sample in list
+        Sample sample = get_sample(0);
 
         // COWAS sampling
         
@@ -229,9 +233,10 @@ void main_program()
             step_purge();
         }
         step_fill_container();
-        step_sampling(get_next_sample_place());
+        step_sampling(get_next_sample_place()-1);
+        display_sample(get_next_sample_place()-1);
         step_rewind();
-        step_dry(get_next_sample_place());
+        step_dry(get_next_sample_place()-1);
         validate_sample();
 
     }

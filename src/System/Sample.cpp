@@ -84,32 +84,38 @@ void Sample::set_frequency(uint8_t _frequency)
 
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth)
 {
-
     Sample sample(_hour, _minutes, _day, _month, _year, _depth);
     uint8_t sample_nb = samples.size();
+    output.println("nb samples : " + String(sample_nb));
     bool inserted = false;
     uint8_t i = 0;
-
-    if (samples.size() == 0)
+    if (samples.size() == 0){
         samples.push_back(sample);
-    else
+        output.println("1");
+    }else
     {
         // initializing list iterator to beginning
         auto it = samples.begin();
+        output.println("2");
 
-        while (i < sample_nb && inserted)
+        while (i < sample_nb && !inserted)
         {
             advance(it, i);
             // insert sample before next samples in time if nearer in time
+            output.println((uint32_t)it->get_epoch());
+            output.println((uint32_t)sample.get_epoch());
             if (it->get_epoch() > sample.get_epoch())
             {
+                output.println("2,1");
                 samples.insert(it, sample);
                 inserted = true;
             }
-            i++;
+            else
+                i++;
         }
         // if sample was not inserted -> furstest away in time, then insert at the end
         if(!inserted){
+            output.println("2,2");
             samples.push_back(sample);
         }
     }
@@ -120,14 +126,22 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month
 
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
+    output.println("sample avec frquency");
+    output.flush();
     // add a sample without frequency
-    uint8_t index = add_sample(_hour, _minutes, _day, _month, _year, _depth, _frequency);
+    uint8_t index = add_sample(_hour, _minutes, _day, _month, _year, _depth);
     
     // add the frequency to the new added sample at index
     auto it = samples.begin();
+    output.print("index ");
+    output.println(index);
+    output.flush();
     advance(it, index);
+    output.println("b");
+    output.flush();
     it->set_frequency(_frequency);
-
+    output.println("c");
+output.flush();
     return index;
 }
 
@@ -138,9 +152,15 @@ time_t get_next_sample_time(){
     return it->get_epoch();
 }
 
-Sample get_next_sample(){
+Sample get_sample(uint8_t number){
 
     auto it = samples.begin();
+    uint8_t list_size = samples.size();
+    if(number >= list_size){
+        output.println("Unable to get requested samples, index out of range");
+        number = list_size-1;
+    }
+    advance(it, number);
     Sample sample(it->get_hour(), it->get_minutes(), it->get_day(), it->get_month(), it->get_year(), it->get_depth());
     return sample;
 }
@@ -151,7 +171,7 @@ uint8_t get_next_sample_place(){
 
 void validate_sample(){
     // log the sample
-    display_next_sample();
+    display_sample(0);
      // set next sample on real hardware
     next_sample_place++;
     // delete the sample from the known list
@@ -161,7 +181,7 @@ void validate_sample(){
 void display_samples(){
     auto it = samples.begin();
     for(uint8_t i = 0; i < samples.size(); i++){
-        advance(it, i);
+        
         output.print("Sample " + String(i+1) + " : ");
 
         String hour = String(it->get_hour());
@@ -173,12 +193,20 @@ void display_samples(){
         String frequency = String(it->get_frequency());
 
         output.println(hour + "h" + minutes + " on " + day + "." + month + "." + year + " at depth " + depth + "cm and day frequency " + frequency);
+        advance(it, 1);
     }
 }
 
-void display_next_sample(){
+void display_sample(uint8_t number){
+    
     auto it = samples.begin();
-    output.print("Sample on place" + String(next_sample_place) + " executed : ");
+    uint8_t list_size = samples.size();
+    if(number >= list_size){
+        output.println("Unable to display requested sample, index out of range");
+        number = list_size-1;
+    }
+    advance(it, number);
+    output.print("Sample on place " + String(next_sample_place) + " printed : ");
 
     String hour = String(it->get_hour());
     String day = String(it->get_day());

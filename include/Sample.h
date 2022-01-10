@@ -41,9 +41,9 @@ public:
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth);
 uint8_t add_sample(uint8_t _hour, uint8_t _minutes,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency);
 time_t get_next_sample_time();
-Sample get_next_sample();
+Sample get_sample(uint8_t number);
 uint8_t get_next_sample_place();
 void validate_sample();
 void display_samples();
-
+void display_sample(uint8_t number);
 #endif
