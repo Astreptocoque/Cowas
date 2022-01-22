@@ -6,6 +6,7 @@ using namespace std;
 #include <Arduino.h>
 #include <SD.h>
 #include "Settings.h"
+#include <TimeLib.h>
 
 enum serial_type_enum
 {
@@ -22,8 +23,7 @@ private:
     File dataFile;
 
 public:
-
-/**
+    /**
  * @brief Choose output of arduino
  * @param _serial_type Terminal, SDCard or both
  *
@@ -73,15 +73,21 @@ public:
     template <typename T>
     void println(T output)
     {
+        // add time before printing in format yyyy-mm-dd hh:mm:ss
+        String data;
+        if (ENABLE_TIME_LOG)
+            data = format_date_logging(now()) + "   " + String(output);
+        else
+            data = output;
         if (serial_type == terminal || serial_type == terminalANDsdCard)
-            Serial.println(output);
+            Serial.println(data);
 
         if (serial_type == sdCard || serial_type == terminalANDsdCard)
         {
             dataFile = SD.open("datalog.txt", FILE_WRITE);
             if (dataFile)
             {
-                dataFile.println(String(output));
+                dataFile.println(String(data));
                 dataFile.close();
             }
         }
@@ -159,5 +165,7 @@ public:
         }
     }
 };
+
+
 
 #endif

@@ -223,18 +223,11 @@ void display_samples(){
 
     if(samples.size() > 0){
         for(uint8_t i = 0; i < samples.size(); i++){
-            
-            output.print("Sample " + String(i+1) + " : ");
-
-            String hour = String(it->get_hour());
-            String day = String(it->get_day());
-            String minute = String(it->get_minute());
-            String month = String(it->get_month());
-            String year = String(it->get_year());
+        
             String depth = String(it->get_depth());
             String frequency = String(it->get_frequency());
-
-            output.println(hour + "h" + minute + " on " + day + "." + month + "." + year + " at depth " + depth + "cm and day frequency " + frequency);
+            time_t t = it->get_epoch();
+            output.println("Sample" + String(i+1) + " : " + format_date_friendly(t)+ " at depth " + depth + "cm and day frequency " + frequency);
             advance(it, 1);
         }
     }else{
@@ -258,17 +251,11 @@ void display_sample(uint8_t number){
         output.println("No samples are currently set");
     }
     advance(it, number);
-    output.print("Sample on place " + String(filter_number) + " is : ");
 
-    String hour = String(it->get_hour());
-    String day = String(it->get_day());
-    String minute = String(it->get_minute());
-    String month = String(it->get_month());
-    String year = String(it->get_year());
     String depth = String(it->get_depth());
-    String frequency = String(it->get_frequency());
-
-    output.println(hour + "h" + minute + " on " + day + "." + month + "." + year + " at depth " + depth + "cm and day frequency " + frequency);
+    String frequency = String(it->get_frequency());    
+    time_t t = it->get_epoch();
+    output.println("Sample on place " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
     output.flush();
 }
 

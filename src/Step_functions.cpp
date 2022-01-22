@@ -183,7 +183,7 @@ void step_dry(uint8_t num_sterivex)
     while(millis() - currentTime < DRYING_TIME){
         if(pressure2.getPressure() > VACUUM_MINIMUM){
             pump_vacuum.start();
-            while(pressure2.getPressure() > VACUUM_TO_ACHIEVE);
+            while(pressure2.getPressure() > VACUUM_TO_ACHIEVE && millis() - currentTime < DRYING_TIME);
             pump_vacuum.stop();
         }
         delay(50);

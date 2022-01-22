@@ -26,7 +26,7 @@ const uint32_t PURGE_TIME = 330000;         // time after which container should
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;           // vacuum to achieve
 const float VACUUM_MINIMUM = 0.17;              // vacuum before restarting vacuum pump
-const uint32_t DRYING_TIME = 30*1000;           // time for pumping hysteris and heating
+const uint32_t DRYING_TIME = 5000; //30*1000;           // time for pumping hysteris and heating
 
 // system variables
 const int UPDATE_TIME = 1000;                      // refresh frequency for action i.e. sampling
@@ -37,6 +37,7 @@ const uint8_t PURGE_NUMBER = 2;                 // number of water container pur
 const uint32_t SYNC_TIME = 32400;               // every 9 hours
 const uint8_t MAX_FILTER_NUMBER = 2;             // max samples allowed in the system. For actuactor init purpose
 extern uint8_t FILTER_IN_SYSTEM;           // max samples currently inserted in the system
+const bool ENABLE_TIME_LOG = true;
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -67,7 +68,8 @@ enum System_state{
 
 System_state get_system_state();
 void set_system_state(System_state state);
-
+String format_date_logging(time_t t);
+String format_date_friendly(time_t t);
 
 // ============ PIN DEFINITIONS ==================
 const uint8_t STATUS_LED_PIN = 22;
