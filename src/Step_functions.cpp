@@ -99,9 +99,9 @@ void step_purge()
     
     pump.start();
     uint32_t time1 = millis();
-    while(pressure1.getPressure() > EMPTY_WATER_THRESHOLD && millis()-time1 < PURGE_TIME);
+    while(pressure1.getPressure() > EMPTY_WATER_PRESSURE_THRESHOLD && millis()-time1 < PURGE_TIME);
     // pump a little bit more to flush all water
-    pump.start(DEBOUCHE_CHIOTTE);
+    pump.start(EMPTY_WATER_SECURITY_TIME);
     
     timerStop(timer_control_pressure1);
 
@@ -135,9 +135,9 @@ void step_sampling(uint8_t num_sterivex)
     
     pump.start();
     uint32_t time1 = millis();
-    while(pressure1.getPressure() > EMPTY_WATER_THRESHOLD && millis()-time1 < PURGE_TIME);
+    while(pressure1.getPressure() > EMPTY_WATER_PRESSURE_THRESHOLD && millis()-time1 < PURGE_TIME);
     // pump a little bit more to flush all water    
-    pump.start(DEBOUCHE_CHIOTTE); 
+    pump.start(EMPTY_WATER_SECURITY_TIME); 
     
     timerStop(timer_control_pressure1);
 

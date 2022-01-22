@@ -295,8 +295,13 @@ void validate_sample(){
     
 }
 
-void reload_filters(){
+void reload_filters(uint8_t number_of_filter){
     filter_number = 1;
+    if(number_of_filter > MAX_FILTER_NUMBER){
+        FILTER_IN_SYSTEM = MAX_FILTER_NUMBER;
+    }else{
+        FILTER_IN_SYSTEM = number_of_filter;
+    }
 }
 
 bool is_filter_available(){

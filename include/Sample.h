@@ -52,6 +52,6 @@ void display_sample(uint8_t number);
 // ============ filter on real system management =========
 
 void validate_sample();
-void reload_filters();
+void reload_filters(uint8_t number_of_filter);
 bool is_filter_available();
 #endif

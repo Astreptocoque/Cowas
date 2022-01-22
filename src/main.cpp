@@ -32,7 +32,6 @@
 #include "Step_functions.h"
 #include "GPIO.h"
 #include "TimeLib.h"
-// #include "Samples.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void system_checkup();
@@ -44,68 +43,42 @@ void main_program();
 
 // ============ PIN DEFINITIONS ==================
 // See in settings
-// ============ PIN DEFINITIONS ==================
-// ====> define here the pins
-/* const uint8_t  STATUS_LED_PIN = 22;
-const uint8_t  GREEN_LED_PIN = 23;
-const uint8_t  PRESSURE1_PIN = 3;
-const uint8_t  PRESSURE2_PIN = 5;
-const uint8_t  VALVE_1_PIN = 44;
-const uint8_t  VALVE_23_PIN = 46;
-const uint8_t  VALVE_PURGE = 45;
-const uint8_t  PUMP_PIN = 6;
-const uint8_t  PUMP_VACUUM = 34;
-const uint8_t  ENCODER_A_PIN = 31;
-const uint8_t  ENCODER_B_PIN = 33;
-const uint8_t  ENCODER_Z_PIN = 35;
-const uint8_t  BUTTON_START_PIN = 24;
-const uint8_t  BUTTON_CONTAINER_PIN = 27;
-const uint8_t  BUTTON_SPOOL_UP = 28;
-const uint8_t  BUTTON_SPOOL_DOWN = 29;
-const uint8_t  BUTTON_LEFT_PIN = 25;
-const uint8_t  BUTTON_RIGHT_PIN = 26;
-const uint8_t  POTENTIOMETER_PIN = A0;
-const uint8_t  SD_CARD_PIN = 4; // need to change in Serial_output.h
-const uint8_t  ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
-const uint8_t VALVE_STX_IN_PIN[NUMBER_SAMPLES] = {36, 38};
-const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40}; */
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
-Serial_output output;                   // custom print function to handle multiple outputs
-Serial_device esp8266;                  // enable communication with wifi card
-Led status_led;                         // general purpose LED
-Led green_led;                          // general purpose LED, used for start signals
-Trustability_ABP_Gage pressure1;        // see schematics
-Trustability_ABP_Gage pressure2;        // see schematics
-Valve_2_2 valve_1;                      // see schematics
-Valve_3_2 valve_23;                     // see schematics
-Valve_2_2 valve_purge;                  // see schematics
-Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];     // see schematics
-Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];    // see schematics
-Pump pump;                              // see schematics
-Pump pump_vacuum;                       // see schematics
-Motor spool;                            // see schematics
-Encoder encoder;                        // see schematics
-Button button_start;                    // User button. Normally open
-Button button_container;                // Control button. Normally closed
-Button button_spool_up;                 // Control button. Normally closed
-Button button_spool_down;               // Control button. Normally closed
-Button button_left;                     // User button. Normally open
-Button button_right;                    // User button. Normally open
-Potentiometer potentiometer;            // User rotary knob
-struct Timer timer_control_pressure1;   // Timer for interrupts with pressure sensor 1
-struct Timer timer_control_pressure2;   // Timer for interrupts with pressure sensor 2
-GPIO wifi_message;                      // Input for message line report from wifi card
-
+Serial_output output;                       // custom print function to handle multiple outputs
+Serial_device esp8266;                      // enable communication with wifi card
+Led status_led;                             // general purpose LED
+Led green_led;                              // general purpose LED, used for start signals
+Trustability_ABP_Gage pressure1;            // see schematics
+Trustability_ABP_Gage pressure2;            // see schematics
+Valve_2_2 valve_1;                          // see schematics
+Valve_3_2 valve_23;                         // see schematics
+Valve_2_2 valve_purge;                      // see schematics
+Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
+Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER]; // see schematics
+Pump pump;                                  // see schematics
+Pump pump_vacuum;                           // see schematics
+Motor spool;                                // see schematics
+Encoder encoder;                            // see schematics
+Button button_start;                        // User button. Normally open
+Button button_container;                    // Control button. Normally closed
+Button button_spool_up;                     // Control button. Normally closed
+Button button_spool_down;                   // Control button. Normally closed
+Button button_left;                         // User button. Normally open
+Button button_right;                        // User button. Normally open
+Potentiometer potentiometer;                // User rotary knob
+struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
+struct Timer timer_control_pressure2;       // Timer for interrupts with pressure sensor 2
+GPIO wifi_message;                          // Input for message line report from wifi card
 
 void setup()
 {
 
     // ========== SYSTEM INITIALIZATION ============
     SPI.begin();
-    output.begin(terminal);     // choose output of logs
-    esp8266.begin();            // connect to wifi card
+    output.begin(terminal); // choose output of logs
+    esp8266.begin();        // connect to wifi card
 
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
     timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};
@@ -118,7 +91,8 @@ void setup()
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_purge.begin(VALVE_PURGE, "V_purge");
-    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
         valve_stx_in[i].begin(VALVE_STX_IN_PIN[i], "Vstx_in_" + String(i));
         valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
     }
@@ -126,7 +100,6 @@ void setup()
     pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
-    // attachInterrupt(digitalPinToInterrupt(ENCODER_Z_PIN), ISR_encoder_z_signal, RISING);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
     button_right.begin(BUTTON_RIGHT_PIN, "B_right");
     button_start.begin(BUTTON_START_PIN, "B_start");
@@ -141,7 +114,6 @@ void setup()
     wifi_message.begin(ESP8266_COMM_PIN, INPUT);
 
     output.println("system initalized\n");
-
 
     // ======== PRE-STARTING EXECUTION =========
     output.println("========== Press start button to play program ==========================");
@@ -160,8 +132,7 @@ void setup()
     // // setSyncProvider(esp8266.receive_time());
 
     // manual time settup
-    setTime(timeToEpoch(16, 00,  22, 01, 2022));
-
+    setTime(timeToEpoch(16, 00, 22, 01, 2022));
 
     time_t t = now();
     output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
@@ -189,6 +160,7 @@ void setup()
     output.println("System checked\n");
 #endif
     output.println("Programm started\n");
+    set_system_state(state_idle);
 }
 
 void loop()
@@ -218,29 +190,39 @@ void loop()
     //   tests();
 }
 
-
 void main_program()
 {
     static bool next_sample_information = true;
     // DO wifi and communication stuffs
 
-    
     // one time print of the next sample informatin for logging
-    if(next_sample_information){
+    if (next_sample_information)
+    {
         output.println("Next sample scheduled :");
         display_sample(0);
         output.println("");
         next_sample_information = false;
     }
-    
+
+    // check if filter are refilled. Potentiometer on the left and button left pressed
+    if (potentiometer.get_value() < 50 && button_left.isPressed()){
+        // choose number of filter inserted. For now always 2.
+        reload_filters(2);
+    }
+
     // when time occurs for a sample to be done
-    if(now() > get_next_sample_time() - PREPARATION_TIME){
+    if (now() > get_next_sample_time() - PREPARATION_TIME)
+    {
         // if a filter is available to be used
-        if(is_filter_available()){
+        if (is_filter_available())
+        {
+            // for human interface
+            set_system_state(state_sampling);
+
             // get first sample in list
             // Sample sample = get_sample(0);
             output.println("It's sampling time !");
-        
+
             // COWAS sampling
             // step_dive(sample.get_depth());
             // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
@@ -253,15 +235,21 @@ void main_program()
             // step_rewind();
             // step_dry(get_next_sample_place()-1);
             validate_sample();
+            
             next_sample_information = true;
-        }else{
+            if(is_filter_available() == false)
+                set_system_state(state_refill);
+            else
+                set_system_state(state_idle);
+        }
+        else
+        {
             output.println("ERROR - sample not done - no filter available");
             validate_sample();
             next_sample_information = true;
         }
     }
-    delay(1000);
-    
+    delay(UPDATE_TIME);
 }
 
 void before_start_program()
@@ -340,9 +328,9 @@ void system_checkup()
     if (error)
     {
         output.println("FATAL ERROR AT STARTUP ");
+        set_system_state(state_error);
         while (true)
             delay(500);
     }
 }
 #endif
-
