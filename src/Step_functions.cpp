@@ -86,7 +86,7 @@ void step_fill_container()
 void step_purge()
 {
     // make sure all sterivex valves are closed
-    for(uint8_t i = 0; i < MAX_SAMPLE; i++) valve_stx_in[i].set_close_way();
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++) valve_stx_in[i].set_close_way();
 
     valve_23.set_L_way();
     valve_purge.set_open_way();
@@ -117,7 +117,7 @@ void step_sampling(uint8_t num_sterivex)
 {
     valve_23.set_L_way();
     valve_purge.set_close_way();
-    for(uint8_t i = 0; i < MAX_SAMPLE; i++){
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         if(i == num_sterivex){
             valve_stx_in[i].set_open_way();
             valve_stx_out[i].set_I_way();
@@ -168,7 +168,7 @@ void step_rewind()
  */
 void step_dry(uint8_t num_sterivex)
 {
-    for(uint8_t i = 0; i < MAX_SAMPLE; i++){
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         valve_stx_in[i].set_close_way();
 
         if(i == num_sterivex)
@@ -189,7 +189,7 @@ void step_dry(uint8_t num_sterivex)
         delay(50);
     }
 
-    for(uint8_t i = 0; i < MAX_SAMPLE; i++){
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         valve_stx_out[i].set_L_way();
     }
 }

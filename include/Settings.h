@@ -4,15 +4,14 @@
 #include <Arduino.h>
 #include "TimeLib.h"
 
-#define MAX_SAMPLE 2             // max samples before refilling
-#define NUMBER_SAMPLES 2
-
+#define MAX_FILTER_NUMBER 2             // max samples allowed in the system. For actuactor init purpose
+#define FILTER_IN_SYSTEM 2              // max samples currently inserted in the system
 
 // ============ PIN DEFINITIONS ==================
 const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
 const uint8_t PRESSURE1_PIN = 3;
-const uint8_t PRESSURE2_PIN = 5;
+const uint8_t PRESSURE2_PIN = 4;
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
 const uint8_t VALVE_PURGE = 45;
@@ -28,13 +27,13 @@ const uint8_t BUTTON_SPOOL_DOWN = 29;
 const uint8_t BUTTON_LEFT_PIN = 25;
 const uint8_t BUTTON_RIGHT_PIN = 26;
 const uint8_t POTENTIOMETER_PIN = A0;
-const uint8_t SD_CARD_SS_PIN = 4; // need to change in Serial_output.h
+const uint8_t SD_CARD_SS_PIN = 5;
 const uint8_t ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
-const uint8_t VALVE_STX_IN_PIN[NUMBER_SAMPLES] = {36, 38};
-const uint8_t VALVE_STX_OUT_PIN[NUMBER_SAMPLES] = {32, 40};
+const uint8_t VALVE_STX_IN_PIN[MAX_FILTER_NUMBER] = {36, 38};
+const uint8_t VALVE_STX_OUT_PIN[MAX_FILTER_NUMBER] = {32, 40};
 const uint8_t MOTOR_INA1_PIN = 53;
 const uint8_t MOTOR_INB1_PIN = 51;
-const uint8_t MOTOR_PWM1_PIN = 2;
+const uint8_t MOTOR_PWM1_PIN = 7;
 const uint8_t MOTOR_EN1DIAG1_PIN = 49;
 const uint8_t MOTOR_CS1_PIN = A11;
 const uint8_t MOTOR_INA2_PIN = 52;
@@ -42,7 +41,7 @@ const uint8_t MOTOR_INB2_PIN = 50;
 const uint8_t MOTOR_PW2_PIN = 48;
 const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
-
+const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30, 42};
 
 // SPOOL VARIABLES
 const int HEIGHT_FROM_WATER = 115;          // in centimeters, ref to spool endstop

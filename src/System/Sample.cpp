@@ -6,7 +6,7 @@
 extern Serial_output output;
 
 std::list<Sample> samples;          // list of samples
-uint8_t next_sample_place = 1;      // next sample on real system to be used    
+uint8_t filter_number = 1;      // next sample on real system to be used. Filter number. 
 
 /**
  * @brief Construct a new Sample:: Sample object.
@@ -210,32 +210,8 @@ Sample get_sample(uint8_t number){
  * 
  * @return the number (starting from 1)
  */
-uint8_t get_next_sample_place(){
-    return next_sample_place;
-}
-
-/**
- * @brief Function to call when a sampling was done. 
- *        Delete the sample from the list and recreate one if a frequency is set.
- * 
- */
-void validate_sample(){
-    // log the sample
-    output.println("Sample done");
-    display_sample(0);
-     // set next sample on real hardware
-    next_sample_place++;
-
-    // if sample has a frequency, set it back in the list
-    auto it = samples.begin();
-    if(it->get_frequency() > 0){
-        Sample sample = get_sample(0);
-        add_sample(sample.get_epoch() + sample.get_frequency() * SECS_PER_DAY, sample.get_depth(), sample.get_frequency());
-    }
-
-    // delete the sample done
-    samples.pop_front();
-    
+uint8_t get_filter_number(){
+    return filter_number;
 }
 
 /**
@@ -278,11 +254,11 @@ void display_sample(uint8_t number){
     if(number >= list_size){
         output.println("Unable to display requested sample, index out of range, taking last sample");
         number = list_size-1;
-    }else if(number == 0){
+    }else if(list_size == 0){
         output.println("No samples are currently set");
     }
     advance(it, number);
-    output.print("Sample on place " + String(next_sample_place) + " scheduled at : ");
+    output.print("Sample on place " + String(filter_number) + " is : ");
 
     String hour = String(it->get_hour());
     String day = String(it->get_day());
@@ -296,4 +272,39 @@ void display_sample(uint8_t number){
     output.flush();
 }
 
+/**
+ * @brief Function to call when a sampling was done. 
+ *        Delete the sample from the list and recreate one if a frequency is set.
+ * 
+ */
+void validate_sample(){
+    // log the sample
+    display_sample(0);
+     // set next sample on real hardware
+    filter_number++;
+
+    // if sample has a frequency, set it back in the list
+    auto it = samples.begin();
+    if(it->get_frequency() > 0){
+        Sample sample = get_sample(0);
+        add_sample(sample.get_epoch() + sample.get_frequency() * SECS_PER_DAY, sample.get_depth(), sample.get_frequency());
+    }
+
+    // delete the sample done
+    samples.pop_front();
+    
+}
+
+void reload_filters(){
+    filter_number = 1;
+}
+
+bool is_filter_available(){
+    // if all filter have been used
+    if(filter_number > FILTER_IN_SYSTEM){
+        return false;
+    }else{
+        return true;
+    }
+}
 

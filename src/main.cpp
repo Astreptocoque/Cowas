@@ -81,8 +81,8 @@ Trustability_ABP_Gage pressure2;        // see schematics
 Valve_2_2 valve_1;                      // see schematics
 Valve_3_2 valve_23;                     // see schematics
 Valve_2_2 valve_purge;                  // see schematics
-Valve_2_2 valve_stx_in[MAX_SAMPLE];     // see schematics
-Valve_3_2 valve_stx_out[MAX_SAMPLE];    // see schematics
+Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];     // see schematics
+Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];    // see schematics
 Pump pump;                              // see schematics
 Pump pump_vacuum;                       // see schematics
 Motor spool;                            // see schematics
@@ -118,7 +118,7 @@ void setup()
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_purge.begin(VALVE_PURGE, "V_purge");
-    for(uint8_t i = 0; i < NUMBER_SAMPLES; i++){
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         valve_stx_in[i].begin(VALVE_STX_IN_PIN[i], "Vstx_in_" + String(i));
         valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
     }
@@ -158,24 +158,29 @@ void setup()
     // setTime(current_date.epoch);
     // // setSyncInterval(SYNC_TIME);
     // // setSyncProvider(esp8266.receive_time());
+
+    // manual time settup
+    setTime(timeToEpoch(16, 00,  22, 01, 2022));
+
+
     time_t t = now();
     output.println("It is " + String(hour(t)) + "h" + String(minute(t)) + "m, on the " + String(day(t)) + "." + String(month(t)) + "." + String(year(t)));
     output.flush();
     //add to test samples
-    add_sample(18, 30, 12, 1, 2022, 40, 0);
-    add_sample(20, 25, 12, 1, 2022, 60, 0);
-    add_sample(19, 30, 13, 1, 2022, 20, 0);
-    add_sample(19, 30, 12, 1, 2022, 10, 4);
-    add_sample(15, 30, 13, 1, 2022, 40, 4);
-    add_sample(18, 03, 10, 1, 2022, 40, 5);
-    add_sample(18, 30, 12, 1, 2022, 40, 0);
+    add_sample(16, 00, 22, 01, 2022, 40, 0);
+    add_sample(16, 00, 22, 01, 2022, 60, 1);
+    add_sample(16, 00, 22, 01, 2022, 20, 0);
+    // add_sample(19, 30, 12, 1, 2022, 10, 4);
+    // add_sample(15, 30, 13, 1, 2022, 40, 4);
+    // add_sample(18, 03, 10, 1, 2022, 40, 5);
+    // add_sample(18, 30, 12, 1, 2022, 40, 0);
     display_samples();
 
     green_led.on();
     status_led.on();
     output.println("Before start program");
-    before_start_program();
-    button_start.waitPressedAndReleased();
+    // before_start_program();
+    // button_start.waitPressedAndReleased();
     green_led.off();
     status_led.off();
 
@@ -222,33 +227,38 @@ void main_program()
     
     // one time print of the next sample informatin for logging
     if(next_sample_information){
-        output.println("Next sample");
+        output.println("Next sample scheduled :");
         display_sample(0);
         output.println("");
         next_sample_information = false;
-        display_samples();
     }
     
     // when time occurs for a sample to be done
     if(now() > get_next_sample_time() - PREPARATION_TIME){
-        // get first sample in list
-        // Sample sample = get_sample(0);
-        output.println("It's sampling time !");
-      
-        // COWAS sampling
-        // step_dive(sample.get_depth());
-        // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-        //     step_fill_container();
-        //     step_purge();
-        // }
-        // step_fill_container();
-        // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
-        // display_sample(get_next_sample_place()-1);
-        // step_rewind();
-        // step_dry(get_next_sample_place()-1);
-        validate_sample();
-        next_sample_information = true;
-
+        // if a filter is available to be used
+        if(is_filter_available()){
+            // get first sample in list
+            // Sample sample = get_sample(0);
+            output.println("It's sampling time !");
+        
+            // COWAS sampling
+            // step_dive(sample.get_depth());
+            // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+            //     step_fill_container();
+            //     step_purge();
+            // }
+            // step_fill_container();
+            // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
+            // display_sample(get_next_sample_place()-1);
+            // step_rewind();
+            // step_dry(get_next_sample_place()-1);
+            validate_sample();
+            next_sample_information = true;
+        }else{
+            output.println("ERROR - sample not done - no filter available");
+            validate_sample();
+            next_sample_information = true;
+        }
     }
     delay(1000);
     
