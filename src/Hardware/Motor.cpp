@@ -109,9 +109,6 @@ void Motor::start(int _depth)
     if (direction == down){
         while (encoder.get_distance() < distance){
             encoder.step_counter();
-            if(depth_current%500==0){
-                output.println(depth_current);
-            }
         }
     }else{
         while (encoder.get_distance() > distance)

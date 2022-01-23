@@ -17,5 +17,9 @@ void tests();
 void test_pressure();
 void test_hardware_general();
 
+void test_sampling(uint8_t num_sterivex);
+void test_purge();
+
+
 
 #endif

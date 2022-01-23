@@ -65,14 +65,26 @@ void Trustability_ABP_Gage::read()
     }
 }
 
+/**
+ * @brief Return last pressure reading.
+ *        Do not read faster than 1ms, see sensor datasheet.
+ *        If so, data will be last correct pressure.
+ * 
+ * @return float 
+ */
 float Trustability_ABP_Gage::getPressure()
 {
-    read();
+    // protection to not read to fast the sensor
+    if(millis()-last_reading > 1){
+        last_reading = millis();
+        read();
+    }
     return pressure;
 }
 
 float Trustability_ABP_Gage::getTemperature()
 {
+    // TODO add a function that block the new reading if less than 1 ms
     read();
     return temperature;
 }

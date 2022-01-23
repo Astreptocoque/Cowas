@@ -16,6 +16,7 @@ protected:
     float temperature = 0;
     String ID = "no_ID";
     float  max_pressure = 3; // in bar
+    uint32_t last_reading = 0;
 
 public:
     virtual void begin(byte _pin_slave_select, float _max_pressure){

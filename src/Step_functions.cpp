@@ -28,8 +28,8 @@ extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_purge;
-extern Valve_2_2 * valve_stx_in;
-extern Valve_3_2 * valve_stx_out;
+extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
+extern Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];
 extern Pump pump;
 extern Pump pump_vacuum;
 extern Motor spool;
@@ -57,6 +57,7 @@ extern struct Timer timer_control_pressure1;
 void step_dive(int _depth)
 {
     // let air escape the system while diving
+    valve_23.set_L_way();
     valve_1.set_open_way();
     delay(DELAY_ACTIONS);
     spool.set_speed(SPEED_DOWN, down);      
@@ -70,6 +71,7 @@ void step_dive(int _depth)
  */
 void step_fill_container()
 {
+    valve_1.set_close_way();
     valve_23.set_I_way();
     delay(DELAY_ACTIONS);
     pump.set_power(100);
@@ -95,15 +97,28 @@ void step_purge()
     pump.set_power(100);
 
     // monitor pressure in parallel
-    timerStart(timer_control_pressure1);
+    // timerStart(timer_control_pressure1);
     
     pump.start();
     uint32_t time1 = millis();
-    while(pressure1.getPressure() > EMPTY_WATER_PRESSURE_THRESHOLD && millis()-time1 < PURGE_TIME);
+    uint32_t time2 = time1;
+    uint8_t validation_tick = 0;
+
+
+    while(validation_tick < 250 && millis()-time1 < PURGE_TIME){
+        if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD){
+            validation_tick++;
+            
+        }else{
+            validation_tick = 0;
+        }
+        delay(10); // don't read pressure to fast
+    }
+    output.println(validation_tick);
     // pump a little bit more to flush all water
-    pump.start(EMPTY_WATER_SECURITY_TIME);
-    
-    timerStop(timer_control_pressure1);
+    // pump.start(EMPTY_WATER_SECURITY_TIME);
+    pump.stop();
+    // timerStop(timer_control_pressure1);
 
     valve_purge.set_close_way();
 }
@@ -135,10 +150,22 @@ void step_sampling(uint8_t num_sterivex)
     
     pump.start();
     uint32_t time1 = millis();
-    while(pressure1.getPressure() > EMPTY_WATER_PRESSURE_THRESHOLD && millis()-time1 < PURGE_TIME);
+    uint32_t time2 = time1;
+    uint8_t validation_tick = 0;
+
+    while(validation_tick < 250 && millis()-time1 < PURGE_TIME){
+        if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
+            validation_tick++;
+        }else{
+            validation_tick = 0;
+        }
+        output.println(pressure1.getPressure());
+        delay(10); // don't read pressure to fast
+    }
+    output.println("Stopped emptying container");
     // pump a little bit more to flush all water    
-    pump.start(EMPTY_WATER_SECURITY_TIME); 
-    
+    // pump.start(EMPTY_WATER_SECURITY_TIME); 
+    pump.stop();
     timerStop(timer_control_pressure1);
 
     valve_stx_in[num_sterivex].set_close_way();

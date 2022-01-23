@@ -11,7 +11,7 @@
 
 // =============== VARIABLES ===============
 // spool variables
-const int HEIGHT_FROM_WATER = 115;          // in centimeters, ref to spool endstop
+const int HEIGHT_FROM_WATER = 10;          // in centimeters, ref to spool endstop
 const uint8_t DISTANCE_FROM_STOP = 5;       // slow down at this distance from origin
 const uint8_t SPEED_UP = 100;               // speed when moving up - experimental tested
 const uint8_t SPEED_DOWN = 100;             // speed when moving down - experimental tested
@@ -20,24 +20,25 @@ const int TUBE_LENGTH = 49000;              // length of tube
 // water pump variables
 const uint8_t POWER_PUMP = 100;             // speed when pumping from water
 const uint8_t POWER_FLUSH = 100;            // speed when pumping from container
-const uint8_t POWER_STX = 50;
-const uint32_t PURGE_TIME = 330000;         // time after which container should be empty
+const uint8_t POWER_STX = 35;
+const uint32_t PURGE_TIME = 60*1000*6;         // time after which container should be empty
 
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;           // vacuum to achieve
-const float VACUUM_MINIMUM = 0.17;              // vacuum before restarting vacuum pump
+const float VACUUM_MINIMUM = 0.20;              // vacuum before restarting vacuum pump
 const uint32_t DRYING_TIME = 5000; //30*1000;           // time for pumping hysteris and heating
 
 // system variables
-const int UPDATE_TIME = 1000;                      // refresh frequency for action i.e. sampling
-const float EMPTY_WATER_PRESSURE_THRESHOLD = 0.2;        // threshold of pressure considered as empty (no water)
-const uint32_t EMPTY_WATER_SECURITY_TIME = 10*1000;      // time to ensure a correct flush of the conainter. milliseconds
+const int UPDATE_TIME = 1000;                      // milliseconds. refresh frequency for action i.e. sampling
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04;        // bar. threshold of pressure considered as empty (no water)
+const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1;           //bar
+const uint32_t EMPTY_WATER_SECURITY_TIME = 10*1000;      // milliseconds. time to ensure a correct flush of the conainter. milliseconds
 const uint32_t PREPARATION_TIME = 60*30;         // seconds. system needs 30 minutes preparation before sampling
 const uint8_t PURGE_NUMBER = 2;                 // number of water container purge before sampling
 const uint32_t SYNC_TIME = 32400;               // every 9 hours
 const uint8_t MAX_FILTER_NUMBER = 2;             // max samples allowed in the system. For actuactor init purpose
 extern uint8_t FILTER_IN_SYSTEM;           // max samples currently inserted in the system
-const bool ENABLE_TIME_LOG = true;
+const bool ENABLE_TIME_LOG = false;
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -78,7 +79,7 @@ const uint8_t PRESSURE1_PIN = 3;
 const uint8_t PRESSURE2_PIN = 4;
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
-const uint8_t VALVE_PURGE = 45;
+const uint8_t VALVE_PURGE = 30;         // heater 1 for now (miss a cable)
 const uint8_t PUMP_PIN = 6;
 const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;

@@ -105,9 +105,9 @@ void setup()
     button_start.begin(BUTTON_START_PIN, "B_start");
     button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
-    // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
@@ -164,13 +164,26 @@ void setup()
 
 void loop()
 {
-    main_program();
 
-    // step_fill_container();
+
+    // output.println(pressure1.getPressure());
+    // output.println(pressure1.getTemperature());
+    // delay(500);
+
+    // test_purge();
+    // test_sampling(0);
+    // step_purge();
+    step_sampling(0);
+    button_start.waitPressedAndReleased();
+    // main_program();
+    // step_dive(30);
     // step_fill_container();
     // step_purge();
-    // button_start.waitPressedAndReleased();
+    // step_sampling(1);
+    // // button_start.waitPressedAndReleased();
     // test_hardware_general();
+    // output.println("fini");
+    // button_left.waitPressedAndReleased();
 
     // TESTS 1
     // test_1_depth_20m();

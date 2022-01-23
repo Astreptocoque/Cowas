@@ -8,11 +8,9 @@
 #include "Encoder.h"
 #include "Potentiometer.h"
 #include "Led.h"
-#include <SPI.h>
 #include "Serial_output.h"
 #include "sample.h"
 #include "Settings.h"
-#include "Critical_error.h"
 #include "Timer.h"
 #include "Serial_device.h"
 #include "Tests.h"
@@ -27,20 +25,18 @@ extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_purge;
-extern Valve_2_2 valve_stx_1_in;
-extern Valve_2_2 valve_stx_2_in;
-extern Valve_3_2 valve_stx_1_out;
-extern Valve_3_2 valve_stx_2_out;
+extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
+extern Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];
 extern Pump pump;
 extern Pump pump_vacuum;
 extern Motor spool;
 extern Encoder encoder;
-extern Button button_start;     // normally open
-extern Button button_container; // normally ???
-extern Button button_spool_up;  // normally closed
+extern Button button_start;    
+extern Button button_container;
+extern Button button_spool_up;     
 extern Button button_spool_down;
-extern Button button_left;  // normally open
-extern Button button_right; // normally open
+extern Button button_left;      
+extern Button button_right;
 extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern struct Timer timer_control_pressure2;
@@ -61,23 +57,20 @@ void tests()
 void test_hardware_general()
 {
 
-    for(int i = 0; i < 10; i++){
     output.println("Valve 1");
     button_left.waitPressedAndReleased();
     valve_1.switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
     valve_1.switch_way();
-    }
 
-    for(int i = 0; i < 10; i++){
     output.println("Valve 23");
     button_left.waitPressedAndReleased();
     valve_23.switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
     valve_23.switch_way();
-    }
+    
     output.println("Valve purge");
     button_left.waitPressedAndReleased();
     valve_purge.switch_way();
@@ -87,31 +80,31 @@ void test_hardware_general()
 
     output.println("Valve stx 1 in");
     button_left.waitPressedAndReleased();
-    valve_stx_1_in.switch_way();
+    valve_stx_in[0].switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
-    valve_stx_1_in.switch_way();
+    valve_stx_in[0].switch_way();
 
     output.println("Valve stx 2 in");
     button_left.waitPressedAndReleased();
-    valve_stx_2_in.switch_way();
+    valve_stx_in[1].switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
-    valve_stx_2_in.switch_way();
+    valve_stx_in[1].switch_way();
 
     output.println("Valve stx 1 out");
     button_left.waitPressedAndReleased();
-    valve_stx_1_out.switch_way();
+    valve_stx_out[0].switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
-    valve_stx_1_out.switch_way();
+    valve_stx_out[0].switch_way();
 
     output.println("Valve stx 2 out");
     button_left.waitPressedAndReleased();
-    valve_stx_2_out.switch_way();
+    valve_stx_out[1].switch_way();
     delay(500);
     button_left.waitPressedAndReleased();
-    valve_stx_2_out.switch_way();
+    valve_stx_out[1].switch_way();
 
     output.println("Pump vaccum");
     button_left.waitPressedAndReleased();
@@ -422,6 +415,7 @@ void test_3_sterivex_1(){
 
 void test_3_sterivex_2(){
 
+
     output.println("TEST 3 - sterivex 2");
 
     spool.start(1000);
@@ -476,4 +470,78 @@ void test_3_sterivex_2(){
     button_start.waitPressedAndReleased();
     step_rewind();
 
+}
+
+void test_sampling(uint8_t num_sterivex)
+{
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
+        if(i == num_sterivex){
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }else{
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    delay(500);
+
+    pump.set_power(POWER_STX);
+
+    // monitor pressure in parallel
+    // timerStart(timer_control_pressure1);
+    
+    pump.start();
+    int pot_value = 0;
+    int pot_last_value = potentiometer.get_value(0, 100);;
+    // uint32_t time1 = millis();
+    while(button_left.isReleased()){
+        pot_value = potentiometer.get_value(0, 100);
+        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4){
+            output.println(pot_value);
+            pot_last_value = pot_value;
+        }
+        pump.set_power(potentiometer.get_value(0, 100));
+        pump.start();
+        // output.println(pump.get_power());
+        output.println(pressure1.getPressure());
+        delay(200);
+    };
+    output.println("Stopped emptying container");
+    // pump a little bit more to flush all water    
+    // pump.start(EMPTY_WATER_SECURITY_TIME); 
+    
+    // timerStop(timer_control_pressure1);
+    pump.stop();
+    valve_stx_in[num_sterivex].set_close_way();
+    valve_stx_out[num_sterivex].set_L_way();
+}
+
+void test_purge()
+{
+    // make sure all sterivex valves are closed
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++) valve_stx_in[i].set_close_way();
+
+    valve_23.set_L_way();
+    valve_purge.set_open_way();
+    delay(500);
+
+    pump.set_power(100);
+
+    // monitor pressure in parallel
+    // timerStart(timer_control_pressure1);
+    
+    pump.start();
+    // uint32_t time1 = millis();
+    while(button_left.isReleased()){
+        output.println(pressure1.getPressure());
+        delay(200);
+    }
+    // pump a little bit more to flush all water
+    // pump.start(EMPTY_WATER_SECURITY_TIME);
+    pump.stop();
+    // timerStop(timer_control_pressure1);
+
+    valve_purge.set_close_way();
 }

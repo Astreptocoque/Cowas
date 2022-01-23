@@ -46,7 +46,7 @@ void Pump::start(){
         analogWrite(control_pin, power);
     else
         digitalWrite(control_pin, HIGH);
-    Pump_interface::start();
+    // Pump_interface::start();
 }
 
 void Pump::start(uint32_t time_ms){
@@ -75,26 +75,27 @@ void Pump::stop(){
 void TC3_Handler(){
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
-    float pressure = pressure1.getPressure();
+    // float pressure = pressure1.getPressure();
     // output.println(pressure);
-    if(pressure > pressure1.getMaxPressure()){
+    if(pressure1.getPressure() > pressure1.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
+        pump.start();
     }
     // pressure = pressure2.getPressure();
     // if(pressure > pressure2.getMaxPressure()){
     //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
     // }
 
-    status_led.switch_state();
+    // status_led.switch_state();
 }
 
 void TC4_Handler(){
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
-    float pressure = pressure2.getPressure();
+    // float pressure = pressure2.getPressure();
     // output.println(pressure);
-    if(pressure > pressure2.getMaxPressure()){
+    if(pressure2.getPressure() > pressure2.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
     }
@@ -103,5 +104,5 @@ void TC4_Handler(){
     //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
     // }
 
-    status_led.switch_state();
+    // status_led.switch_state();
 }
