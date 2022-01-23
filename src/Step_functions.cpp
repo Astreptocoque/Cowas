@@ -160,6 +160,7 @@ void step_sampling(uint8_t num_sterivex)
             validation_tick = 0;
         }
         output.println(pressure1.getPressure());
+
         delay(10); // don't read pressure to fast
     }
     output.println("Stopped emptying container");

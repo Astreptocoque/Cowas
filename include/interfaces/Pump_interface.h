@@ -12,8 +12,10 @@ class Pump_interface
 protected:
     byte control_pin;
     int power; // refers to power
+    uint8_t power_percent;
     bool pwm; // if pump is controlled by pwm or only HIGH/LOW
     String ID = "no_ID";
+    bool running = false;
 
 public:
     virtual void begin(byte _control_pin, bool _pwm){

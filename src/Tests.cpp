@@ -503,7 +503,6 @@ void test_sampling(uint8_t num_sterivex)
             pot_last_value = pot_value;
         }
         pump.set_power(potentiometer.get_value(0, 100));
-        pump.start();
         // output.println(pump.get_power());
         output.println(pressure1.getPressure());
         delay(200);

@@ -35,10 +35,14 @@ void Pump::set_flow(int _flow){
 
 void Pump::set_power(int _power){
     power = map(_power, 0, 100, 0, 255);
+    power_percent = _power;
+    // if pump already ON, then update the power
+    if(running)
+        pump.start();
 }
 
 int Pump::get_power(){
-    return power;
+    return power_percent;
 }
 
 void Pump::start(){
@@ -46,7 +50,8 @@ void Pump::start(){
         analogWrite(control_pin, power);
     else
         digitalWrite(control_pin, HIGH);
-    // Pump_interface::start();
+    running = true;
+    Pump_interface::start();
 }
 
 void Pump::start(uint32_t time_ms){
@@ -63,6 +68,7 @@ void Pump::stop(){
         analogWrite(control_pin, 0);
     else
         digitalWrite(control_pin, 0);
+    running = false;
     Pump_interface::stop();   
 }
 
@@ -73,25 +79,24 @@ void Pump::stop(){
  * 
  */
 void TC3_Handler(){
+    // You must do TC_GetStatus to "accept" interrupt
+    // As parameters use the first two parameters used in startTimer (TC1, 0 in this case)
     TC_GetStatus(TC1, 0);
     // print if too high is included in .getPressure()
     // float pressure = pressure1.getPressure();
-    // output.println(pressure);
     if(pressure1.getPressure() > pressure1.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
-        pump.start();
     }
-    // pressure = pressure2.getPressure();
-    // if(pressure > pressure2.getMaxPressure()){
-    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
-    // }
 
-    // status_led.switch_state();
+    status_led.switch_state();
 }
 
+
 void TC4_Handler(){
-    TC_GetStatus(TC1, 0);
+    // You must do TC_GetStatus to "accept" interrupt
+    // As parameters use the first two parameters used in startTimer (TC1, 0 in this case)
+    TC_GetStatus(TC1, 1);
     // print if too high is included in .getPressure()
     // float pressure = pressure2.getPressure();
     // output.println(pressure);
@@ -104,5 +109,5 @@ void TC4_Handler(){
     //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
     // }
 
-    // status_led.switch_state();
+    status_led.switch_state();
 }
