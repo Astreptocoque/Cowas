@@ -17,7 +17,7 @@
 #include "Serial_device.h"
 #include "Step_functions.h"
 
-#define DELAY_ACTIONS 500
+#define DELAY_ACTIONS 1000
 
 extern Serial_output output;
 extern Serial_device serial;
@@ -96,30 +96,39 @@ void step_purge()
 
     pump.set_power(100);
 
-    // monitor pressure in parallel
-    // timerStart(timer_control_pressure1);
+    // first action is to fill all tubes with water
+    // otherwise the sensor will detect end of emptying
+    pump.start(5000);
     
+    // then start with sensor reading
     pump.start();
     uint32_t time1 = millis();
-    uint32_t time2 = time1;
     uint8_t validation_tick = 0;
+    float pressure;
 
+    while(validation_tick < 250 && millis()-time1 < EMPTY_CONTAINER_TIME_PURGE){
+       
+        pressure = pressure1.getPressure();
 
-    while(validation_tick < 250 && millis()-time1 < PURGE_TIME){
+        // adapt pump power to pressure
+        if(pressure > 3){
+            pump.set_power(pump.get_power()-2);
+        }else if(pressure < 2.6f){
+            pump.set_power(pump.get_power()+2);
+        }
+       
         if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD){
-            validation_tick++;
-            
+            validation_tick++;   
         }else{
             validation_tick = 0;
         }
         delay(10); // don't read pressure to fast
     }
-    output.println(validation_tick);
+    
     // pump a little bit more to flush all water
-    // pump.start(EMPTY_WATER_SECURITY_TIME);
+    pump.start(EMPTY_WATER_SECURITY_TIME);
     pump.stop();
-    // timerStop(timer_control_pressure1);
-
+    delay(DELAY_ACTIONS);
     valve_purge.set_close_way();
 }
 
@@ -145,32 +154,46 @@ void step_sampling(uint8_t num_sterivex)
 
     pump.set_power(POWER_STX);
 
-    // monitor pressure in parallel
-    timerStart(timer_control_pressure1);
+    // start by filling all tubes
+    pump.start(5000);
     
     pump.start();
     uint32_t time1 = millis();
-    uint32_t time2 = time1;
     uint8_t validation_tick = 0;
+    float pressure;
 
-    while(validation_tick < 250 && millis()-time1 < PURGE_TIME){
-        if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
+    while(validation_tick < 250 && millis()-time1 < EMPTY_CONTAINER_TIME_FILTER){
+
+        pressure = pressure1.getPressure();
+
+        // adapt pump power to pressure
+        if(pressure > 3){
+            pump.set_power(pump.get_power()-2);
+        }else if(pressure < 2.6f){
+            pump.set_power(pump.get_power()+2);
+        }
+
+        // detect empty container
+        if(pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
             validation_tick++;
         }else{
             validation_tick = 0;
         }
-        output.println(pressure1.getPressure());
+        output.println(pressure);
 
         delay(10); // don't read pressure to fast
     }
-    output.println("Stopped emptying container");
-    // pump a little bit more to flush all water    
-    // pump.start(EMPTY_WATER_SECURITY_TIME); 
-    pump.stop();
-    timerStop(timer_control_pressure1);
 
+    // pump a little bit more to flush all water    
+    pump.start(EMPTY_WATER_SECURITY_TIME); 
+
+    pump.stop();
+    delay(DELAY_ACTIONS);
     valve_stx_in[num_sterivex].set_close_way();
     valve_stx_out[num_sterivex].set_L_way();
+
+    // end with a purge
+    step_purge();
 }
 
 /**

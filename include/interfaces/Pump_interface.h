@@ -11,7 +11,7 @@ class Pump_interface
 
 protected:
     byte control_pin;
-    int power; // refers to power
+    uint8_t power; // refers to power
     uint8_t power_percent;
     bool pwm; // if pump is controlled by pwm or only HIGH/LOW
     String ID = "no_ID";
@@ -29,7 +29,7 @@ public:
         power = _flow; //function needed)
         output.println("Flow pump " + ID + " set on " + String(_flow) + " L/min");
     }
-    virtual void set_power(int _power){
+    virtual void set_power(int8_t _power){
         power = _power;
         output.println("Power pump " + ID + " set on " + String(_power) + "% 24VDC");
     }

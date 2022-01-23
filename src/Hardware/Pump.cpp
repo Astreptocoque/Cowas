@@ -33,7 +33,13 @@ void Pump::set_flow(int _flow){
     output.println("function -set_flow- not implemented");
 }
 
-void Pump::set_power(int _power){
+void Pump::set_power(int8_t _power){
+    // data validation
+    if(_power > 100)
+        _power = 100;
+    if(_power < 0)
+        _power = 0;
+
     power = map(_power, 0, 100, 0, 255);
     power_percent = _power;
     // if pump already ON, then update the power
@@ -50,8 +56,12 @@ void Pump::start(){
         analogWrite(control_pin, power);
     else
         digitalWrite(control_pin, HIGH);
-    running = true;
-    Pump_interface::start();
+   
+    // display starting info only if previous state was OFF
+    if(!running){
+        Pump_interface::start();
+        running = true;
+    }
 }
 
 void Pump::start(uint32_t time_ms){
