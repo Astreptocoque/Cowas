@@ -211,6 +211,9 @@ void step_rewind()
     spool.set_speed(SPEED_UP, up);
     // go to origin
     spool.start(-1);
+
+    delay(DELAY_ACTIONS);
+    valve_1.set_close_way();
 }
 
 /**

@@ -180,6 +180,7 @@ void ISR_emergency_stop_up()
     {
         spool.endstop_up = true;
         md.setM1Brake(400);
+        encoder.reset();
         output.println("Endstop up touched");
     }
 }
