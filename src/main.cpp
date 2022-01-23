@@ -39,7 +39,7 @@ void before_start_program();
 void main_program();
 
 // ============ EXECUTION MODE ===================
-// #define  SYSTEM_CHECKUP
+#define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // See in settings
@@ -172,7 +172,7 @@ void loop()
     // test_purge();
     // test_sampling(0);
     // step_purge();
-    step_sampling(0);
+    // step_sampling(0);
     button_start.waitPressedAndReleased();
     // main_program();
     // step_dive(30);
@@ -319,13 +319,21 @@ void system_checkup()
         error = true;
     }
 
-    /*     // check container switch
+    // check container switch
     if (button_container.getState() == 1)
         output.println("CHECK | Button container working");
     else{
         output.println("ERROR | Button container not working");
         error = true;
-    } */
+    }
+
+    // check spool down switch
+    if (button_spool_down.getState() == 1)
+        output.println("CHECK | Button spool down working");
+    else{
+        output.println("ERROR | Button spool down not working");
+        error = true;
+    }
 
     //check temperature
     if (pressure1.getTemperature() > 0)

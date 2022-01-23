@@ -84,8 +84,11 @@ float Trustability_ABP_Gage::getPressure()
 
 float Trustability_ABP_Gage::getTemperature()
 {
-    // TODO add a function that block the new reading if less than 1 ms
-    read();
+    // protection to not read to fast the sensor
+    if(millis()-last_reading > 1){
+        last_reading = millis();
+        read();
+    }
     return temperature;
 }
 
