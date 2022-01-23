@@ -82,14 +82,20 @@ void TC3_Handler(){
     // You must do TC_GetStatus to "accept" interrupt
     // As parameters use the first two parameters used in startTimer (TC1, 0 in this case)
     TC_GetStatus(TC1, 0);
+
+    // disable all text output
+    ENABLE_OUTPUT = false;
     // print if too high is included in .getPressure()
     // float pressure = pressure1.getPressure();
     if(pressure1.getPressure() > pressure1.getMaxPressure()){
         // simple decremental function to reduce pressure
-        pump.set_power(pump.get_power() - 5);
+        pump.set_power(pump.get_power() - 2);
     }
 
     status_led.switch_state();
+    
+    //enable all text output back
+    ENABLE_OUTPUT = true;
 }
 
 
@@ -97,17 +103,17 @@ void TC4_Handler(){
     // You must do TC_GetStatus to "accept" interrupt
     // As parameters use the first two parameters used in startTimer (TC1, 0 in this case)
     TC_GetStatus(TC1, 1);
+
+    // disable all text output
+    ENABLE_OUTPUT = false;
     // print if too high is included in .getPressure()
-    // float pressure = pressure2.getPressure();
-    // output.println(pressure);
     if(pressure2.getPressure() > pressure2.getMaxPressure()){
         // simple decremental function to reduce pressure
         pump.set_power(pump.get_power() - 5);
     }
-    // pressure = pressure2.getPressure();
-    // if(pressure > pressure2.getMaxPressure()){
-    //     output.println("Pressure to high on sensor " + pressure1.getID() + " : " + pressure + "bar");
-    // }
 
     status_led.switch_state();
+
+    //enable all text output back
+    ENABLE_OUTPUT = true;
 }

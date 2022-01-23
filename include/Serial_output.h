@@ -56,16 +56,18 @@ public:
     template <typename T>
     void print(T output)
     {
-        if (serial_type == terminal || serial_type == terminalANDsdCard)
-            Serial.print(output);
+        if(ENABLE_OUTPUT){
+            if (serial_type == terminal || serial_type == terminalANDsdCard)
+                Serial.print(output);
 
-        if (serial_type == sdCard || serial_type == terminalANDsdCard)
-        {
-            dataFile = SD.open("datalog.txt", FILE_WRITE);
-            if (dataFile)
+            if (serial_type == sdCard || serial_type == terminalANDsdCard)
             {
-                dataFile.print(String(output));
-                dataFile.close();
+                dataFile = SD.open("datalog.txt", FILE_WRITE);
+                if (dataFile)
+                {
+                    dataFile.print(String(output));
+                    dataFile.close();
+                }
             }
         }
     }
@@ -73,22 +75,26 @@ public:
     template <typename T>
     void println(T output)
     {
-        // add time before printing in format yyyy-mm-dd hh:mm:ss
-        String data;
-        if (ENABLE_TIME_LOG)
-            data = format_date_logging(now()) + "   " + String(output);
-        else
-            data = output;
-        if (serial_type == terminal || serial_type == terminalANDsdCard)
-            Serial.println(data);
+        if(ENABLE_OUTPUT){
+            // add time before printing in format yyyy-mm-dd hh:mm:ss
+            String data;
+            if (ENABLE_TIME_LOG)
+                data = format_date_logging(now()) + "   " + String(output);
+            else
+                data = output;
 
-        if (serial_type == sdCard || serial_type == terminalANDsdCard)
-        {
-            dataFile = SD.open("datalog.txt", FILE_WRITE);
-            if (dataFile)
+
+            if (serial_type == terminal || serial_type == terminalANDsdCard)
+                Serial.println(data);
+
+            if (serial_type == sdCard || serial_type == terminalANDsdCard)
             {
-                dataFile.println(String(data));
-                dataFile.close();
+                dataFile = SD.open("datalog.txt", FILE_WRITE);
+                if (dataFile)
+                {
+                    dataFile.println(String(data));
+                    dataFile.close();
+                }
             }
         }
     }

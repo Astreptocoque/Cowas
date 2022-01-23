@@ -5,6 +5,7 @@
 extern Serial_output output;
 
 uint8_t FILTER_IN_SYSTEM = 2;           // max samples currently inserted in the system
+bool ENABLE_OUTPUT = true;
 
 System_state system_state = state_starting;
 

@@ -39,6 +39,7 @@ const uint32_t SYNC_TIME = 32400;               // every 9 hours
 const uint8_t MAX_FILTER_NUMBER = 2;             // max samples allowed in the system. For actuactor init purpose
 extern uint8_t FILTER_IN_SYSTEM;           // max samples currently inserted in the system
 const bool ENABLE_TIME_LOG = false;
+extern bool ENABLE_OUTPUT;
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -69,6 +70,7 @@ enum System_state{
 
 System_state get_system_state();
 void set_system_state(System_state state);
+void enable_output(bool enable);
 String format_date_logging(time_t t);
 String format_date_friendly(time_t t);
 
