@@ -78,6 +78,7 @@ void step_fill_container()
     pump.start();
     while(button_container.getState() == 1);
     pump.stop();
+    delay(DELAY_ACTIONS);
     valve_23.set_L_way();
 }
 
