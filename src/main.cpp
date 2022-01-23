@@ -122,23 +122,23 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    // output.println("Get date");
-    // struct Date current_date;
-    // esp8266.start_communication();
-    // current_date = esp8266.receive_time();
-    // // esp8266.validate();
-    // setTime(current_date.epoch);
-    // // setSyncInterval(SYNC_TIME);
-    // // setSyncProvider(esp8266.receive_time());
+    output.println("Get date");
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
+    // esp8266.validate();
+    setTime(current_date.epoch);
+    // setSyncInterval(SYNC_TIME);
+    // setSyncProvider(esp8266.receive_time());
 
     // manual time settup
-    setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
     output.flush();
 
     //add to test samples
-    add_sample(16, 31, 22, 01, 2022, 40, 0);
-    add_sample(17, 05, 22, 01, 2022, 600, 1);
+    add_sample(21, 30, 23, 01, 2022, 10, 2);
+    add_sample(17, 05, 24, 01, 2022, 600, 1);
     // add_sample(16, 00, 22, 01, 2022, 20, 0);
     // add_sample(19, 30, 12, 1, 2022, 10, 4);
     // add_sample(15, 30, 13, 1, 2022, 40, 4);
@@ -173,8 +173,8 @@ void loop()
     // test_sampling(0);
     // step_purge();
     // step_sampling(0);
-    button_start.waitPressedAndReleased();
-    // main_program();
+    // button_start.waitPressedAndReleased();
+    main_program();
     // step_dive(30);
     // step_fill_container();
     // step_purge();
@@ -236,15 +236,17 @@ void main_program()
             Sample sample = get_sample(0);
             // COWAS sampling
             step_dive(sample.get_depth());
-            for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-                step_fill_container();
-                step_purge();
-            }
-            step_fill_container();
-            step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
-            // display_sample(get_next_sample_place()-1);
+            // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+            //     step_fill_container();
+            //     step_purge();
+            // }
+            // step_fill_container();
             step_rewind();
-            step_dry(get_next_sample_place()-1);
+            // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
+            step_sampling(0); // sample place is a human number, start at 1
+            // display_sample(get_next_sample_place()-1);
+            
+            // step_dry(get_next_sample_place()-1);
             validate_sample();
             
             if(is_filter_available() == false){
@@ -336,6 +338,9 @@ void system_checkup()
     }
 
     //check temperature
+    // flush first time reading otherwise error (no idea why)
+    pressure1.getTemperature();
+    delay(10);
     if (pressure1.getTemperature() > 0)
     {
         output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
