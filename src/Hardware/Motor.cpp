@@ -196,6 +196,10 @@ void ISR_emergency_stop_down()
     {
         spool.endstop_down = true;
         md.setM1Brake(400);
-        output.println("Endstop down touched");
+        output.println("Endstop down touched - system stopped");
+        while(true){
+            delay(10);
+            //TODO : system alert and user warning
+        }
     }
 }

@@ -56,8 +56,8 @@ extern struct Timer timer_control_pressure1;
  */
 void step_dive(int _depth)
 {
-    // let air escape the system while diving
     valve_23.set_L_way();
+    // let air escape the system while diving
     valve_1.set_open_way();
     delay(DELAY_ACTIONS);
     spool.set_speed(SPEED_DOWN, down);      
@@ -74,9 +74,26 @@ void step_fill_container()
     valve_1.set_close_way();
     valve_23.set_I_way();
     delay(DELAY_ACTIONS);
+
+    uint32_t time1 = millis();
+    bool run = true;
+
     pump.set_power(100);
     pump.start();
-    while(button_container.getState() == 1);
+
+    do{
+
+        // conditions ouside loop to print what condition is responible for stopping
+        if(button_container.getState() == 0){
+            run = false;
+            output.println("Fill container stopped by button");
+        }else if(millis()-time1 > FILL_CONTAINER_TIME){
+            run = false;
+            output.println("Fill container stopped by security timer");
+            // TODO : raise a system warning to user
+        }
+    }while(run);
+
     pump.stop();
     delay(DELAY_ACTIONS);
     valve_23.set_L_way();
@@ -88,9 +105,8 @@ void step_fill_container()
  */
 void step_purge()
 {
-    // make sure all sterivex valves are closed
+    // set the valves
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++) valve_stx_in[i].set_close_way();
-
     valve_23.set_L_way();
     valve_purge.set_open_way();
     delay(DELAY_ACTIONS);
@@ -135,7 +151,8 @@ void step_purge()
             output.println("Purge stopped by low pressure");
         }else if(millis()-time1 > EMPTY_CONTAINER_TIME_PURGE){
             run = false;
-            output.println("Purge stopped by timer");
+            output.println("Purge stopped by security timer");
+            // TODO : raise a system warning to user
         }
         
     }while(run);
@@ -154,6 +171,7 @@ void step_purge()
  */
 void step_sampling(uint8_t num_sterivex)
 {
+    // set the valves
     valve_23.set_L_way();
     valve_purge.set_close_way();
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
@@ -178,8 +196,8 @@ void step_sampling(uint8_t num_sterivex)
     float pressure;
     bool run = true;
 
+    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
     do{
-
         delay(10); // don't read pressure to fast
 
         pressure = pressure1.getPressure();
@@ -191,7 +209,7 @@ void step_sampling(uint8_t num_sterivex)
             pump.set_power(pump.get_power()+2);
         }
 
-        // detect empty container
+        // if pressure low enough, engage stopping processure
         if(pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
             validation_tick++;
         }else{
@@ -204,7 +222,8 @@ void step_sampling(uint8_t num_sterivex)
             output.println("Purge stopped by low pressure");
         }else if(millis()-time1 > EMPTY_CONTAINER_TIME_FILTER){
             run = false;
-            output.println("Purge stopped by timer");
+            output.println("Purge stopped by security timer");
+            // TODO : raise a system warning to user
         }
        
     }while(run);
