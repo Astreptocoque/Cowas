@@ -39,7 +39,7 @@ void before_start_program();
 void main_program();
 
 // ============ EXECUTION MODE ===================
-#define  SYSTEM_CHECKUP
+// #define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // See in settings
@@ -107,7 +107,8 @@ void setup()
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
+    // doing problem right now
+    // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
@@ -122,16 +123,16 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    setTime(current_date.epoch);
+    // output.println("Get date");
+    // struct Date current_date;
+    // esp8266.start_communication();
+    // current_date = esp8266.receive_time();
+    // setTime(current_date.epoch);
     // setSyncInterval(SYNC_TIME);
     // setSyncProvider(esp8266.receive_time());
 
     // manual time settup
-    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
     output.flush();
 
@@ -164,15 +165,15 @@ void setup()
 void loop()
 {
 
-    output.println(pressure1.getPressure());
-    output.println(pressure1.getTemperature());
-    delay(500);
+    // output.println(pressure1.getPressure());
+    // output.println(pressure1.getTemperature());
+    // delay(500);
 
     // test_purge();
-    // test_sampling(0);
-    // step_purge();
+    test_sampling(0);
+    // test_purge();
     // step_sampling(0);
-    // button_start.waitPressedAndReleased();
+    button_start.waitPressedAndReleased();
     // main_program();
     // step_dive(30);
     // step_fill_container();

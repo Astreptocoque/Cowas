@@ -57,12 +57,12 @@ void Trustability_ABP_Gage::read()
         pressure = output_pressure * BAR_FACTORa - BAR_FACTORb;
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
         if(pressure > max_pressure){
-            output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
+            // output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }
     }
     else
     {
-        output.println("error pressure reading");
+        // output.println("error pressure reading");
     }
 }
 

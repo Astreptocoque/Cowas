@@ -41,7 +41,7 @@ const uint8_t PURGE_NUMBER = 2;                 // number of water container pur
 const uint32_t SYNC_TIME = 32400;               // milliseconds. every 9 hours
 const uint8_t MAX_FILTER_NUMBER = 2;             // max samples allowed in the system. For actuactor init purpose
 extern uint8_t FILTER_IN_SYSTEM;           // max samples currently inserted in the system
-const bool ENABLE_TIME_LOG = true;
+const bool ENABLE_TIME_LOG = false;
 extern bool ENABLE_OUTPUT;
 
 // ============= TIME MANAGEMENT ==============

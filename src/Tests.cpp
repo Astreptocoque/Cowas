@@ -474,6 +474,7 @@ void test_3_sterivex_2(){
 
 void test_sampling(uint8_t num_sterivex)
 {
+    // set the valves
     valve_23.set_L_way();
     valve_purge.set_close_way();
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
@@ -485,62 +486,156 @@ void test_sampling(uint8_t num_sterivex)
             valve_stx_out[i].set_L_way();
         }
     }
-    delay(500);
+    delay(1000);
+
+    output.println("sample every 10 ms");
 
     pump.set_power(POWER_STX);
 
-    // monitor pressure in parallel
-    // timerStart(timer_control_pressure1);
+    // start by filling all tubes with water
+    pump.start(10000);
     
     pump.start();
-    int pot_value = 0;
-    int pot_last_value = potentiometer.get_value(0, 100);;
-    // uint32_t time1 = millis();
-    while(button_left.isReleased()){
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4){
-            output.println(pot_value);
-            pot_last_value = pot_value;
+    uint32_t time1 = millis();
+    uint8_t validation_tick = 0;
+    float pressure;
+    bool run = true;
+
+    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
+    do{
+        delay(10); // don't read pressure to fast
+
+        pressure = pressure1.getPressure();
+
+        // adapt pump power to pressure
+        if(pressure > 3){
+            pump.set_power(pump.get_power()-2);
+        }else if(pressure < 2.6f){
+            pump.set_power(pump.get_power()+2);
         }
-        pump.set_power(potentiometer.get_value(0, 100));
-        // output.println(pump.get_power());
-        output.println(pressure1.getPressure());
-        delay(200);
-    };
-    output.println("Stopped emptying container");
+
+        // if pressure low enough, engage stopping processure
+        if(pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
+            validation_tick++;
+        }else{
+            validation_tick = 0;
+        }
+
+        output.println(pump.get_power());
+        output.println(pressure);
+        
+        
+        // conditions outside while loop to allow printing which condition is responsible for stop
+        if(validation_tick >= 250){
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }else if(millis()-time1 > EMPTY_CONTAINER_TIME_FILTER){
+            run = false;
+            output.println("Purge stopped by security timer");
+            // TODO : raise a system warning to user
+        }
+       
+    }while(run);
+
+    output.println("temps à l'arret");
+    output.println(millis()-time1);
+
     // pump a little bit more to flush all water    
-    // pump.start(EMPTY_WATER_SECURITY_TIME); 
-    
-    // timerStop(timer_control_pressure1);
+    pump.start(EMPTY_WATER_SECURITY_TIME); 
+
     pump.stop();
+    delay(1000);
+    valve_stx_in[num_sterivex].set_close_way();
+    valve_stx_out[num_sterivex].set_L_way();
+
+    // end with a purge
+    step_purge();
+
+    // now that tubes are empty, ensure to have the tube before filter emmpty
+    // set the valves
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
+        if(i == num_sterivex){
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }else{
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    delay(1000);
+    pump.set_power(100);
+    pump.start(EMPTY_WATER_SECURITY_TIME*2); 
+    delay(1000);
     valve_stx_in[num_sterivex].set_close_way();
     valve_stx_out[num_sterivex].set_L_way();
 }
 
 void test_purge()
 {
-    // make sure all sterivex valves are closed
+    // set the valves
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++) valve_stx_in[i].set_close_way();
-
     valve_23.set_L_way();
     valve_purge.set_open_way();
-    delay(500);
+    delay(1000);
 
     pump.set_power(100);
 
-    // monitor pressure in parallel
-    // timerStart(timer_control_pressure1);
+    // first action is to fill all tubes with water
+    // otherwise the sensor will detect end of emptying
+    pump.start(FILL_TUBES_WITH_WATER_TIME);
     
+    // then start with sensor reading
     pump.start();
-    // uint32_t time1 = millis();
-    while(button_left.isReleased()){
-        output.println(pressure1.getPressure());
-        delay(200);
-    }
-    // pump a little bit more to flush all water
-    // pump.start(EMPTY_WATER_SECURITY_TIME);
-    pump.stop();
-    // timerStop(timer_control_pressure1);
+    uint32_t time1 = millis();
+    uint8_t validation_tick = 0;
+    float pressure;
 
+    bool run = true;
+
+    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
+    do{
+        delay(10); // don't read pressure to fast
+
+        pressure = pressure1.getPressure();
+
+        // adapt pump power to pressure to not go over limit
+        if(pressure > 3){
+            pump.set_power(pump.get_power()-2);
+        }else if(pressure < 2.6f){
+            pump.set_power(pump.get_power()+2);
+        }
+
+        output.println(pump.get_power());
+        output.println(pressure);
+        
+       
+        // if pressure low enough, engage stopping processure
+        if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD){
+            validation_tick++;   
+        }else{
+            validation_tick = 0;
+        }
+
+        // conditions outside while loop to allow printing which condition is responsible for stop
+        if(validation_tick >= 250){
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }else if(millis()-time1 > EMPTY_CONTAINER_TIME_PURGE){
+            run = false;
+            output.println("Purge stopped by security timer");
+            // TODO : raise a system warning to user
+        }
+        
+    }while(run);
+    
+    output.println("temps à l'arret");
+    output.println(millis()-time1);
+
+    // pump a little bit more to flush all water
+    pump.start(EMPTY_WATER_SECURITY_TIME);
+    pump.stop();
+    delay(1000);
     valve_purge.set_close_way();
 }

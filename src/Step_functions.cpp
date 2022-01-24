@@ -87,11 +87,14 @@ void step_fill_container()
         if(button_container.getState() == 0){
             run = false;
             output.println("Fill container stopped by button");
-        }else if(millis()-time1 > FILL_CONTAINER_TIME){
-            run = false;
-            output.println("Fill container stopped by security timer");
-            // TODO : raise a system warning to user
         }
+        // TODO : better function. cannot be constant time because time depends of how deep we sample
+        // --> water need to go through the spool tube before entering the system
+        // else if(millis()-time1 > FILL_CONTAINER_TIME){
+        //     run = false;
+        //     output.println("Fill container stopped by security timer");
+        //     // TODO : raise a system warning to user
+        // }
     }while(run);
 
     pump.stop();
@@ -238,6 +241,26 @@ void step_sampling(uint8_t num_sterivex)
 
     // end with a purge
     step_purge();
+
+    // now that tubes are empty, ensure to have the tube before filter emmpty
+    // set the valves
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
+        if(i == num_sterivex){
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }else{
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    delay(DELAY_ACTIONS);
+    pump.set_power(100);
+    pump.start(EMPTY_WATER_SECURITY_TIME*2); 
+    delay(DELAY_ACTIONS);
+    valve_stx_in[num_sterivex].set_close_way();
+    valve_stx_out[num_sterivex].set_L_way();
 }
 
 /**
