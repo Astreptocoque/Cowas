@@ -84,7 +84,7 @@ void setup()
     timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};
 
     // ========== HARDWARE INITIALIZATION ==========
-    status_led.begin(STATUS_LED_PIN, "blue");
+    status_led.begin(STATUS_LED_PIN, "status");
     green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
     pressure2.begin(PRESSURE2_PIN, 3, "P2");
@@ -126,7 +126,6 @@ void setup()
     struct Date current_date;
     esp8266.start_communication();
     current_date = esp8266.receive_time();
-    // esp8266.validate();
     setTime(current_date.epoch);
     // setSyncInterval(SYNC_TIME);
     // setSyncProvider(esp8266.receive_time());
@@ -137,7 +136,7 @@ void setup()
     output.flush();
 
     //add to test samples
-    add_sample(21, 30, 23, 01, 2022, 10, 2);
+    add_sample(23, 30, 23, 01, 2022, 10, 2);
     add_sample(17, 05, 24, 01, 2022, 600, 1);
     // add_sample(16, 00, 22, 01, 2022, 20, 0);
     // add_sample(19, 30, 12, 1, 2022, 10, 4);
@@ -165,16 +164,16 @@ void setup()
 void loop()
 {
 
-    // output.println(pressure1.getPressure());
-    // output.println(pressure1.getTemperature());
-    // delay(500);
+    output.println(pressure1.getPressure());
+    output.println(pressure1.getTemperature());
+    delay(500);
 
     // test_purge();
     // test_sampling(0);
     // step_purge();
     // step_sampling(0);
     // button_start.waitPressedAndReleased();
-    main_program();
+    // main_program();
     // step_dive(30);
     // step_fill_container();
     // step_purge();

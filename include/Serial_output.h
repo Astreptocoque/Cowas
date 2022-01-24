@@ -7,6 +7,7 @@ using namespace std;
 #include <SD.h>
 #include "Settings.h"
 #include <TimeLib.h>
+#include <SPI.h>
 
 enum serial_type_enum
 {
@@ -89,6 +90,7 @@ public:
 
             if (serial_type == sdCard || serial_type == terminalANDsdCard)
             {
+                
                 dataFile = SD.open("datalog.txt", FILE_WRITE);
                 if (dataFile)
                 {

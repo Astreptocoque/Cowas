@@ -99,7 +99,7 @@ void step_purge()
 
     // first action is to fill all tubes with water
     // otherwise the sensor will detect end of emptying
-    pump.start(5000);
+    pump.start(FILL_TUBES_WITH_WATER_TIME);
     
     // then start with sensor reading
     pump.start();
@@ -107,24 +107,38 @@ void step_purge()
     uint8_t validation_tick = 0;
     float pressure;
 
-    while(validation_tick < 250 && millis()-time1 < EMPTY_CONTAINER_TIME_PURGE){
-       
+    bool run = true;
+
+    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
+    do{
+        delay(10); // don't read pressure to fast
+
         pressure = pressure1.getPressure();
 
-        // adapt pump power to pressure
+        // adapt pump power to pressure to not go over limit
         if(pressure > 3){
             pump.set_power(pump.get_power()-2);
         }else if(pressure < 2.6f){
             pump.set_power(pump.get_power()+2);
         }
        
+        // if pressure low enough, engage stopping processure
         if(pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD){
             validation_tick++;   
         }else{
             validation_tick = 0;
         }
-        delay(10); // don't read pressure to fast
-    }
+
+        // conditions outside while loop to allow printing which condition is responsible for stop
+        if(validation_tick >= 250){
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }else if(millis()-time1 > EMPTY_CONTAINER_TIME_PURGE){
+            run = false;
+            output.println("Purge stopped by timer");
+        }
+        
+    }while(run);
     
     // pump a little bit more to flush all water
     pump.start(EMPTY_WATER_SECURITY_TIME);
@@ -155,15 +169,18 @@ void step_sampling(uint8_t num_sterivex)
 
     pump.set_power(POWER_STX);
 
-    // start by filling all tubes
-    pump.start(5000);
+    // start by filling all tubes with water
+    pump.start(FILL_TUBES_WITH_WATER_TIME);
     
     pump.start();
     uint32_t time1 = millis();
     uint8_t validation_tick = 0;
     float pressure;
+    bool run = true;
 
-    while(validation_tick < 250 && millis()-time1 < EMPTY_CONTAINER_TIME_FILTER){
+    do{
+
+        delay(10); // don't read pressure to fast
 
         pressure = pressure1.getPressure();
 
@@ -180,10 +197,17 @@ void step_sampling(uint8_t num_sterivex)
         }else{
             validation_tick = 0;
         }
-        output.println(pressure);
-
-        delay(10); // don't read pressure to fast
-    }
+        
+        // conditions outside while loop to allow printing which condition is responsible for stop
+        if(validation_tick >= 250){
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }else if(millis()-time1 > EMPTY_CONTAINER_TIME_FILTER){
+            run = false;
+            output.println("Purge stopped by timer");
+        }
+       
+    }while(run);
 
     // pump a little bit more to flush all water    
     pump.start(EMPTY_WATER_SECURITY_TIME); 

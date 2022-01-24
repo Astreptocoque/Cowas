@@ -17,6 +17,7 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
 {
     pin_slave_select = _pin_slave_select;
     pinMode(pin_slave_select, OUTPUT);
+    digitalWrite(pin_slave_select, HIGH);
     max_pressure = _max_pressure;
     SPIPressure = new SPISettings(800000, MSBFIRST, SPI_MODE0);
 }
@@ -33,16 +34,16 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, S
  */
 void Trustability_ABP_Gage::read()
 {
-    // SPISettings SPIPressure(800000, MSBFIRST, SPI_MODE0);
 
     // SPI communication API
-    SPI.beginTransaction(*SPIPressure);
+    SPI.beginTransaction(SPISettings(800000, MSBFIRST, SPI_MODE0));
     digitalWrite(pin_slave_select, LOW);
     byte byte1 = SPI.transfer(0); // control & pressure 14 bits
     byte byte2 = SPI.transfer(0); // pressure 14 bits
     byte byte3 = SPI.transfer(0); // temperature 8 bits
     digitalWrite(pin_slave_select, HIGH);
     SPI.endTransaction();
+    
 
     // filter non valid data of pressure sensor (see datasheet)
     // two first bits should be 00
