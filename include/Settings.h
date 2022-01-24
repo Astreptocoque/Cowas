@@ -23,6 +23,7 @@ const uint8_t POWER_FLUSH = 100;            // speed when pumping from container
 const uint8_t POWER_STX = 35;
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*6;         // time after which container should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*16;       // seconds --> 16 minutes
+const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;                  // seconds, time to fill tubes for purge and sampling
 
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;           // vacuum to achieve
