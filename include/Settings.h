@@ -22,7 +22,7 @@ const uint8_t POWER_PUMP = 100;             // over 100. Power when pumping from
 const uint8_t POWER_FLUSH = 100;            // over 100. Power when pumping from container
 const uint8_t POWER_STX = 35;               // over 100. Experimental. Start power for sterivex but code adapts it.
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;         // milliseconds. Experimental. time after which container should be empty
-const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*16;       // milliseconds. Experimental. --> 16 minutes
+const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;       // milliseconds. Experimental. --> 16 minutes
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;                  // milliseconds. Experimental time to fill tubes for purge and sampling
 const uint32_t FILL_CONTAINER_TIME = 60*1000*10;     // milliseconds. Experimental.
 
