@@ -34,7 +34,7 @@ public:
         output.println("Power pump " + ID + " set on " + String(_power) + "% 24VDC");
     }
     virtual void start(){
-        output.println("Pump " + ID + " started with power " + power);
+        output.println("Pump " + ID + " started with power " + power_percent);
     }
     virtual void stop(){
         output.println("Pump " + ID + " stopped");

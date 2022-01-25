@@ -18,7 +18,7 @@ void Pump::begin(byte _control_pin, bool _pwm)
 {
     control_pin = _control_pin;
     pwm = _pwm;
-    pinMode(control_pin, INPUT);
+    pinMode(control_pin, OUTPUT);
     set_power(190); // after 190, flow doesn't increase
     stop();
 }

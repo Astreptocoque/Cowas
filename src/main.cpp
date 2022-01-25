@@ -39,7 +39,7 @@ void before_start_program();
 void main_program();
 
 // ============ EXECUTION MODE ===================
-// #define  SYSTEM_CHECKUP
+#define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
 // See in settings
@@ -123,22 +123,22 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    // output.println("Get date");
-    // struct Date current_date;
-    // esp8266.start_communication();
-    // current_date = esp8266.receive_time();
-    // setTime(current_date.epoch);
+    output.println("Get date");
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
+    setTime(current_date.epoch);
     // setSyncInterval(SYNC_TIME);
     // setSyncProvider(esp8266.receive_time());
 
     // manual time settup
-    setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
     output.flush();
 
     //add to test samples
-    add_sample(23, 30, 23, 01, 2022, 10, 2);
-    add_sample(17, 05, 24, 01, 2022, 600, 1);
+    add_sample(16, 35, 25, 01, 2022, 5, 2);
+    add_sample(8, 00, 26, 01, 2022, 600, 1);
     // add_sample(16, 00, 22, 01, 2022, 20, 0);
     // add_sample(19, 30, 12, 1, 2022, 10, 4);
     // add_sample(15, 30, 13, 1, 2022, 40, 4);
@@ -175,9 +175,18 @@ void loop()
     // button_start.waitPressedAndReleased();
     // spool.start(5);
     // test_purge();
-    step_fill_container();
+    // spool.start(-1);
+    // button_start.waitPressedAndReleased();
+    // step_dive(5);
+    // step_fill_container();
+    // step_purge();
+    step_dry(0);
+    // pump_vacuum.set_power(100);
+    // pump_vacuum.start();
+    // delay(1000);
+    // pump_vacuum.stop();
     // step_sampling(0);
-    button_start.waitPressedAndReleased();
+    // button_start.waitPressedAndReleased();
     // main_program();
     // step_dive(30);
     // step_fill_container();
@@ -229,9 +238,15 @@ void main_program()
     // when time occurs for a sample to be done
     if (now() > get_next_sample_time() - PREPARATION_TIME)
     {
+        // output.println((uint32_t)now());
+        // output.println((uint32_t)(get_next_sample_time()));
+        // output.println(String(PREPARATION_TIME));
+        // output.println((uint32_t)(get_next_sample_time() - PREPARATION_TIME));
         // if a filter is available to be used
         if (is_filter_available())
         {
+            uint32_t time_sampling = millis();
+
             // for human interface
             set_system_state(state_sampling);
 
@@ -253,6 +268,8 @@ void main_program()
             
             // step_dry(get_next_sample_place()-1);
             validate_sample();
+
+            output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
             
             if(is_filter_available() == false){
                 set_system_state(state_refill);
@@ -318,9 +335,10 @@ void system_checkup()
     spool.start(20, down);
     delay(200);
     spool.stop();
-    if (button_spool_up.getState() == 1)
+    if (button_spool_up.getState() == 1){
         output.println("CHECK | Button spool working");
-    else
+        spool.start_origin();
+    }else
     {
         output.println("ERROR | Button spool not working");
         error = true;
