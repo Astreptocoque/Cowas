@@ -56,13 +56,23 @@ extern struct Timer timer_control_pressure1;
  */
 void step_dive(int _depth)
 {
+    output.println("Step dive started");
+
     valve_23.set_L_way();
     // let air escape the system while diving
     valve_1.set_open_way();
     delay(DELAY_ACTIONS);
+
+    uint32_t time1 = millis();
+
     spool.set_speed(SPEED_DOWN, down);      
     spool.start(_depth);
+
+    output.println("Time to dive : " + String(millis()-time1) + " ms");
+
     valve_1.set_close_way();
+
+    output.println("Step dive ended");
 }
 
 /**
@@ -71,6 +81,8 @@ void step_dive(int _depth)
  */
 void step_fill_container()
 {
+    output.println("Step fill container started");
+
     valve_1.set_close_way();
     valve_23.set_I_way();
     delay(DELAY_ACTIONS);
@@ -98,8 +110,13 @@ void step_fill_container()
     }while(run);
 
     pump.stop();
+
+    output.println("Time to fill container : " + String(millis()-time1) + " ms");
+
     delay(DELAY_ACTIONS);
     valve_23.set_L_way();
+
+    output.println("Step fill container ended");
 }
 
 /**
@@ -108,6 +125,8 @@ void step_fill_container()
  */
 void step_purge()
 {
+    output.println("Step purge container started");
+
     // set the valves
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++) valve_stx_in[i].set_close_way();
     valve_23.set_L_way();
@@ -163,8 +182,13 @@ void step_purge()
     // pump a little bit more to flush all water
     pump.start(EMPTY_WATER_SECURITY_TIME);
     pump.stop();
+
+    output.println("Time to purge container : " + String(millis()-time1) + " ms");
+
     delay(DELAY_ACTIONS);
     valve_purge.set_close_way();
+
+    output.println("Step purge container ended");
 }
 
 /**
@@ -174,6 +198,8 @@ void step_purge()
  */
 void step_sampling(uint8_t num_sterivex)
 {
+    output.println("Step sample through filter started");
+
     // set the valves
     valve_23.set_L_way();
     valve_purge.set_close_way();
@@ -235,6 +261,9 @@ void step_sampling(uint8_t num_sterivex)
     pump.start(EMPTY_WATER_SECURITY_TIME); 
 
     pump.stop();
+
+    output.println("Time to sample water : " + String(millis()-time1) + " ms");
+
     delay(DELAY_ACTIONS);
     valve_stx_in[num_sterivex].set_close_way();
     valve_stx_out[num_sterivex].set_L_way();
@@ -261,6 +290,9 @@ void step_sampling(uint8_t num_sterivex)
     delay(DELAY_ACTIONS);
     valve_stx_in[num_sterivex].set_close_way();
     valve_stx_out[num_sterivex].set_L_way();
+
+    output.println("Step sample through filter ended");
+
 }
 
 /**
@@ -269,17 +301,25 @@ void step_sampling(uint8_t num_sterivex)
  */
 void step_rewind()
 {
+    output.println("Step rewind started");
+
     // let air enter the system
     valve_1.set_open_way();
     valve_23.set_L_way();
     delay(DELAY_ACTIONS);
 
+    uint32_t time1 = millis();
+
     spool.set_speed(SPEED_UP, up);
     // go to origin
     spool.start(-1);
 
+    output.println("Time to rewind : " + String(millis()-time1) + " ms");
+
     delay(DELAY_ACTIONS);
     valve_1.set_close_way();
+
+    output.println("Step rewind ended");
 }
 
 /**
@@ -289,6 +329,8 @@ void step_rewind()
  */
 void step_dry(uint8_t num_sterivex)
 {
+    output.println("Step drying started");
+
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         valve_stx_in[i].set_close_way();
 
@@ -313,4 +355,6 @@ void step_dry(uint8_t num_sterivex)
     for(uint8_t i = 0; i < MAX_FILTER_NUMBER; i++){
         valve_stx_out[i].set_L_way();
     }
+
+    output.println("Step drying ended");
 }

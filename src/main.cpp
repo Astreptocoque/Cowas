@@ -170,8 +170,12 @@ void loop()
     // delay(500);
 
     // test_purge();
-    test_sampling(0);
+    // test_sampling(0);
+    // spool.start(-1);
+    // button_start.waitPressedAndReleased();
+    // spool.start(5);
     // test_purge();
+    step_fill_container();
     // step_sampling(0);
     button_start.waitPressedAndReleased();
     // main_program();
@@ -216,10 +220,11 @@ void main_program()
     }
 
     // check if filter are refilled. Potentiometer on the left and button left pressed
-    // if (potentiometer.get_value() < 50 && button_left.isPressed()){
-    //     // choose number of filter inserted. For now always 2.
-    //     reload_filters(2);
-    // }
+    if (potentiometer.get_value() < 50 && button_left.isPressed()){
+        // choose number of filter inserted. For now always 2.
+        reload_filters(2);
+        output.println("Filter refilled");
+    }
 
     // when time occurs for a sample to be done
     if (now() > get_next_sample_time() - PREPARATION_TIME)
@@ -236,11 +241,11 @@ void main_program()
             Sample sample = get_sample(0);
             // COWAS sampling
             step_dive(sample.get_depth());
-            // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-            //     step_fill_container();
-            //     step_purge();
-            // }
-            // step_fill_container();
+            for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+                step_fill_container();
+                step_purge();
+            }
+            step_fill_container();
             step_rewind();
             // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
             step_sampling(0); // sample place is a human number, start at 1
