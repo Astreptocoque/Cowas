@@ -13,8 +13,8 @@
 // spool variables
 const int HEIGHT_FROM_WATER = 50;          // cm. in centimeters, ref to spool endstop
 const uint8_t DISTANCE_FROM_STOP = 5;       // cm. slow down at this distance from origin
-const uint8_t SPEED_UP = 30; //100;               // over 100. Speed when moving up - experimental tested
-const uint8_t SPEED_DOWN = 30; //100;             // over 100. Speed when moving down - experimental tested
+const uint8_t SPEED_UP = 100; //100;               // over 100. Speed when moving up - experimental tested
+const uint8_t SPEED_DOWN = 100; //100;             // over 100. Speed when moving down - experimental tested
 const int TUBE_LENGTH = 49000;              // cm. length of tube
 
 // water pump variables
@@ -24,7 +24,7 @@ const uint8_t POWER_STX = 35;               // over 100. Experimental. Start pow
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;         // milliseconds. Experimental. time after which container should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;       // milliseconds. Experimental. --> 16 minutes
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;                  // milliseconds. Experimental time to fill tubes for purge and sampling
-const uint32_t FILL_CONTAINER_TIME = 60*1000*10;     // milliseconds. Experimental.
+const uint32_t FILL_CONTAINER_TIME = 60*1000*11;     // milliseconds. Experimental.
 
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;           // bar from atmsophere. vacuum to achieve

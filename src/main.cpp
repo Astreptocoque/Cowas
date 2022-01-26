@@ -123,16 +123,16 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    setTime(current_date.epoch);
+    // output.println("Get date");
+    // struct Date current_date;
+    // esp8266.start_communication();
+    // current_date = esp8266.receive_time();
+    // setTime(current_date.epoch);
     // setSyncInterval(SYNC_TIME);
     // setSyncProvider(esp8266.receive_time());
 
     // manual time settup
-    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
     output.flush();
 
@@ -173,14 +173,19 @@ void loop()
     // test_sampling(0);
     // spool.start(-1);
     // button_start.waitPressedAndReleased();
-    // spool.start(5);
+    // spool.start(100, up);
     // test_purge();
-    // spool.start(-1);
     // button_start.waitPressedAndReleased();
+    // spool.start_origin();
+    // spool.set_speed(50, down);
+    // spool.start(5);
+    step_dive(5);
+    button_start.waitPressedAndReleased();
+
     // step_dive(5);
     // step_fill_container();
     // step_purge();
-    step_dry(0);
+    // step_dry(0);
     // pump_vacuum.set_power(100);
     // pump_vacuum.start();
     // delay(1000);

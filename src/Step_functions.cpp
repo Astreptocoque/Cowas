@@ -90,7 +90,7 @@ void step_fill_container()
     uint32_t time1 = millis();
     bool run = true;
 
-    pump.set_power(90);
+    pump.set_power(40);
     pump.start();
 
     do
