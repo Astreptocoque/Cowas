@@ -121,7 +121,7 @@ void setup()
     current_date = esp8266.receive_time();
     setTime(current_date.epoch);
     // manual time settup
-    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
 
     //  Test samples intialized

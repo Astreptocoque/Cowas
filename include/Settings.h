@@ -24,7 +24,7 @@ const uint8_t POWER_STX = 35;                               // over 100. Experim
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;         // ms. Experimental. Time to fill tubes for purge and sampling before sensor take over
-const uint32_t FILL_CONTAINER_TIME = 60*1000*10;            // ms. Experimental.
+const uint32_t FILL_CONTAINER_TIME = 60*1000*11;            // ms. Experimental.
 
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;               // bar from atmsophere. Vacuum to achieve
