@@ -9,40 +9,41 @@
 
 // global const = static = each file has its own decleration
 
-// =============== VARIABLES ===============
+// =============== COWAS VARIABLES ===============
 // spool variables
-const int HEIGHT_FROM_WATER = 50;          // cm. in centimeters, ref to spool endstop
-const uint8_t DISTANCE_FROM_STOP = 5;       // cm. slow down at this distance from origin
-const uint8_t SPEED_UP = 30; //100;               // over 100. Speed when moving up - experimental tested
-const uint8_t SPEED_DOWN = 30; //100;             // over 100. Speed when moving down - experimental tested
-const int TUBE_LENGTH = 49000;              // cm. length of tube
+const int HEIGHT_FROM_WATER = 50;           // cm. between water level and spool endstop
+const uint8_t DISTANCE_FROM_STOP = 5;       // cm. distance from spool endstop at which speed is decreased
+const uint8_t SPEED_UP = 100;               // over 100. Speed when moving up - experimentaly tested
+const uint8_t SPEED_DOWN = 100;             // over 100. Speed when moving down - experimentaly tested
+const int TUBE_LENGTH = 49000;              // cm. length of tube (not sure of this number)
 
 // water pump variables
-const uint8_t POWER_PUMP = 100;             // over 100. Power when pumping from water
-const uint8_t POWER_FLUSH = 100;            // over 100. Power when pumping from container
-const uint8_t POWER_STX = 35;               // over 100. Experimental. Start power for sterivex but code adapts it.
-const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;         // milliseconds. Experimental. time after which container should be empty
-const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;       // milliseconds. Experimental. --> 16 minutes
-const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;                  // milliseconds. Experimental time to fill tubes for purge and sampling
-const uint32_t FILL_CONTAINER_TIME = 60*1000*10;     // milliseconds. Experimental.
+const uint8_t POWER_PUMP = 50;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
+const uint8_t POWER_FLUSH = 100;                            // over 100. Power when pumping from container
+const uint8_t POWER_STX = 35;                               // over 100. Experimental. Start power for sterivex but code adapts it.
+const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
+const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
+const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;         // ms. Experimental. Time to fill tubes for purge and sampling before sensor take over
+const uint32_t FILL_CONTAINER_TIME = 60*1000*10;            // ms. Experimental.
 
 // vacuum pump variables
-const float VACUUM_TO_ACHIEVE = 0.13;           // bar from atmsophere. vacuum to achieve
-const float VACUUM_MINIMUM = 0.20;              // bar from atmosphere. vacuum before restarting vacuum pump
-const uint32_t DRYING_TIME = 2*60*1000-10*1000; //30*1000;           // milliseconds. time for pumping hysteris and heating
+const float VACUUM_TO_ACHIEVE = 0.13;               // bar from atmsophere. Vacuum to achieve
+const float VACUUM_MINIMUM = 0.20;                  // bar from atmosphere. Vacuum before restarting vacuum pump
+const uint32_t DRYING_TIME = 2*60*1000-10*1000;     // ms. Time for pumping hysteris and heating
 
 // system variables
-const int UPDATE_TIME = 1000;                      // milliseconds. refresh frequency for action i.e. sampling
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04f;        // bar from atmosphere. threshold of pressure considered as empty (no water)
-const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.7f;           //bar from atmosphere.
-const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;      // milliseconds. time to ensure a correct flush of the conainter. milliseconds
-const uint32_t PREPARATION_TIME = 60*30;         // milliseconds. system needs 30 minutes preparation before sampling
-const uint8_t PURGE_NUMBER = 2;                 // number of water container purge before sampling
-const uint32_t SYNC_TIME = 32400;               // milliseconds. every 9 hours
-const uint8_t MAX_FILTER_NUMBER = 2;             // max samples allowed in the system. For actuactor init purpose
-extern uint8_t FILTER_IN_SYSTEM;           // max samples currently inserted in the system
-const bool ENABLE_TIME_LOG = true;
-extern bool ENABLE_OUTPUT;
+const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
+const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
+const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 10*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
+const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
+const uint8_t PURGE_NUMBER = 2;                                 // number of water container purge before sampling
+const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
+const uint8_t MAX_FILTER_NUMBER = 2;                            // max filters possible in the system
+extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
+const bool ENABLE_TIME_LOG = true;                              // If true, print the time before each printed output
+extern bool ENABLE_OUTPUT;                                      // Enable or disable output printing, even if trying
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -58,7 +59,10 @@ struct Date{
     struct Time time;
 };
 
-// ========== SYSTEM STATES =============
+String format_date_logging(time_t t);
+String format_date_friendly(time_t t);
+
+// ============ SYSTEM STATES ================
 // system states are here for the human interface. The goal is to have the system updating its
 // state when necessary and communicating it to the wifi card. When connecting to the server,
 // the wifi card will send the state and by this mean enable or disable control functions.
@@ -74,8 +78,7 @@ enum System_state{
 System_state get_system_state();
 void set_system_state(System_state state);
 void enable_output(bool enable);
-String format_date_logging(time_t t);
-String format_date_friendly(time_t t);
+
 
 // ============ PIN DEFINITIONS ==================
 const uint8_t STATUS_LED_PIN = 22;
@@ -84,7 +87,7 @@ const uint8_t PRESSURE1_PIN = 3;
 const uint8_t PRESSURE2_PIN = 4;
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
-const uint8_t VALVE_PURGE = 30;         // heater 1 for now (miss a cable)
+const uint8_t VALVE_PURGE = 30; // heater 1 but valve purge for now (miss a cable)
 const uint8_t PUMP_PIN = 6;
 const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;

@@ -15,7 +15,27 @@ System_state get_system_state(){
 
 void set_system_state(System_state state){
     system_state = state;
-    // TODO : communicate state to wifi card
+    // TODO : communicate state to wifi card and 
+   /*  switch (state){
+        case state_starting:
+
+        break;
+        case state_idle:
+        
+        break;
+        case state_sampling:
+        
+        break;
+        case state_refill:
+        
+        break;
+        case state_communicating:
+        
+        break;
+        case state_error:
+        
+        break;
+    } */
 }
 
 String format_date_logging(time_t t){
@@ -49,7 +69,7 @@ String format_date_logging(time_t t){
 }
 
 String format_date_friendly(time_t t){
-    // add time before printing in format yyyy-mm-dd hh:mm:ss
+    // add time before printing in format hh:mm:ss yyyy-mm-dd
     
     String data = "";
     if(hour(t) < 10)

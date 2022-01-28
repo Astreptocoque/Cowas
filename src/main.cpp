@@ -1,16 +1,15 @@
 /**
  * @file MAIN.CPP
- * @author Timothée Hirt & Christophe Deloose & Elio Sanchez
+ * @author Timothée Hirt
  * @brief A GenoRobotics project - CoWaS (Continous Water Sampling). 
- *        ARDUINO DUE !!!
+ *        A project for ARDUINO DUE
  * @version 2.0
- * @date 2021-10-10
+ * @date 2022-01-28
  * 
- * @copyright Copyright (c) 2021
+ * @copyright Copyright (c) 2022
  * 
  */
 
-// #include <list>                     // include before arduino.h, otherwise error
 #include <Arduino.h>
 #include "Button.h"
 #include "Trustability_ABP_Gage.h"
@@ -39,17 +38,18 @@ void before_start_program();
 void main_program();
 
 // ============ EXECUTION MODE ===================
+// comment this line if no system check at startup
 #define  SYSTEM_CHECKUP
 
 // ============ PIN DEFINITIONS ==================
-// See in settings
+// See in Settings.h
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
 Serial_output output;                       // custom print function to handle multiple outputs
 Serial_device esp8266;                      // enable communication with wifi card
 Led status_led;                             // general purpose LED
-Led green_led;                              // general purpose LED, used for start signals
+Led green_led;                              // general purpose LED, used here for start signals
 Trustability_ABP_Gage pressure1;            // see schematics
 Trustability_ABP_Gage pressure2;            // see schematics
 Valve_2_2 valve_1;                          // see schematics
@@ -62,11 +62,11 @@ Pump pump_vacuum;                           // see schematics
 Motor spool;                                // see schematics
 Encoder encoder;                            // see schematics
 Button button_start;                        // User button. Normally open
+Button button_left;                         // User button. Normally open
+Button button_right;                        // User button. Normally open
 Button button_container;                    // Control button. Normally closed
 Button button_spool_up;                     // Control button. Normally closed
 Button button_spool_down;                   // Control button. Normally closed
-Button button_left;                         // User button. Normally open
-Button button_right;                        // User button. Normally open
 Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 struct Timer timer_control_pressure2;       // Timer for interrupts with pressure sensor 2
@@ -80,8 +80,8 @@ void setup()
     output.begin(terminal); // choose output of logs
     esp8266.begin();        // connect to wifi card
 
-    timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};
-    timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};
+    timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};    // timer of 1 second (4)
+    timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};    // timer of 1 second (4)
 
     // ========== HARDWARE INITIALIZATION ==========
     status_led.begin(STATUS_LED_PIN, "status");
@@ -107,12 +107,29 @@ void setup()
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    // doing problem right now
+    // doing problem right now, to investigate
     // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
     wifi_message.begin(ESP8266_COMM_PIN, INPUT);
+
+    // ========= DATE FROM WIFI CARD ============
+    output.println("Get date");
+    struct Date current_date;
+    esp8266.start_communication();
+    current_date = esp8266.receive_time();
+    setTime(current_date.epoch);
+    // manual time settup
+    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
+    output.println("It is " + format_date_friendly(now()));
+
+    //  Test samples intialized
+    add_sample(16, 35, 25, 01, 2022, 5, 2);
+    add_sample(8, 00, 26, 01, 2022, 600, 1);
+
+    display_samples();
+
 
     output.println("system initalized\n");
 
@@ -123,32 +140,8 @@ void setup()
     output.println("========== Press reset button on due button to come back here ==========");
     output.flush();
 
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    setTime(current_date.epoch);
-    // setSyncInterval(SYNC_TIME);
-    // setSyncProvider(esp8266.receive_time());
-
-    // manual time settup
-    // setTime(timeToEpoch(16, 00, 22, 01, 2022));
-    output.println("It is " + format_date_friendly(now()));
-    output.flush();
-
-    //add to test samples
-    add_sample(16, 35, 25, 01, 2022, 5, 2);
-    add_sample(8, 00, 26, 01, 2022, 600, 1);
-    // add_sample(16, 00, 22, 01, 2022, 20, 0);
-    // add_sample(19, 30, 12, 1, 2022, 10, 4);
-    // add_sample(15, 30, 13, 1, 2022, 40, 4);
-    // add_sample(18, 03, 10, 1, 2022, 40, 5);
-    // add_sample(18, 30, 12, 1, 2022, 40, 0);
-    display_samples();
-
     green_led.on();
     status_led.on();
-    output.println("Before start program");
     before_start_program();
     button_start.waitPressedAndReleased();
     green_led.off();
@@ -158,44 +151,17 @@ void setup()
     system_checkup();
     output.println("System checked\n");
 #endif
+
     output.println("Programm started\n");
+    // System states are command for the server to allow or not some manipulations
     set_system_state(state_idle);
 }
 
 void loop()
 {
-
-    // output.println(pressure1.getPressure());
-    // output.println(pressure1.getTemperature());
-    // delay(500);
-
-    // test_purge();
-    // test_sampling(0);
-    // spool.start(-1);
-    // button_start.waitPressedAndReleased();
-    // spool.start(5);
-    // test_purge();
-    // spool.start(-1);
-    // button_start.waitPressedAndReleased();
-    // step_dive(5);
-    // step_fill_container();
-    // step_purge();
-    step_dry(0);
-    // pump_vacuum.set_power(100);
-    // pump_vacuum.start();
-    // delay(1000);
-    // pump_vacuum.stop();
-    // step_sampling(0);
-    // button_start.waitPressedAndReleased();
-    // main_program();
-    // step_dive(30);
-    // step_fill_container();
-    // step_purge();
-    // step_sampling(1);
-    // // button_start.waitPressedAndReleased();
+    main_program();
+    
     // test_hardware_general();
-    // output.println("fini");
-    // button_left.waitPressedAndReleased();
 
     // TESTS 1
     // test_1_depth_20m();
@@ -208,53 +174,52 @@ void loop()
 
     // TESTS 3
     // test_3_sterivex_1();
-    // test_pressure();
-    //   main_program();
-    //   test_depth();
-    //   tests();
+
 }
 
 void main_program()
 {
-    static bool next_sample_information = true;
-    // DO wifi and communication stuffs
+    static bool one_time_code_idle_mode = true;
 
-    // one time print of the next sample informatin for logging
-    if (next_sample_information)
+    // =============== IDLE CODE ==================    
+    // TODO : Wi-Fi and communication stuffs
+
+
+    // ========= ONE TIME CODE IN IDLE ============
+    if (one_time_code_idle_mode)
     {
         output.println("Next sample scheduled :");
         display_sample(0);
-        output.println("");
-        next_sample_information = false;
+        one_time_code_idle_mode = false;
+        // TODO : send this information to server
     }
 
-    // check if filter are refilled. Potentiometer on the left and button left pressed
+    // ======== FILTER REFILLING COMMAND ==========
+    // Manual command. Potentiometer on the left and button left pressed
+    // TODO : refill validation through server
     if (potentiometer.get_value() < 50 && button_left.isPressed()){
         // choose number of filter inserted. For now always 2.
         reload_filters(2);
         output.println("Filter refilled");
     }
 
-    // when time occurs for a sample to be done
+    // ============== SAMPLING STEPS ==============
     if (now() > get_next_sample_time() - PREPARATION_TIME)
     {
-        // output.println((uint32_t)now());
-        // output.println((uint32_t)(get_next_sample_time()));
-        // output.println(String(PREPARATION_TIME));
-        // output.println((uint32_t)(get_next_sample_time() - PREPARATION_TIME));
-        // if a filter is available to be used
+        // if there is still new filters in the system
         if (is_filter_available())
         {
             uint32_t time_sampling = millis();
 
-            // for human interface
             set_system_state(state_sampling);
-
-            output.println("It's sampling time !");
 
             // get first sample in list
             Sample sample = get_sample(0);
-            // COWAS sampling
+
+            output.println("It's sampling time !");
+            output.println("Sample started at depth " + String(sample.get_depth()) + "cm in filter " + String(get_next_filter_place()));
+
+            // Sampling steps
             step_dive(sample.get_depth());
             for(uint8_t i = 0; i < PURGE_NUMBER; i++){
                 step_fill_container();
@@ -262,36 +227,37 @@ void main_program()
             }
             step_fill_container();
             step_rewind();
-            // step_sampling(get_next_sample_place()-1); // sample place is a human number, start at 1
-            step_sampling(0); // sample place is a human number, start at 1
-            // display_sample(get_next_sample_place()-1);
+            step_sampling(get_next_filter_place()); // sample place is a human number, start at 1
+            // step_dry(get_next_sample_place());   // not completely done yet
             
-            // step_dry(get_next_sample_place()-1);
+            // changes variables accordingly and log done sample
             validate_sample();
 
             output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
-            
+
+            // Check new filter availability
             if(is_filter_available() == false){
                 set_system_state(state_refill);
-                output.println("No more filter in stock");
+                output.println("Out of filter stock");
             }else{
                 set_system_state(state_idle);
-                next_sample_information = true;
             }
         }
         else
         {
             output.println("ERROR - sample not done - no filter available");
             validate_sample();
-            next_sample_information = true;
         }
+
+        one_time_code_idle_mode = true;
     }
     delay(UPDATE_TIME);
 }
 
 void before_start_program()
 {
-    // move the motor before starting
+    // Enable to move spool manualy with left and right buttons
+    // Tune speed with potentiometer
 
     int pot_last_value = potentiometer.get_value(0, 100);
     int pot_value = 0;

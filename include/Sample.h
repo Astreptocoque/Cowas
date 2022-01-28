@@ -45,13 +45,14 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minute,  uint8_t _day, uint8_t _month
 time_t timeToEpoch(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year);
 time_t get_next_sample_time();
 Sample get_sample(uint8_t number);
-uint8_t get_next_sample_place();
 void display_samples();
 void display_sample(uint8_t number);
+void validate_sample();
 
 // ============ filter on real system management =========
 
-void validate_sample();
 void reload_filters(uint8_t number_of_filter);
 bool is_filter_available();
+uint8_t get_next_filter_place();
+
 #endif

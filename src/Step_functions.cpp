@@ -1,3 +1,16 @@
+/**
+ * @file Step_functions.cpp
+ * @author Timothée Hirt & Christophe Deloose
+ * @brief All detailed steps of a sampling process. Each function shall be independant
+ *        from the other and make sure the valves are correctely set
+ *        See fluidic diagram for all details and understand the steps
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include <Arduino.h>
 #include "Button.h"
 #include "Trustability_ABP_Gage.h"
@@ -17,6 +30,7 @@
 #include "Serial_device.h"
 #include "Step_functions.h"
 
+// Delay when actuating valves
 #define DELAY_ACTIONS 1000
 
 extern Serial_output output;
@@ -28,7 +42,7 @@ extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_purge;
-extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER]; // see schematics
+extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];
 extern Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];
 extern Pump pump;
 extern Pump pump_vacuum;
@@ -43,24 +57,17 @@ extern Button button_right;
 extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 
-// ============= DESCRIPTION ==============
-// Code for all steps of execution of COWAS with high level functions.
-// Each step should be independant, that is be responible to have all valves
-// and actuators being correctely set.
-// See fluidic diagram for details.
-
 /**
  * @brief Unroll the spool at the correct depth
  * 
- * @param _depth absolute depth at which the sampling is going to be done.
+ * @param _depth Absolute depth at which to go.
  */
 void step_dive(int _depth)
 {
     output.println("Step dive started");
 
     valve_23.set_L_way();
-    // let air escape the system while diving
-    valve_1.set_open_way();
+    valve_1.set_open_way();  // let air escape the system while diving
     delay(DELAY_ACTIONS);
 
     uint32_t time1 = millis();
@@ -90,13 +97,12 @@ void step_fill_container()
     uint32_t time1 = millis();
     bool run = true;
 
-    pump.set_power(90);
+    pump.set_power(POWER_PUMP);
     pump.start();
 
+    // two possibilities to stop filling : switch or time
     do
     {
-
-        // conditions ouside loop to print what condition is responible for stopping
         if (button_container.getState() == 0)
         {
             run = false;
@@ -110,7 +116,7 @@ void step_fill_container()
             output.println("Fill container stopped by security timer");
             // TODO : raise a system warning to user
         }
-    } while (run);
+    } while (run); // conditions are ouside loop to print what condition is responible for stopping
 
     pump.stop();
 
@@ -137,7 +143,7 @@ void step_purge()
     valve_purge.set_open_way();
     delay(DELAY_ACTIONS);
 
-    pump.set_power(100);
+    pump.set_power(POWER_FLUSH);
 
     // first action is to fill all tubes with water
     // otherwise the sensor will detect end of emptying
@@ -158,27 +164,19 @@ void step_purge()
 
         pressure = pressure1.getPressure();
 
-        // adapt pump power to pressure to not go over limit
+        // adapt pump power to pressure to not go over limit of 3 bar
+        // simple incremental controler. Not the best one but does the job
         if (pressure > 3)
-        {
             pump.set_power(pump.get_power() - 2);
-        }
         else if (pressure < 2.6f)
-        {
             pump.set_power(pump.get_power() + 2);
-        }
 
-        // if pressure low enough, engage stopping processure
+        // if pressure is low enough, engage stopping processure
         if (pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD)
-        {
             validation_tick++;
-        }
         else
-        {
             validation_tick = 0;
-        }
 
-        // conditions outside while loop to allow printing which condition is responsible for stop
         if (validation_tick >= 250)
         {
             run = false;
@@ -191,11 +189,10 @@ void step_purge()
             // TODO : raise a system warning to user
         }
 
-    } while (run);
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
     // pump a little bit more to flush all water
     pump.start(EMPTY_WATER_SECURITY_TIME);
-    pump.stop();
 
     output.println("Time to purge container : " + String(millis() - time1) + " ms");
 
@@ -206,20 +203,22 @@ void step_purge()
 }
 
 /**
- * @brief Empty water from container into choosen sterivex. Step_fill_container first.
+ * @brief Empty water from container into choosen filter. Step_fill_container first.
  * 
- * @param num_sterivex The sterivex in which the sampling is made
+ * @param num_filter The filter in which the sampling is made
  */
-void step_sampling(uint8_t num_sterivex)
+void step_sampling(uint8_t num_filter)
 {
     output.println("Step sample through filter started");
+
+    num_filter -= 1; //convert human filter place to computer array numbering
 
     // set the valves
     valve_23.set_L_way();
     valve_purge.set_close_way();
     for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
     {
-        if (i == num_sterivex)
+        if (i == num_filter)
         {
             valve_stx_in[i].set_open_way();
             valve_stx_out[i].set_I_way();
@@ -234,7 +233,7 @@ void step_sampling(uint8_t num_sterivex)
 
     pump.set_power(POWER_STX);
 
-    // start by filling all tubes with water
+    // start by filling all tubes with water to have enough pressure (sensor)
     pump.start(FILL_TUBES_WITH_WATER_TIME);
 
     pump.start();
@@ -243,34 +242,26 @@ void step_sampling(uint8_t num_sterivex)
     float pressure;
     bool run = true;
 
-    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
+    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
     do
     {
         delay(10); // don't read pressure to fast
 
         pressure = pressure1.getPressure();
 
-        // adapt pump power to pressure
+        // adapt pump power to pressure to not go over limit of 3 bar
+        // simple incremental controler. Not the best one but does the job
         if (pressure > 3)
-        {
             pump.set_power(pump.get_power() - 2);
-        }
         else if (pressure < 2.6f)
-        {
             pump.set_power(pump.get_power() + 2);
-        }
 
         // if pressure low enough, engage stopping processure
         if (pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD)
-        {
             validation_tick++;
-        }
         else
-        {
             validation_tick = 0;
-        }
 
-        // conditions outside while loop to allow printing which condition is responsible for stop
         if (validation_tick >= 250)
         {
             run = false;
@@ -283,45 +274,33 @@ void step_sampling(uint8_t num_sterivex)
             // TODO : raise a system warning to user
         }
 
-    } while (run);
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
     // pump a little bit more to flush all water
-    pump.start(EMPTY_WATER_SECURITY_TIME);
-
-    pump.stop();
+    pump.start(EMPTY_WATER_STX_SECURITY_TIME);
 
     output.println("Time to sample water : " + String(millis() - time1) + " ms");
 
     delay(DELAY_ACTIONS);
-    valve_stx_in[num_sterivex].set_close_way();
-    valve_stx_out[num_sterivex].set_L_way();
+    valve_stx_in[num_filter].set_close_way();
+    valve_stx_out[num_filter].set_L_way();
 
-    // end with a purge
+    // Do a purge to facilitate emptying the tubes from remaining water (hard trough filter)
     step_purge();
 
-    // now that tubes are empty, ensure to have the tube before filter emmpty
-    // set the valves
+    // after purge, all tube are mainly empty. Push air through sterivex again to really flush last water in filter tubing
     valve_23.set_L_way();
     valve_purge.set_close_way();
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        if (i == num_sterivex)
-        {
-            valve_stx_in[i].set_open_way();
-            valve_stx_out[i].set_I_way();
-        }
-        else
-        {
-            valve_stx_in[i].set_close_way();
-            valve_stx_out[i].set_L_way();
-        }
-    }
+    valve_stx_in[num_filter].set_open_way();
+    valve_stx_out[num_filter].set_I_way();
     delay(DELAY_ACTIONS);
+
     pump.set_power(100);
     pump.start(EMPTY_WATER_SECURITY_TIME * 2);
     delay(DELAY_ACTIONS);
-    valve_stx_in[num_sterivex].set_close_way();
-    valve_stx_out[num_sterivex].set_L_way();
+
+    valve_stx_in[num_filter].set_close_way();
+    valve_stx_out[num_filter].set_L_way();
 
     output.println("Step sample through filter ended");
 }
@@ -334,8 +313,7 @@ void step_rewind()
 {
     output.println("Step rewind started");
 
-    // let air enter the system
-    valve_1.set_open_way();
+    valve_1.set_open_way(); // let air enter the system
     valve_23.set_L_way();
     delay(DELAY_ACTIONS);
 
@@ -355,10 +333,12 @@ void step_rewind()
 
 /**
  * @brief Dry a sterivex. Step_sample first.
+ *        FUNCTION NOT CORRECTLY COMPLETED.
+ *        TO ADAPT WITH SYSTEM.
  * 
- * @param num_sterivex the sterivex to dry
+ * @param num_filter the sterivex to dry
  */
-void step_dry(uint8_t num_sterivex)
+void step_dry(uint8_t num_filter)
 {
     output.println("Step drying started");
 
@@ -370,7 +350,7 @@ void step_dry(uint8_t num_sterivex)
     {
         valve_stx_in[i].set_close_way();
 
-        if (i == num_sterivex)
+        if (i == num_filter)
             valve_stx_out[i].set_L_way();
         else
             valve_stx_out[i].set_I_way();

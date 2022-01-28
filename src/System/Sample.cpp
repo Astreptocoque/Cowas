@@ -255,7 +255,7 @@ void display_sample(uint8_t number){
     String depth = String(it->get_depth());
     String frequency = String(it->get_frequency());    
     time_t t = it->get_epoch();
-    output.println("Sample on place " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
+    output.println("Sample in filter " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
     output.flush();
 }
 
@@ -267,6 +267,8 @@ void display_sample(uint8_t number){
 void validate_sample(){
     // log the sample
     display_sample(0);
+    output.println("Ended at time " + format_date_logging(now()));
+
      // set next sample on real hardware
     filter_number++;
 
@@ -281,6 +283,8 @@ void validate_sample(){
     samples.pop_front();
     
 }
+
+// ============ filter on real system management =========
 
 void reload_filters(uint8_t number_of_filter){
     filter_number = 1;
@@ -299,4 +303,9 @@ bool is_filter_available(){
         return true;
     }
 }
+
+uint8_t get_next_filter_place(){
+    return filter_number;
+}
+
 
