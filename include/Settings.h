@@ -11,11 +11,11 @@
 
 // =============== COWAS VARIABLES ===============
 // spool variables
-const int HEIGHT_FROM_WATER = 50;           // cm. between water level and spool endstop
+const uint8_t HEIGHT_FROM_WATER = 50;           // cm. between water level and spool endstop
 const uint8_t DISTANCE_FROM_STOP = 5;       // cm. distance from spool endstop at which speed is decreased
 const uint8_t SPEED_UP = 100;               // over 100. Speed when moving up - experimentaly tested
 const uint8_t SPEED_DOWN = 100;             // over 100. Speed when moving down - experimentaly tested
-const int TUBE_LENGTH = 49000;              // cm. length of tube (not sure of this number)
+const uint16_t TUBE_LENGTH = 4900;              // cm. length of tube (not sure of this number)
 
 // water pump variables
 const uint8_t POWER_PUMP = 50;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
@@ -52,7 +52,7 @@ struct Time{
 };
 
 struct Date{
-    int year;
+    uint16_t year;
     uint8_t day;
     uint8_t month;
     time_t epoch;
@@ -81,6 +81,7 @@ void enable_output(bool enable);
 
 
 // ============ PIN DEFINITIONS ==================
+// To update with pinout table sheet
 const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
 const uint8_t PRESSURE1_PIN = 3;

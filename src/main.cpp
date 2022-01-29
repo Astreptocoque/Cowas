@@ -259,9 +259,9 @@ void before_start_program()
     // Enable to move spool manualy with left and right buttons
     // Tune speed with potentiometer
 
-    int pot_last_value = potentiometer.get_value(0, 100);
-    int pot_value = 0;
-    int speedy = 60;
+    uint8_t pot_last_value = potentiometer.get_value(0, 100);
+    uint8_t pot_value = 0;
+    uint8_t speedy = 60;
     while (!button_start.isPressed())
     {
         pot_value = potentiometer.get_value(0, 100);
