@@ -5,17 +5,20 @@
 #include "Settings.h"
 #include "Button.h"
 #include "Critical_error.h"
+#include "Serial_output.h"
 
-unsigned char INA1 = MOTOR_INA1_PIN;            // INPUT - motor 1 direction input A
-unsigned char INB1 = MOTOR_INB1_PIN;            // INPUT - motor 1 direction input B
-unsigned char PWM1 = MOTOR_PWM1_PIN;            // INPUT - motor 1 speed input
-unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN;    // Non attributed OUTPUT - motor 1 enable input/fault output
-unsigned char CS1 = MOTOR_CS1_PIN;              // Non attributed// OUTPUT - motor 1 current sense
-unsigned char INA2 = MOTOR_INA2_PIN;            // Non attributed// INPUT - motor 2 direction input A
-unsigned char INB2 = MOTOR_INB2_PIN;            // Non attributed// INPUT - motor 2 direction input B
-unsigned char PWM2 = MOTOR_PW2_PIN;             // Non attributed// INPUT - motor 2 speed input
-unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN;    // Non attributed// OUTPUT - motor 2 enable input/fault output
-unsigned char CS2 = MOTOR_CS2_PIN;              // Non attributed// OUTPUT - motor 2 current sense
+extern Serial_output output;
+
+unsigned char INA1 = MOTOR_INA1_PIN;         // INPUT - motor 1 direction input A
+unsigned char INB1 = MOTOR_INB1_PIN;         // INPUT - motor 1 direction input B
+unsigned char PWM1 = MOTOR_PWM1_PIN;         // INPUT - motor 1 speed input
+unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN; // Non attributed OUTPUT - motor 1 enable input/fault output
+unsigned char CS1 = MOTOR_CS1_PIN;           // Non attributed// OUTPUT - motor 1 current sense
+unsigned char INA2 = MOTOR_INA2_PIN;         // Non attributed// INPUT - motor 2 direction input A
+unsigned char INB2 = MOTOR_INB2_PIN;         // Non attributed// INPUT - motor 2 direction input B
+unsigned char PWM2 = MOTOR_PW2_PIN;          // Non attributed// INPUT - motor 2 speed input
+unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN; // Non attributed// OUTPUT - motor 2 enable input/fault output
+unsigned char CS2 = MOTOR_CS2_PIN;           // Non attributed// OUTPUT - motor 2 current sense
 
 // motor initialization with polulu driver
 
@@ -32,6 +35,7 @@ extern Button button_spool_down;
 void Motor::begin()
 {
     md.init();
+    output.println("Motor " + ID + " initiated");
 }
 
 /**
@@ -52,7 +56,7 @@ void Motor::set_speed(uint8_t _speed, motor_direction _direction)
 
 /**
  * @brief Start the motor with the current settings of speed and direction
- * 
+ *
  */
 void Motor::start()
 {
@@ -67,13 +71,13 @@ void Motor::start()
         endstop_down = false;
         // set here direction of motor
         md.setM1Speed(speed * (direction == up ? 1 : -1));
-        Motor_interface::start();
+        output.println("Motor started with speed " + String(speed) + " in direction " + (direction == up ? "up" : "down"));
     }
 }
 
 /**
  * @brief Start the motor with a given speed and direction
- * 
+ *
  * @param _speed Between 0 and 100. Always positive.
  * @param _direction Up or down.
  */
@@ -94,7 +98,7 @@ void Motor::start(int _depth)
     // if complete rewind, set a security distance to stop, then use start_origin function
     if (_depth <= 0)
         _depth = -HEIGHT_FROM_WATER + DISTANCE_FROM_STOP;
-    if(_depth > TUBE_LENGTH)
+    if (_depth > TUBE_LENGTH)
         _depth = -HEIGHT_FROM_WATER + TUBE_LENGTH;
 
     depth_goal = _depth;                           // distance from water level
@@ -109,16 +113,20 @@ void Motor::start(int _depth)
     else
         set_speed(0, down);
 
-    Motor_interface::start(_depth);
+    output.println("Motor started to go at " + String(_depth));
 
     // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
     start();
     // loop take ~6 us.
-    if (direction == down){
-        while (encoder.get_distance() < distance){
+    if (direction == down)
+    {
+        while (encoder.get_distance() < distance)
+        {
             encoder.step_counter();
         }
-    }else{
+    }
+    else
+    {
         while (encoder.get_distance() > distance)
             encoder.step_counter();
     }
@@ -141,7 +149,7 @@ void Motor::start_origin()
     {
         set_speed(30, up);
 
-        Motor_interface::start_origin();
+        output.println("Motor started to go at origin");
 
         start();
         while (button_spool_up.getState() == 1)
@@ -161,17 +169,17 @@ void Motor::start_origin()
 
 /**
  * @brief Stop the motor with a fast deceleration.
- * 
+ *
  */
 void Motor::stop()
 {
     md.setM1Brake(300);
-    Motor_interface::stop();
+    output.println("Motor stopped");
 }
 
 /**
  * @brief Not used. Stop the motor if driver return an error.
- * 
+ *
  */
 void Motor::stopIfFault()
 {
@@ -211,7 +219,7 @@ void ISR_emergency_stop_down()
         spool.endstop_down = true;
         md.setM1Brake(400);
         output.println("Endstop down touched - system stopped");
-    
-        //TODO : system alert and user warning
+
+        // TODO : system alert and user warning
     }
 }

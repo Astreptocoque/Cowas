@@ -11,6 +11,9 @@
 
 #include <Arduino.h>
 #include "GPIO.h"
+#include "Serial_output.h"
+
+extern Serial_output output;
 
 void GPIO::begin(byte _pin, byte _mode)
 {
@@ -19,6 +22,7 @@ void GPIO::begin(byte _pin, byte _mode)
     pinMode(pin, (_mode == input_mode ? INPUT : OUTPUT));
     if (mode == output_mode)
         off();
+    output.println("GPIO " + ID + " initiated");
 }
 
 void GPIO::begin(byte _pin, byte _mode, String _ID)

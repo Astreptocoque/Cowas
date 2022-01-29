@@ -4,13 +4,16 @@
  * @brief Class for a Trustability ABP gage pressure sensor
  * @version 0.1
  * @date 2022-01-29
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include "Trustability_ABP_Gage.h"
 #include <SPI.h>
 #include <Arduino.h>
+#include "Serial_output.h"
+
+extern Serial_output output;
 
 // See sensor datasheet
 #define BAR_FACTORa 7.63e-4
@@ -20,7 +23,7 @@
 
 /**
  * @brief  Constructor for a pressure sensor
- * 
+ *
  * @param _pin_slave_select Input connection on the board
  * @param _max_pressure Bar. Max pressure the sensor has to deal with
  */
@@ -30,11 +33,12 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
     pinMode(pin_slave_select, OUTPUT);
     digitalWrite(pin_slave_select, HIGH);
     max_pressure = _max_pressure;
+    output.println("Pressure sensor " + ID + " initiated");
 }
 
 /**
  * @brief  Constructor for a pressure sensor
- * 
+ *
  * @param _pin_slave_select Input connection on the board
  * @param _max_pressure Bar. Max pressure the sensor has to deal with
  * @param _ID Name of sensor
@@ -47,7 +51,7 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, S
 
 /**
  * @brief Pressure with reference 0 at atmospheric pressure
- * 
+ *
  */
 void Trustability_ABP_Gage::read()
 {
@@ -59,7 +63,7 @@ void Trustability_ABP_Gage::read()
     byte byte3 = SPI.transfer(0); // temperature 8 bits
     digitalWrite(pin_slave_select, HIGH);
     SPI.endTransaction();
-    
+
     // filter non valid data of pressure sensor. Two first bits should be 00
     if (!(byte1 & B11000000))
     {
@@ -70,7 +74,8 @@ void Trustability_ABP_Gage::read()
 
         pressure = output_pressure * BAR_FACTORa - BAR_FACTORb;
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
-        if(pressure > max_pressure){
+        if (pressure > max_pressure)
+        {
             output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }
     }
@@ -84,13 +89,14 @@ void Trustability_ABP_Gage::read()
  * @brief Return last pressure reading.
  *        Do not read faster than 1ms, see sensor datasheet.
  *        If so, data will be last correct pressure.
- * 
+ *
  * @return float last pressure read.
  */
 float Trustability_ABP_Gage::getPressure()
 {
     // protection to not read to fast the sensor
-    if(millis()-last_reading > 1){
+    if (millis() - last_reading > 1)
+    {
         last_reading = millis();
         read();
     }
@@ -100,7 +106,8 @@ float Trustability_ABP_Gage::getPressure()
 float Trustability_ABP_Gage::getTemperature()
 {
     // protection to not read to fast the sensor
-    if(millis()-last_reading > 1){
+    if (millis() - last_reading > 1)
+    {
         last_reading = millis();
         read();
     }

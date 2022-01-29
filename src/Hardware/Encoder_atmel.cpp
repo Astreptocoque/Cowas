@@ -1,3 +1,13 @@
+/**
+ * @file Encoder_atmel.cpp
+ * @author Timothée Hirt
+ * @brief Use of hardware encoder of cortex M3. Not implemented.
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <Arduino.h>
 #include "Encoder_atmel.h"
 #include <math.h>

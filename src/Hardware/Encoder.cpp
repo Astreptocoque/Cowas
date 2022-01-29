@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include "Encoder.h"
 #include <math.h>
+#include "Serial_output.h"
 
+extern Serial_output output;
 extern Encoder encoder;
 
 void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, const int _pulse_per_rev, const float _diameter)
@@ -16,6 +18,8 @@ void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, 
     pinMode(pin_signal_Z, INPUT);
 
     rad_per_pulse = PI / pulse_per_rev;
+    
+    output.println("Encoder sensor " + ID + " initiated");
 }
 
 void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, const int _pulse_per_rev, const float _diameter, String _ID)

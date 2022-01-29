@@ -1,11 +1,14 @@
 #include "Valve_2_2.h"
+#include "Serial_output.h"
 
+extern Serial_output output;
 
 void Valve_2_2::begin(byte _pin_control)
 {
     pin_control = _pin_control;
     pinMode(pin_control, OUTPUT);
     set_close_way();
+    output.println("Valve " + ID + " initated");
 }
 
 /**
@@ -19,26 +22,29 @@ void Valve_2_2::begin(byte _pin_control, String _ID)
     begin(_pin_control);
 }
 
-void Valve_2_2::set_open_way(){
+void Valve_2_2::set_open_way()
+{
     digitalWrite(pin_control, HIGH);
     state = open_way;
-    Valve_2_2_interface::set_open_way();
+    output.println("Valve " + ID + " opened");
 }
 
-void Valve_2_2::set_close_way(){
+void Valve_2_2::set_close_way()
+{
     digitalWrite(pin_control, LOW);
     state = close_way;
-    Valve_2_2_interface::set_close_way();
+    output.println("Valve " + ID + " closed");
 }
 
 void Valve_2_2::switch_way()
 {
-    if(state == open_way) 
+    if (state == open_way)
         set_close_way();
     else
         set_open_way();
 }
 
-valve_2_2_state Valve_2_2::get_state(){
+valve_2_2_state Valve_2_2::get_state()
+{
     return state;
 }

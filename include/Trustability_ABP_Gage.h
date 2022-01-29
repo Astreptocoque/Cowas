@@ -2,16 +2,20 @@
 #define TRUSTABILITY_ABP_GAGE_H
 
 #include <Arduino.h>
-#include "interfaces/Pressure_interface.h"
 
 #include <SPI.h>
 
-
-class Trustability_ABP_Gage : public Pressure_interface
+class Trustability_ABP_Gage
 {
 
 private:
-    SPISettings *SPIPressure;
+    int pin_slave_select;
+    float pressure = 0;
+    float temperature = 0;
+    String ID = "no_ID";
+    float max_pressure = 3; // in bar
+    uint32_t last_reading = 0;
+
 public:
     void begin(byte _pin_slave_select, float _max_pressure);
     void begin(byte _pin_slave_select, float _max_pressure, String _name);
@@ -19,7 +23,7 @@ public:
     float getPressure();
     float getTemperature();
     float getMaxPressure();
-    String getID();    
+    String getID();
 };
 
 void TC3_Handler();

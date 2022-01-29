@@ -2,12 +2,17 @@
 #define PUMP_H
 
 #include <Arduino.h>
-#include "interfaces/Pump_interface.h"
 
-class Pump : public Pump_interface
+class Pump
 {
 
 private:
+    byte control_pin;
+    uint8_t power; // refers to power
+    uint8_t power_percent;
+    bool pwm; // if pump is controlled by pwm or only HIGH/LOW
+    String ID = "no_ID";
+    bool running = false;
 
 public:
     void begin(byte _control_pin, bool _pwm);

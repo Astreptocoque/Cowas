@@ -2,12 +2,12 @@
 #define BUTTON_H
 
 #include <Arduino.h>
-#include <interfaces/Button_interface.h>
 
-class Button : public Button_interface
+class Button
 {
 
 private:
+    String ID = "no_ID";
     byte input_pin;
     byte state;
     byte lastReading;

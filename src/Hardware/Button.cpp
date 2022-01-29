@@ -1,4 +1,7 @@
 #include "Button.h"
+#include "Serial_output.h"
+
+extern Serial_output output;
 
 /**
  * @brief Constructor for a button
@@ -10,6 +13,7 @@ void Button::begin(byte _input_pin)
     input_pin = _input_pin;
     pinMode(input_pin, INPUT);
     update();
+    output.println("Button " + ID + " initiated");
 }
 void Button::begin(byte _input_pin, String _ID)
 {

@@ -2,12 +2,20 @@
 #define VALVE_3_2_H
 
 #include <Arduino.h>
-#include "interfaces/Valve_3_2_interface.h"
 
-class Valve_3_2 : public Valve_3_2_interface
+enum valve_3_2_state
+{
+    L_way,
+    I_way
+};
+
+class Valve_3_2
 {
 
 private:
+    int pin_control;
+    valve_3_2_state state; // 1 I way, 0 L way
+    String ID = "no_ID";
 
 public:
     void begin(byte _pin_control, String _name);

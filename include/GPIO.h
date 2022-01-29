@@ -1,16 +1,23 @@
 #ifndef GPIO_H
 #define GPIO_H
 #include <Arduino.h>
-#include "interfaces/GPIO_interface.h"
 
-class GPIO : public GPIO_interface
+enum pin_mode{input_mode, output_mode};
+
+class GPIO
 {
-  public:
-    void begin(byte _pin, byte _mode);
-    void begin(byte _pin, byte _mode, String _ID);
-    void on();
-    void off();
-    void switch_state();
-    bool read();
+private:
+  byte pin;
+  byte mode;
+  bool state;
+  String ID = "no_ID";
+
+public:
+  void begin(byte _pin, byte _mode);
+  void begin(byte _pin, byte _mode, String _ID);
+  void on();
+  void off();
+  void switch_state();
+  bool read();
 };
 #endif
