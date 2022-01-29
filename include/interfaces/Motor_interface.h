@@ -13,7 +13,7 @@ class Motor_interface
 
 protected:
     byte control_pin;
-    int speed; // refers to power
+    int speed; // Refers to power
     String ID = "no_ID";
 
 public:

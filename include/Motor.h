@@ -7,7 +7,7 @@
 class Motor : public Motor_interface
 {
 
-protected:
+private:
     int depth_current;
     int depth_goal;
 
@@ -15,9 +15,9 @@ public:
     bool endstop_down = false; // public for interrupt
     bool endstop_up = false;
     void begin();
-    void set_speed(int _speed, motor_direction _direction);
+    void set_speed(uint8_t _speed, motor_direction _direction);
     void start();
-    void start(int _speed, motor_direction _direction);
+    void start(uint8_t _speed, motor_direction _direction);
     void start(int _depth);
     void start_origin();
     void stop();

@@ -6,16 +6,18 @@
 #include "Button.h"
 #include "Critical_error.h"
 
-unsigned char INA1 = MOTOR_INA1_PIN;     // INPUT - motor 1 direction input A
-unsigned char INB1 = MOTOR_INB1_PIN;     // INPUT - motor 1 direction input B
-unsigned char PWM1 = MOTOR_PWM1_PIN;      // INPUT - motor 1 speed input
-unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN; // Non attributed OUTPUT - motor 1 enable input/fault output
-unsigned char CS1 = MOTOR_CS1_PIN;     // Non attributed// OUTPUT - motor 1 current sense
-unsigned char INA2 = MOTOR_INA2_PIN;     // Non attributed// INPUT - motor 2 direction input A
-unsigned char INB2 = MOTOR_INB2_PIN;     // Non attributed// INPUT - motor 2 direction input B
-unsigned char PWM2 = MOTOR_PW2_PIN;     // Non attributed// INPUT - motor 2 speed input
-unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN; // Non attributed// OUTPUT - motor 2 enable input/fault output
-unsigned char CS2 = MOTOR_CS2_PIN;     // Non attributed// OUTPUT - motor 2 current sense
+unsigned char INA1 = MOTOR_INA1_PIN;            // INPUT - motor 1 direction input A
+unsigned char INB1 = MOTOR_INB1_PIN;            // INPUT - motor 1 direction input B
+unsigned char PWM1 = MOTOR_PWM1_PIN;            // INPUT - motor 1 speed input
+unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN;    // Non attributed OUTPUT - motor 1 enable input/fault output
+unsigned char CS1 = MOTOR_CS1_PIN;              // Non attributed// OUTPUT - motor 1 current sense
+unsigned char INA2 = MOTOR_INA2_PIN;            // Non attributed// INPUT - motor 2 direction input A
+unsigned char INB2 = MOTOR_INB2_PIN;            // Non attributed// INPUT - motor 2 direction input B
+unsigned char PWM2 = MOTOR_PW2_PIN;             // Non attributed// INPUT - motor 2 speed input
+unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN;    // Non attributed// OUTPUT - motor 2 enable input/fault output
+unsigned char CS2 = MOTOR_CS2_PIN;              // Non attributed// OUTPUT - motor 2 current sense
+
+// motor initialization with polulu driver
 
 DualVNH5019MotorShield md(INA1, INB1, PWM1, EN1DIAG1, CS1, INA2, INB2, PWM2, EN2DIAG2, CS2);
 extern Encoder encoder;
@@ -24,7 +26,7 @@ extern Button button_spool_up;
 extern Button button_spool_down;
 
 /**
- * @brief Constructor for a diaphragm Motor
+ * @brief Constructor for a motor with polulu driver
  *
  */
 void Motor::begin()
@@ -35,9 +37,10 @@ void Motor::begin()
 /**
  * @brief set speed
  *
- * @param _speed max speed = 100, min speed = 0
+ * @param _speed Between 0 and 100. Always positive.
+ * @param _direction Up or down.
  */
-void Motor::set_speed(int _speed, motor_direction _direction)
+void Motor::set_speed(uint8_t _speed, motor_direction _direction)
 {
     if (_speed > 100)
         _speed = 100;
@@ -47,9 +50,13 @@ void Motor::set_speed(int _speed, motor_direction _direction)
     direction = _direction;
 }
 
+/**
+ * @brief Start the motor with the current settings of speed and direction
+ * 
+ */
 void Motor::start()
 {
-    // security at end stop
+    // Do not start if already at the very top or very down and order to go further
     if ((direction == up && endstop_up) || (direction == down && endstop_down))
     {
         output.println("Reach end of tube, order cancelled | cannot wind up more");
@@ -65,19 +72,21 @@ void Motor::start()
 }
 
 /**
- * @brief user manual function
+ * @brief Start the motor with a given speed and direction
+ * 
+ * @param _speed Between 0 and 100. Always positive.
+ * @param _direction Up or down.
  */
-void Motor::start(int _speed, motor_direction _direction)
+void Motor::start(uint8_t _speed, motor_direction _direction)
 {
     set_speed(_speed, _direction);
     start();
 }
 
 /**
- * @brief go to a given depth.
- *        Negative number to go out of water
+ * @brief Start the motor to go at a given absolute depth.
  *
- * @param _depth in centimeters
+ * @param _depth in centimeters. Negative to go out of water at origin.
  */
 void Motor::start(int _depth)
 {
@@ -103,7 +112,6 @@ void Motor::start(int _depth)
     Motor_interface::start(_depth);
 
     // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
-
     start();
     // loop take ~6 us.
     if (direction == down){
@@ -115,7 +123,6 @@ void Motor::start(int _depth)
             encoder.step_counter();
     }
     stop();
-
 
     // update state
     depth_current = depth_goal;
@@ -132,7 +139,6 @@ void Motor::start_origin()
     // check that sensor is working
     if (button_spool_up.getState() == 1)
     {
-        
         set_speed(30, up);
 
         Motor_interface::start_origin();
@@ -153,12 +159,20 @@ void Motor::start_origin()
     }
 }
 
+/**
+ * @brief Stop the motor with a fast deceleration.
+ * 
+ */
 void Motor::stop()
 {
     md.setM1Brake(300);
     Motor_interface::stop();
 }
 
+/**
+ * @brief Not used. Stop the motor if driver return an error.
+ * 
+ */
 void Motor::stopIfFault()
 {
     if (md.getM1Fault())
@@ -170,7 +184,7 @@ void Motor::stopIfFault()
 }
 
 /**
- * @brief Interrupt function
+ * @brief Interrupt function with spool microswitches
  * Do not serial print here, cause crash
  *
  */
@@ -197,9 +211,7 @@ void ISR_emergency_stop_down()
         spool.endstop_down = true;
         md.setM1Brake(400);
         output.println("Endstop down touched - system stopped");
-        while(true){
-            delay(10);
-            //TODO : system alert and user warning
-        }
+    
+        //TODO : system alert and user warning
     }
 }

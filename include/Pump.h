@@ -14,9 +14,9 @@ public:
     void begin(byte _control_pin, bool _pwm, String _name);
     void set_flow(int _flow);
     void set_power(int8_t _power);
-    int get_power();
+    uint8_t get_power();
     void start();
-    void start(uint32_t time_ms);
+    void start(uint32_t _time_ms);
     void stop();
 };
 

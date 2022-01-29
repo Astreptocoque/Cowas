@@ -38,6 +38,30 @@ void set_system_state(System_state state){
     } */
 }
 
+/**
+ * @brief Conversion from human readible time to computer seconds starting 01.01.1970
+ *
+ * @param _hour
+ * @param _minute
+ * @param _day
+ * @param _month
+ * @param _year
+ * @return time_t
+ */
+time_t timeToEpoch(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year)
+{
+
+    // set epoch time, seconds from 1970
+    tmElements_t tm;
+    tm.Day = _day;
+    tm.Hour = _hour;
+    tm.Minute = _minute;
+    tm.Month = _month;
+    tm.Second = 0;
+    tm.Year = _year - 1970; // see makeTime function
+    return makeTime(tm);
+}
+
 String format_date_logging(time_t t){
     // add time before printing in format yyyy-mm-dd hh:mm:ss
     String data = String(year(t))+"-";

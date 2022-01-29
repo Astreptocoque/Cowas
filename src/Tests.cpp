@@ -1,3 +1,13 @@
+/**
+ * @file Tests.cpp
+ * @author Timothée Hirt
+ * @brief Try things, be free. No guarantie that those functions work.
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <Arduino.h>
 #include "Button.h"
 #include "Trustability_ABP_Gage.h"
@@ -25,7 +35,7 @@ extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_purge;
-extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
+extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];
 extern Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];
 extern Pump pump;
 extern Pump pump_vacuum;
@@ -48,7 +58,6 @@ void tests()
     {
         output.println(serial.receive());
     }
-
     // output.println(pressure1.getPressure());
     // output.println(pressure1.getTemperature());
     // delay(500);

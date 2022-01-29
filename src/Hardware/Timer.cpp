@@ -1,4 +1,13 @@
-
+/**
+ * @file Timer.cpp
+ * @author Timothée Hirt
+ * @brief See Cortex M3 datasheet.
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "Timer.h"  
 
 // ===== Timer list =====
@@ -24,7 +33,6 @@
  * @param _frequency frequency. 4 = 1 second.
  */
 void timerStart(struct Timer pTimer) {
-    // Tc *tc, uint32_t _channel, IRQn_Type _irq, uint32_t _frequency
     Tc *tc = pTimer.timer_clock;
     uint32_t _channel = pTimer.channel;
     IRQn_Type _irq = pTimer.irq;

@@ -11,7 +11,8 @@ extern Pump pump;
 
 /**
  * @brief Constructor for a diaphragm pump
- * @param control_pin Output connection on the board
+ * @param _control_pin Output connection on the board
+ * @param _pwm True if the control is PWM (analog pin). False if control is only HIGH/LOW (digital pin)
  *
  */
 void Pump::begin(byte _control_pin, bool _pwm)
@@ -19,7 +20,7 @@ void Pump::begin(byte _control_pin, bool _pwm)
     control_pin = _control_pin;
     pwm = _pwm;
     pinMode(control_pin, OUTPUT);
-    set_power(190); // after 190, flow doesn't increase
+    set_power(50);
     stop();
 }
 
@@ -29,10 +30,20 @@ void Pump::begin(byte _control_pin, bool _pwm, String _ID)
     begin(_control_pin, _pwm);
 }
 
+/**
+ * @brief Not implemented. Possiblity to control flow if power is mapped correspondingly.
+ * 
+ * @param _flow ???
+ */
 void Pump::set_flow(int _flow){
     output.println("function -set_flow- not implemented");
 }
 
+/**
+ * @brief Set pump power. Warning, on diaphragm pump, flow is not linear at all.
+ * 
+ * @param _power From 0 to 100
+ */
 void Pump::set_power(int8_t _power){
     // data validation
     if(_power > 100)
@@ -42,15 +53,24 @@ void Pump::set_power(int8_t _power){
 
     power = map(_power, 0, 100, 0, 255);
     power_percent = _power;
-    // if pump already ON, then update the power
+    // if pump already ON, then update the power live
     if(running)
         pump.start();
 }
 
-int Pump::get_power(){
+/**
+ * @brief Get current power set
+ * 
+ * @return int power between 0 to 100.
+ */
+uint8_t Pump::get_power(){
     return power_percent;
 }
 
+/**
+ * @brief Start the pump with current power setting until stop command.
+ * 
+ */
 void Pump::start(){
     if(pwm)
         analogWrite(control_pin, power);
@@ -64,15 +84,24 @@ void Pump::start(){
     }
 }
 
-void Pump::start(uint32_t time_ms){
+/**
+ * @brief Start the pump with current power setting for a certain time, then stop
+ * 
+ * @param time_ms The time is millisecond to run the pump.
+ */
+void Pump::start(uint32_t _time_ms){
     start();
     uint32_t current_time = millis();
-    while(millis() - current_time < time_ms){
+    while(millis() - current_time < _time_ms){
         delay(5);
     }
     stop();
 }
 
+/**
+ * @brief Stop the pump.
+ * 
+ */
 void Pump::stop(){
     if(pwm)
         analogWrite(control_pin, 0);
@@ -83,9 +112,7 @@ void Pump::stop(){
 }
 
 /**
- * @brief Pressure checking, every 1 seconds
- *        System function, place wherever
- *        No need to call
+ * @brief Timer interrupt. Was implemented but now not used anymore.
  * 
  */
 void TC3_Handler(){
@@ -95,12 +122,8 @@ void TC3_Handler(){
 
     // disable all text output
     ENABLE_OUTPUT = false;
-    // print if too high is included in .getPressure()
-    // float pressure = pressure1.getPressure();
-    if(pressure1.getPressure() > pressure1.getMaxPressure()){
-        // simple decremental function to reduce pressure
-        pump.set_power(pump.get_power() - 2);
-    }
+   
+    // TODO : Raise flag
 
     status_led.switch_state();
     
@@ -108,7 +131,10 @@ void TC3_Handler(){
     ENABLE_OUTPUT = true;
 }
 
-
+/**
+ * @brief Timer interrupt. Was implemented but now not used anymore.
+ * 
+ */
 void TC4_Handler(){
     // You must do TC_GetStatus to "accept" interrupt
     // As parameters use the first two parameters used in startTimer (TC1, 0 in this case)
@@ -116,11 +142,8 @@ void TC4_Handler(){
 
     // disable all text output
     ENABLE_OUTPUT = false;
-    // print if too high is included in .getPressure()
-    if(pressure2.getPressure() > pressure2.getMaxPressure()){
-        // simple decremental function to reduce pressure
-        pump.set_power(pump.get_power() - 5);
-    }
+   
+    // TODO : raise flag
 
     status_led.switch_state();
 

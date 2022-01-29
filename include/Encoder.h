@@ -18,12 +18,12 @@ public:
     int32_t get_pulses_A();
     int32_t get_pulses_B();
     int32_t get_pulses_Z();
-    void print_states();
     void set_distance_to_reach(int distance);
     void set_pulses_Z(encoder_direction _direction);
     encoder_direction get_direction();
     int32_t step_counter();
     void reset();
+    void print_states();
 };
 
 

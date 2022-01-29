@@ -61,6 +61,7 @@ struct Date{
 
 String format_date_logging(time_t t);
 String format_date_friendly(time_t t);
+time_t timeToEpoch(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year);
 
 // ============ SYSTEM STATES ================
 // system states are here for the human interface. The goal is to have the system updating its

@@ -1,3 +1,14 @@
+/**
+ * @file Sample.cpp
+ * @author Timothée Hirt
+ * @brief Handle samples. There is a class "sample" to handle the samples as objects.
+ *        Then there is global function to handle the sample array, containing all sample objects.
+ * @version 0.1
+ * @date 2022-01-29
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
 #include <list>
 #include "Sample.h"
 #include "Serial_output.h"
@@ -5,17 +16,21 @@
 
 extern Serial_output output;
 
-std::list<Sample> samples;          // list of samples
-uint8_t filter_number = 1;      // next sample on real system to be used. Filter number. 
+std::list<Sample> samples; // list of samples
+uint8_t filter_number = 1; // next sample on real system to be used. Filter number.
+
+
+// ====== SAMPLE OBJECTS FUNCTIONS =========
 
 /**
- * @brief Construct a new Sample:: Sample object.
- * 
+ * @brief Construct a new sample object
+ *
  * @param _epoch The number of seconds since 01.01.1970
  * @param _depth The depth of the sample, in centimeters
- * @param _frequency The days after which the sample is repeated. 
+ * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
  */
-Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency){
+Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
+{
     date.time.hour = hour(_epoch);
     date.time.minute = minute(_epoch);
     date.day = day(_epoch);
@@ -24,97 +39,54 @@ Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency){
     date.epoch = _epoch;
     depth = _depth;
     frequency = _frequency;
-    if(frequency == 0)
+    if (frequency == 0)
         type = unique;
     else
         type = repeated;
 }
 
 /**
- * @brief Construct a new Sample:: Sample object. A human constructor. Seconds aren't fun isn't it ?
- * 
- * @param _hour 
- * @param _minute 
- * @param _day 
- * @param _month 
- * @param _year 
+ * @brief Construct a new sample object. A human constructor. Seconds aren't fun isn't it ?
+ *
+ * @param _hour
+ * @param _minute
+ * @param _day
+ * @param _month
+ * @param _year
  * @param _depth The depth of the sample, in centimeters
- * @param _frequency The days after which the sample is repeated. 
+ * @param _frequency The days after which the sample is repeated.
  */
-Sample::Sample(uint8_t _hour, uint8_t _minute,  uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
+Sample::Sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
     Sample(timeToEpoch(_hour, _minute, _day, _month, _year), _depth, _frequency);
 }
 
-uint8_t Sample::get_day()
-{
-    return date.day;
-}
+uint8_t Sample::get_day() { return date.day; }
 
-uint8_t Sample::get_hour()
-{
-    return date.time.hour;
-}
+uint8_t Sample::get_hour() { return date.time.hour; }
 
-uint8_t Sample::get_minute()
-{
-    return date.time.minute;
-}
+uint8_t Sample::get_minute() { return date.time.minute; }
 
-uint8_t Sample::get_month()
-{
-    return date.month;
-}
+uint8_t Sample::get_month() { return date.month; }
 
-uint16_t Sample::get_year(){
-    return date.year;
-}
+uint16_t Sample::get_year() { return date.year; }
 
-time_t Sample::get_epoch()
-{
-    return date.epoch;
-}
+time_t Sample::get_epoch() { return date.epoch; }
 
-uint16_t Sample::get_depth()
-{
-    return depth;
-}
+uint16_t Sample::get_depth() { return depth; }
 
-uint8_t Sample::get_frequency()
-{
-    return frequency;
-}
+uint8_t Sample::get_frequency() { return frequency; }
+
+
+// ============= SAMPLE ARRAY GLOBAL FUNCTIONS
 
 /**
- * @brief Conversion from human readible time to computer seconds starting 01.01.1970
- * 
- * @param _hour 
- * @param _minute 
- * @param _day 
- * @param _month 
- * @param _year 
- * @return time_t 
- */
-time_t timeToEpoch(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year){
-    
-    // set epoch time, seconds from 1970
-    tmElements_t tm;
-    tm.Day = _day;
-    tm.Hour = _hour;
-    tm.Minute = _minute;
-    tm.Month = _month;
-    tm.Second = 0;
-    tm.Year = _year-1970; // see makeTime function
-    return makeTime(tm);
-}
-
-/**
- * @brief Add new sample
- * 
- * @param _epoch 
- * @param _depth 
- * @param _frequency 
- * @return the index in the list of the sample
+ * @brief Add new sample to the list in time ordered manner
+ *
+ * @param _epoch The number of seconds since 01.01.1970
+ * @param _depth The depth of the sample, in centimeters
+ * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
+ * @return the index in the list of the sample (ordered in time)
  */
 uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
 {
@@ -124,9 +96,11 @@ uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
     bool inserted = false;
     uint8_t i = 0;
 
-    if (samples.size() == 0){
+    if (samples.size() == 0)
+    {
         samples.push_back(sample);
-    }else
+    }
+    else
     {
         // initializing list iterator to beginning
         auto it = samples.begin();
@@ -144,7 +118,8 @@ uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
                 i++;
         }
         // if sample was not inserted -> furstest away in time, then insert at the end
-        if(!inserted){
+        if (!inserted)
+        {
             samples.push_back(sample);
         }
     }
@@ -155,15 +130,15 @@ uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
 
 /**
  * @brief A human way to add a sample.
- * 
- * @param _hour 
- * @param _minute 
- * @param _day 
- * @param _month 
- * @param _year 
- * @param _depth 
- * @param _frequency 
- * @return the index in the list of the sample 
+ *
+ * @param _hour
+ * @param _minute
+ * @param _day
+ * @param _month
+ * @param _year
+ * @param _depth The depth of the sample, in centimeters
+ * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
+ * @return the index in the list of the sample (ordered in time)
  */
 uint8_t add_sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
 {
@@ -171,15 +146,19 @@ uint8_t add_sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month,
 }
 
 /**
- * @brief Return the time of the next sample.
- * 
- * @return time_t The time. 0 if no sample.
+ * @brief Return the time (epoch) of the next sample.
+ *
+ * @return time_t The time in second since 1970. 0 if no sample.
  */
-time_t get_next_sample_time(){
+time_t get_next_sample_time()
+{
 
-    if(samples.size() == 0){
+    if (samples.size() == 0)
+    {
         return 0;
-    }else{
+    }
+    else
+    {
         auto it = samples.begin();
         return it->get_epoch();
     }
@@ -187,17 +166,19 @@ time_t get_next_sample_time(){
 
 /**
  * @brief Return a sample object from the sample list.
- * 
+ *
  * @param number The number of the sample in the list (starting from 0).
- * @return Sample 
+ * @return Sample
  */
-Sample get_sample(uint8_t number){
+Sample get_sample(uint8_t number)
+{
 
     auto it = samples.begin();
     uint8_t list_size = samples.size();
-    if(number >= list_size){
+    if (number >= list_size)
+    {
         output.println("Unable to get requested sample, index out of range, taking last sample");
-        number = list_size-1;
+        number = list_size - 1;
     }
     advance(it, number);
     Sample sample(it->get_epoch(), it->get_depth(), it->get_frequency());
@@ -206,106 +187,133 @@ Sample get_sample(uint8_t number){
 }
 
 /**
- * @brief Return the number of the sample on the real hardware.
- * 
- * @return the number (starting from 1)
- */
-uint8_t get_filter_number(){
-    return filter_number;
-}
-
-/**
  * @brief Display all the set samples.
- * 
+ *
  */
-void display_samples(){
+void display_samples()
+{
     auto it = samples.begin();
 
-    if(samples.size() > 0){
-        for(uint8_t i = 0; i < samples.size(); i++){
-        
+    output.println("Display samples command executed");
+
+    if (samples.size() > 0)
+    {
+        for (uint8_t i = 0; i < samples.size(); i++)
+        {
             String depth = String(it->get_depth());
             String frequency = String(it->get_frequency());
             time_t t = it->get_epoch();
-            output.println("Sample" + String(i+1) + " : " + format_date_friendly(t)+ " at depth " + depth + "cm and day frequency " + frequency);
+            output.println("Sample" + String(i + 1) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
             advance(it, 1);
         }
-    }else{
+    }
+    else
+    {
         output.println("No samples are currently set");
     }
 }
 
 /**
  * @brief Display the sample desired.
- * 
+ *
  * @param number The list number of the sample (starting from 0)
  */
-void display_sample(uint8_t number){
-    
+void display_sample(uint8_t number)
+{
+
+    output.println("Display sample command executed");
+
     auto it = samples.begin();
     uint8_t list_size = samples.size();
-    if(number >= list_size){
+    if (number >= list_size)
+    {
         output.println("Unable to display requested sample, index out of range, taking last sample");
-        number = list_size-1;
-    }else if(list_size == 0){
+        number = list_size - 1;
+    }
+    else if (list_size == 0)
+    {
         output.println("No samples are currently set");
     }
     advance(it, number);
 
     String depth = String(it->get_depth());
-    String frequency = String(it->get_frequency());    
+    String frequency = String(it->get_frequency());
     time_t t = it->get_epoch();
     output.println("Sample in filter " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
     output.flush();
 }
 
 /**
- * @brief Function to call when a sampling was done. 
+ * @brief Function to call when a sampling was done.
  *        Delete the sample from the list and recreate one if a frequency is set.
- * 
+ *
  */
-void validate_sample(){
+void validate_sample()
+{
     // log the sample
     display_sample(0);
     output.println("Ended at time " + format_date_logging(now()));
 
-     // set next sample on real hardware
+    // set next sample on real hardware
     filter_number++;
 
     // if sample has a frequency, set it back in the list
     auto it = samples.begin();
-    if(it->get_frequency() > 0){
+    if (it->get_frequency() > 0)
+    {
         Sample sample = get_sample(0);
         add_sample(sample.get_epoch() + sample.get_frequency() * SECS_PER_DAY, sample.get_depth(), sample.get_frequency());
     }
 
     // delete the sample done
     samples.pop_front();
-    
 }
 
 // ============ filter on real system management =========
 
-void reload_filters(uint8_t number_of_filter){
+/**
+ * @brief Function to call when refilling the system with new filters.
+ * 
+ * @param number_of_filter The number of filter reloaded (can be less that what system accept)
+ */
+void reload_filters(uint8_t number_of_filter)
+{
     filter_number = 1;
-    if(number_of_filter > MAX_FILTER_NUMBER){
+    if (number_of_filter > MAX_FILTER_NUMBER)
+    {
         FILTER_IN_SYSTEM = MAX_FILTER_NUMBER;
-    }else{
+    }
+    else
+    {
         FILTER_IN_SYSTEM = number_of_filter;
     }
 }
 
-bool is_filter_available(){
+/**
+ * @brief True if new filter are availabler. False if refilling is needed.
+ * 
+ * @return true 
+ * @return false 
+ */
+bool is_filter_available()
+{
     // if all filter have been used
-    if(filter_number > FILTER_IN_SYSTEM){
+    if (filter_number > FILTER_IN_SYSTEM)
+    {
         return false;
-    }else{
+    }
+    else
+    {
         return true;
     }
 }
 
-uint8_t get_next_filter_place(){
+/**
+ * @brief Get the next place with a new filter on the system.
+ * 
+ * @return uint8_t The number of the filter, starting from 1.
+ */
+uint8_t get_next_filter_place()
+{
     return filter_number;
 }
-
-

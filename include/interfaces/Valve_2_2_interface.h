@@ -16,34 +16,30 @@ protected:
     String ID = "no_ID";
 
 public:
-    virtual void begin(byte _pin_control, String _ID)
-    {
-        ID = _ID;
-        output.println("Valve " + ID + " initated");
-        set_close_way();
-    }
-
     virtual void begin(byte _pin_control)
     {
         output.println("Valve " + ID + " initated");
         set_open_way();
     }
 
+    virtual void begin(byte _pin_control, String _ID)
+    {
+        ID = _ID;
+        begin(_pin_control);
+    }
+
     virtual void switch_way()
     {
-        if(state == open_way) state = close_way;
-        else state = open_way;
         output.println("Valve " +ID +  String((state == open_way?" open":" close")));
     }
 
     virtual void set_open_way()
     {
-        state = open_way;
         output.println("Valve " + ID + " opened");
     }
+
     virtual void set_close_way()
     {
-        state = close_way;
         output.println("Valve " + ID + " closed");
     }
 

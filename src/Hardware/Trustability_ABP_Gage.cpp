@@ -1,17 +1,28 @@
+/**
+ * @file Trustability_ABP_Gage.cpp
+ * @author Timothée Hirt
+ * @brief Class for a Trustability ABP gage pressure sensor
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "Trustability_ABP_Gage.h"
 #include <SPI.h>
 #include <Arduino.h>
 
-
+// See sensor datasheet
 #define BAR_FACTORa 7.63e-4
 #define BAR_FACTORb 1.25
 #define TEMP_FACTOREa 9.77e-2
 #define TEMP_FACTOREb 50
 
 /**
- * @brief Constructor for a pressure sensor
- * @param pin Input connection on the board
- *
+ * @brief  Constructor for a pressure sensor
+ * 
+ * @param _pin_slave_select Input connection on the board
+ * @param _max_pressure Bar. Max pressure the sensor has to deal with
  */
 void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
 {
@@ -19,9 +30,15 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure)
     pinMode(pin_slave_select, OUTPUT);
     digitalWrite(pin_slave_select, HIGH);
     max_pressure = _max_pressure;
-    SPIPressure = new SPISettings(800000, MSBFIRST, SPI_MODE0);
 }
 
+/**
+ * @brief  Constructor for a pressure sensor
+ * 
+ * @param _pin_slave_select Input connection on the board
+ * @param _max_pressure Bar. Max pressure the sensor has to deal with
+ * @param _ID Name of sensor
+ */
 void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, String _ID)
 {
     ID = _ID;
@@ -34,7 +51,6 @@ void Trustability_ABP_Gage::begin(byte _pin_slave_select, float _max_pressure, S
  */
 void Trustability_ABP_Gage::read()
 {
-
     // SPI communication API
     SPI.beginTransaction(SPISettings(800000, MSBFIRST, SPI_MODE0));
     digitalWrite(pin_slave_select, LOW);
@@ -44,25 +60,23 @@ void Trustability_ABP_Gage::read()
     digitalWrite(pin_slave_select, HIGH);
     SPI.endTransaction();
     
-
-    // filter non valid data of pressure sensor (see datasheet)
-    // two first bits should be 00
+    // filter non valid data of pressure sensor. Two first bits should be 00
     if (!(byte1 & B11000000))
     {
         // output of pressure sensor in bits
-        // concatenate data byte into one 16 byte
+        // concatenate data byte into one 16 byte then cast to float
         float output_pressure = (byte1 << 8) + byte2;
         float output_temp = (byte3 << 3) + B000;
 
         pressure = output_pressure * BAR_FACTORa - BAR_FACTORb;
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
         if(pressure > max_pressure){
-            // output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
+            output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }
     }
     else
     {
-        // output.println("error pressure reading");
+        output.println("error pressure reading");
     }
 }
 
@@ -71,7 +85,7 @@ void Trustability_ABP_Gage::read()
  *        Do not read faster than 1ms, see sensor datasheet.
  *        If so, data will be last correct pressure.
  * 
- * @return float 
+ * @return float last pressure read.
  */
 float Trustability_ABP_Gage::getPressure()
 {
@@ -102,8 +116,3 @@ String Trustability_ABP_Gage::getID()
 {
     return ID;
 }
-
-void ISR_pressure_checking(){
-
-}
-

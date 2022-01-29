@@ -6,10 +6,16 @@ void Potentiometer::begin(byte _input_pin){
   pinMode(input_pin, OUTPUT);
 }
 
+void Potentiometer::begin(byte _input_pin, String _ID)
+{
+  ID = _ID;
+  begin(_input_pin);
+}
+
 /**
- * @brief Return value from potentiometer between 0 and 255
+ * @brief Return value from potentiometer
  * 
- * @return int 
+ * @return int between 0 and 1023
  */
 int Potentiometer::get_value(){
     value = analogRead(input_pin);
@@ -17,7 +23,7 @@ int Potentiometer::get_value(){
 }
 
 /**
- * @brief Return value from potentiometer and map it on a new scale (from 0 to 255 to new values)
+ * @brief Return value from potentiometer and map it on a new scale (from 0 to 1023 to new values)
  * 
  * @param _level_mapping_min min scale value
  * @param _level_mapping_max max scale value

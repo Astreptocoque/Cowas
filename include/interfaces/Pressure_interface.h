@@ -26,8 +26,7 @@ public:
     }
     virtual void begin(byte _pin_slave_select, float _max_pressure, String _ID){
         ID = _ID;
-        max_pressure = _max_pressure;
-        output.println("Pressure sensor " + ID + " initiated");
+        begin(_pin_slave_select, _max_pressure);
     }
     virtual void read(){
         output.println("Pressure from sensor " + ID + " read");

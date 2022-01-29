@@ -17,12 +17,12 @@ void Button::begin(byte _input_pin, String _ID)
     begin(_input_pin);
 }
 
+/**
+ * @brief udpate button state. Debounce incorporated.
+ * 
+ */
 void Button::update()
 {
-    // You can handle the debounce of the button directly
-    // in the class, so you don't have to think about it
-    // elsewhere in your code
-    // unsigned long timeCurrent = millis();
     bool looping = true;
     while (looping)
     {

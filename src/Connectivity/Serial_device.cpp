@@ -1,3 +1,14 @@
+/**
+ * @file Serial_device.cpp
+ * @author Timothée Hirt
+ * @brief Class to intiatlize communication with another device on Serial lines.
+ *        Here for Wi-Fi card
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "Serial_device.h"
 #include "Serial_output.h"
 #include "Settings.h"
@@ -24,24 +35,21 @@ void Serial_device::start_communication(){
     }
     Serial1.flush();
 
+    // Why not.
     Serial1.print("1234");
 }
 
+/**
+ * @brief Receive the time under the epoch format (seconds from 1970)
+ * 
+ * @return struct Date 
+ */
 struct Date Serial_device::receive_time(){
 
     struct Date date;
-    // while(Serial1.available() == 0);
-    // date.time.hour = Serial1.parseInt();
-    // output.println(date.time.hour);
-    // while(Serial1.available() == 0);
-    // date.time.minutes = Serial1.parseInt();
-    // output.println(date.time.minutes);
-    // while(Serial1.available() == 0);
-    // date.day = Serial1.parseInt(); 
-    // output.println(date.day);
+
     while(Serial1.available() == 0);
     Serial1.setTimeout(2000);
-    // output.println(Serial1.readString());
     date.epoch = (time_t) Serial1.parseInt();
     output.println((uint32_t)date.epoch);
     output.flush();
@@ -55,11 +63,6 @@ void Serial_device::validate(){
     if(Serial.parseInt() != 1){
         output.println("Failed serial1 validation");
     }
-}
-
-template <typename T>
-void Serial_device::send(T output){
-    Serial1.println(output);
 }
 
 String Serial_device::receive(){

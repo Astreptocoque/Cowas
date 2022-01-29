@@ -14,10 +14,11 @@ private:
     unsigned long lastDebounceTime = 0;
     unsigned long debounceDelay = 50;
 
+    void update();
+
 public:
     void begin(byte _input_pin);
     void begin(byte _input_pin, String _ID);
-    void update();
     byte getState();
     bool isPressed();
     bool isReleased();

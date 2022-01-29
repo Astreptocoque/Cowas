@@ -10,6 +10,7 @@ class GPIO : public GPIO_interface
     void begin(byte _pin, byte _mode, String _ID);
     void on();
     void off();
+    void switch_state();
     bool read();
 };
 #endif

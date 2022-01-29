@@ -12,39 +12,34 @@ class Valve_3_2_interface
 
 protected:
     int pin_control;
-    valve_3_2_state state; // 1 open, 0 closed
+    valve_3_2_state state; // 1 I way, 0 L way
     String ID = "no_ID";
 
 public:
-    virtual void begin(byte _pin_control, String _ID)
-    {
-        ID = _ID;
-        output.println("Valve " + ID + " initiated");
-        set_I_way();
-    }
-
     virtual void begin(byte _pin_control)
     {
         output.println("Valve " + ID + " initiated");
         set_I_way();
     }
 
+    virtual void begin(byte _pin_control, String _ID)
+    {
+        ID = _ID;
+        begin(_pin_control);
+    }
+
     virtual void switch_way()
     {
-        if(state == L_way) state = I_way; 
-        else state = L_way;
         output.println("Valve " + ID + " on " + String((state == I_way?"I":"L")) + " way");
-
     }
 
     virtual void set_L_way()
     {
-        state = L_way;
         output.println("Valve " + ID + " on L way");
     }
+    
     virtual void set_I_way()
     {
-        state = I_way;
         output.println("Valve " + ID + " on I way");
     }
 

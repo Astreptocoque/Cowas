@@ -26,15 +26,22 @@ public:
         output.println("Pump " + ID + " initiated");
     }
     virtual void set_flow(int _flow){
-        power = _flow; //function needed)
+        power = _flow;
         output.println("Flow pump " + ID + " set on " + String(_flow) + " L/min");
     }
     virtual void set_power(int8_t _power){
         power = _power;
         output.println("Power pump " + ID + " set on " + String(_power) + "% 24VDC");
     }
+    uint8_t get_power(){
+        output.println("Power pump " + ID + " asked");
+        return 1;
+    }
     virtual void start(){
         output.println("Pump " + ID + " started with power " + power_percent);
+    }
+    virtual void start(uint32_t _time_ms){
+        output.println("Pump " + ID + " started with power " + power_percent + " for " + String(_time_ms) + " ms");
     }
     virtual void stop(){
         output.println("Pump " + ID + " stopped");
