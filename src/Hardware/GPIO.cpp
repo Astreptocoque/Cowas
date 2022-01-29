@@ -11,9 +11,9 @@
 
 #include <Arduino.h>
 #include "GPIO.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 void GPIO::begin(byte _pin, byte _mode)
 {

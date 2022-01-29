@@ -1,7 +1,7 @@
 #include "Button.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 /**
  * @brief Constructor for a button

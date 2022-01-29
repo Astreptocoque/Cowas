@@ -22,7 +22,7 @@
 #include "Potentiometer.h"
 #include "Led.h"
 #include <SPI.h>
-#include "Serial_output.h"
+#include "C_output.h"
 #include "sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
@@ -33,7 +33,7 @@
 // Delay when actuating valves
 #define DELAY_ACTIONS 1000
 
-extern Serial_output output;
+extern C_output output;
 extern Serial_device serial;
 extern Led blue_led;
 extern Led green_led;

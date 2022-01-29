@@ -18,7 +18,7 @@
 #include "Encoder.h"
 #include "Potentiometer.h"
 #include "Led.h"
-#include "Serial_output.h"
+#include "C_output.h"
 #include "sample.h"
 #include "Settings.h"
 #include "Timer.h"
@@ -26,7 +26,7 @@
 #include "Tests.h"
 #include "Step_functions.h"
 
-extern Serial_output output;
+extern C_output output;
 extern Serial_device serial;
 extern Led status_led;
 extern Led green_led;

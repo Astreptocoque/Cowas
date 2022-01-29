@@ -11,9 +11,9 @@
 #include "Trustability_ABP_Gage.h"
 #include <SPI.h>
 #include <Arduino.h>
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 // See sensor datasheet
 #define BAR_FACTORa 7.63e-4

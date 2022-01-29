@@ -5,9 +5,9 @@
 #include "Settings.h"
 #include "Button.h"
 #include "Critical_error.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 unsigned char INA1 = MOTOR_INA1_PIN;         // INPUT - motor 1 direction input A
 unsigned char INB1 = MOTOR_INB1_PIN;         // INPUT - motor 1 direction input B

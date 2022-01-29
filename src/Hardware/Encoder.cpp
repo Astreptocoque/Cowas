@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include "Encoder.h"
 #include <math.h>
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 extern Encoder encoder;
 
 void Encoder::begin(byte _pin_signal_A, byte _pin_signal_B, byte _pin_signal_Z, const int _pulse_per_rev, const float _diameter)

@@ -9,9 +9,9 @@
  *
  */
 #include "Valve_3_2.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 void Valve_3_2::begin(byte _pin_control)
 {

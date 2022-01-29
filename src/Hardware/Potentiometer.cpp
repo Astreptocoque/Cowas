@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "Potentiometer.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 void Potentiometer::begin(byte _input_pin)
 {

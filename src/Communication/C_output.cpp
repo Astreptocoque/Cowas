@@ -1,5 +1,15 @@
+/**
+ * @file C_output.cpp
+ * @author Timothée Hirt
+ * @brief Custom output class to print in Terminal and other places seamlessly
+ * @version 0.1
+ * @date 2022-01-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <Arduino.h>
-#include "Serial_output.h"
+#include "C_output.h"
 #include <SD.h>
 #include "Settings.h"
 #include <TimeLib.h>
@@ -10,7 +20,7 @@
  * @param _serial_type Terminal, SDCard or both
  *
  */
-void Serial_output::begin(serial_type_enum _serial_type)
+void C_output::begin(serial_type_enum _serial_type)
 {
 
     serial_type = _serial_type;
@@ -37,7 +47,7 @@ void Serial_output::begin(serial_type_enum _serial_type)
  * 
  * @return int 
  */
-int Serial_output::read()
+int C_output::read()
 {
     int data;
     switch (serial_type)
@@ -65,7 +75,7 @@ int Serial_output::read()
  * 
  * @return int 
  */
-int Serial_output::available()
+int C_output::available()
 {
     int data;
     switch (serial_type)
@@ -84,12 +94,12 @@ int Serial_output::available()
     return data;
 }
 
-serial_type_enum Serial_output::get_serial_type()
+serial_type_enum C_output::get_serial_type()
 {
     return serial_type;
 }
 
-int Serial_output::waitInt()
+int C_output::waitInt()
 {
     int data = 0;
     if (serial_type == terminal)
@@ -107,7 +117,7 @@ int Serial_output::waitInt()
  * @brief Wait until all serial buffer is sent
  *
  */
-void Serial_output::flush()
+void C_output::flush()
 {
     if (serial_type == terminal || serial_type == terminalANDsdCard)
     {

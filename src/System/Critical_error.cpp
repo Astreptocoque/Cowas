@@ -9,11 +9,11 @@
  * 
  */
 #include <Arduino.h>
-#include "Serial_output.h"
+#include "C_output.h"
 #include "Settings.h"
 #include "Critical_error.h"
 
-extern Serial_output output;
+extern C_output output;
 
 void critical_error(unsigned int code){
 

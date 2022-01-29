@@ -10,11 +10,11 @@
  * 
  */
 #include "Serial_device.h"
-#include "Serial_output.h"
+#include "C_output.h"
 #include "Settings.h"
 #include "GPIO.h"
 
-extern Serial_output output;
+extern C_output output;
 extern GPIO wifi_message;
 
 void Serial_device::begin(){

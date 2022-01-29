@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "Settings.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 uint8_t FILTER_IN_SYSTEM = 2;           // max samples currently inserted in the system
 bool ENABLE_OUTPUT = true;

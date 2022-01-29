@@ -11,10 +11,10 @@
  */
 #include <list>
 #include "Sample.h"
-#include "Serial_output.h"
+#include "C_output.h"
 #include "TimeLib.h"
 
-extern Serial_output output;
+extern C_output output;
 
 std::list<Sample> samples; // list of samples
 uint8_t filter_number = 1; // next sample on real system to be used. Filter number.

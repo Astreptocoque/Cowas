@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "Led.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 
 void Led::begin(byte _control_pin)
 {

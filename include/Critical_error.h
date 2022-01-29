@@ -2,7 +2,7 @@
 #define CRITICAL_ERRORS_H
 
 #include <Arduino.h>
-#include "Serial_output.h"
+#include "C_output.h"
 #include "Settings.h"
 
 // reset function @ Saddress 0

@@ -1,5 +1,5 @@
-#ifndef SERIAL_OUTPUT_H
-#define SERIAL_OUTPUT_H
+#ifndef C_OUTPUT_H
+#define C_OUTPUT_H
 
 using namespace std;
 
@@ -16,7 +16,7 @@ enum serial_type_enum
     terminalANDsdCard
 };
 
-class Serial_output
+class C_output
 {
 
 private:
@@ -49,7 +49,7 @@ public:
  * @return template <typename T> 
  */
 template <typename T>
-void Serial_output::print(T output)
+void C_output::print(T output)
 {
     if (ENABLE_OUTPUT)
     {
@@ -78,7 +78,7 @@ void Serial_output::print(T output)
  * @return template <typename T> 
  */
 template <typename T>
-void Serial_output::println(T output)
+void C_output::println(T output)
 {
     if (ENABLE_OUTPUT)
     {

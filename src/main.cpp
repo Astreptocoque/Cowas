@@ -21,7 +21,7 @@
 #include "Potentiometer.h"
 #include "Led.h"
 #include <SPI.h>
-#include "Serial_output.h"
+#include "C_output.h"
 #include "Sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
@@ -46,7 +46,7 @@ void main_program();
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
-Serial_output output;                       // custom print function to handle multiple outputs
+C_output output;                       // custom print function to handle multiple outputs
 Serial_device esp8266;                      // enable communication with wifi card
 Led status_led;                             // general purpose LED
 Led green_led;                              // general purpose LED, used here for start signals

@@ -2,9 +2,9 @@
 #include "Pump.h"
 #include "Trustability_ABP_Gage.h"
 #include "Led.h"
-#include "Serial_output.h"
+#include "C_output.h"
 
-extern Serial_output output;
+extern C_output output;
 extern Trustability_ABP_Gage pressure1;
 extern Trustability_ABP_Gage pressure2;
 extern Led status_led;
