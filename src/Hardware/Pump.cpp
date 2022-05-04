@@ -86,7 +86,7 @@ void Pump::start()
     // display starting info only if previous state was OFF
     if (!running)
     {
-        output.println("Pump " + ID + " started with power " + power_percent);
+        if(VERBOSE_PUMP){output.println("Pump " + ID + " started with power " + power_percent);}
         running = true;
     }
 }
@@ -118,7 +118,7 @@ void Pump::stop()
     else
         digitalWrite(control_pin, 0);
     running = false;
-    output.println("Pump " + ID + " stopped");
+    if(VERBOSE_PUMP){output.println("Pump " + ID + " stopped");}
 }
 
 /**

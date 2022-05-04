@@ -18,7 +18,8 @@ void Valve_3_2::begin(byte _pin_control)
     pin_control = _pin_control;
     pinMode(pin_control, OUTPUT);
     set_L_way(); // normally closed on L way
-    output.println("Valve " + ID + " initiated");
+    if (VERBOSE_INIT){output.println("Valve " + ID + " initiated");}
+    
 }
 
 /**
@@ -36,14 +37,16 @@ void Valve_3_2::set_L_way()
 {
     digitalWrite(pin_control, LOW);
     state = L_way;
-    output.println("Valve " + ID + " on L way");
+    if (VERBOSE_VALVES){output.println("Valve " + ID + " on L way");}
+    
 }
 
 void Valve_3_2::set_I_way()
 {
     digitalWrite(pin_control, HIGH);
     state = I_way;
-    output.println("Valve " + ID + " on I way");
+    if (VERBOSE_VALVES){output.println("Valve " + ID + " on I way");}
+    
 }
 
 void Valve_3_2::switch_way()

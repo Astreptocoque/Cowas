@@ -13,7 +13,7 @@ private:
     float pressure = 0;
     float temperature = 0;
     String ID = "no_ID";
-    float max_pressure = 3; // in bar
+    float max_pressure = 3.2; // in bar
     uint32_t last_reading = 0;
 
 public:

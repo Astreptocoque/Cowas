@@ -114,6 +114,7 @@ void setup()
     potentiometer.begin(POTENTIOMETER_PIN);
     wifi_message.begin(ESP8266_COMM_PIN, INPUT);
 
+/*
     // ========= DATE FROM WIFI CARD ============
     output.println("Get date");
     struct Date current_date;
@@ -123,10 +124,11 @@ void setup()
     // manual time settup
     setTime(timeToEpoch(16, 00, 22, 01, 2022));
     output.println("It is " + format_date_friendly(now()));
+*/
+
 
     //  Test samples intialized
-    add_sample(16, 35, 25, 01, 2022, 5, 2);
-    add_sample(8, 00, 26, 01, 2022, 600, 1);
+    add_sample(16, 35, 25, 01, 2022, 20, 1);
 
     display_samples();
 
@@ -159,7 +161,7 @@ void setup()
 
 void loop()
 {
-    main_program();
+    //main_program();
     
     // test_hardware_general();
 
@@ -175,6 +177,17 @@ void loop()
     // TESTS 3
     // test_3_sterivex_1();
 
+    // Test characteristic new pump
+    // test_characteristic_new_pump();
+    // test_control_loop_Kp();
+    // test_flux_pompe();
+    // test_vanes();
+
+    int nb_sample=0;
+    while(nb_sample<4){
+        test_demonstration();
+        nb_sample++;
+    }
 }
 
 void main_program()
@@ -204,7 +217,7 @@ void main_program()
     }
 
     // ============== SAMPLING STEPS ==============
-    if (now() > get_next_sample_time() - PREPARATION_TIME)
+    if (now() > get_next_sample_time() - PREPARATION_TIME || button_start.isPressed())
     {
         // if there is still new filters in the system
         if (is_filter_available())

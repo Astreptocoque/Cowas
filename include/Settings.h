@@ -7,7 +7,7 @@
 // ===> PINS DECLARATION AT THE BOTTOM
 
 
-// global const = static = each file has its own decleration
+// global const = static = each file has its own declaration
 
 // =============== COWAS VARIABLES ===============
 // spool variables
@@ -20,7 +20,7 @@ const uint16_t TUBE_LENGTH = 4900;              // cm. length of tube (not sure 
 // water pump variables
 const uint8_t POWER_PUMP = 50;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
 const uint8_t POWER_FLUSH = 100;                            // over 100. Power when pumping from container
-const uint8_t POWER_STX = 35;                               // over 100. Experimental. Start power for sterivex but code adapts it.
+const uint8_t POWER_STX = 45;                               // over 100. Experimental. Start power for sterivex but code adapts it.
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;         // ms. Experimental. Time to fill tubes for purge and sampling before sensor take over
@@ -33,12 +33,12 @@ const uint32_t DRYING_TIME = 2*60*1000-10*1000;     // ms. Time for pumping hyst
 
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
 const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 10*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
-const uint8_t PURGE_NUMBER = 2;                                 // number of water container purge before sampling
+const uint8_t PURGE_NUMBER = 1;                                 // number of water container purge before sampling
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
 const uint8_t MAX_FILTER_NUMBER = 2;                            // max filters possible in the system
 extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
@@ -80,6 +80,22 @@ System_state get_system_state();
 void set_system_state(System_state state);
 void enable_output(bool enable);
 
+// ============ VERBOSE DEFINITIONS ==================
+// To print or not the infos of a subsystem in the terminal
+const bool VERBOSE_INIT = false;
+const bool VERBOSE_VALVES = false;
+const bool VERBOSE_MOTOR = false;
+const bool VERBOSE_PURGE = false;
+const bool VERBOSE_PURGE_PRESSURE = false;
+const bool VERBOSE_SAMPLE = false;
+const bool VERBOSE_SAMPLE_PRESSURE = true;
+const bool VERBOSE_PUMP = false;
+const bool VERBOSE_REWIND = false;
+const bool VERBOSE_FILL_CONTAINER = false;
+const bool VERBOSE_DIVE = false;
+const bool TIMER = true;
+const bool PRESSURE_SENSOR_ERROR = false;
+
 
 // ============ PIN DEFINITIONS ==================
 // To update with pinout table sheet
@@ -116,7 +132,7 @@ const uint8_t MOTOR_INB2_PIN = 50;
 const uint8_t MOTOR_PW2_PIN = 48;
 const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
-const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30, 42};
+const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
 
 
 #endif

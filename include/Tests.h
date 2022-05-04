@@ -20,6 +20,11 @@ void test_hardware_general();
 void test_sampling(uint8_t num_sterivex);
 void test_purge();
 
+void test_characteristic_new_pump();
+void test_control_loop_Kp();
+void test_flux_pompe();
+void test_vanes();
+void test_demonstration();
 
 
 #endif

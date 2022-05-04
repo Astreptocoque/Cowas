@@ -8,7 +8,7 @@ void Valve_2_2::begin(byte _pin_control)
     pin_control = _pin_control;
     pinMode(pin_control, OUTPUT);
     set_close_way();
-    output.println("Valve " + ID + " initated");
+    if (VERBOSE_INIT){output.println("Valve " + ID + " initated");}
 }
 
 /**
@@ -26,14 +26,14 @@ void Valve_2_2::set_open_way()
 {
     digitalWrite(pin_control, HIGH);
     state = open_way;
-    output.println("Valve " + ID + " opened");
+    if (VERBOSE_VALVES){output.println("Valve " + ID + " opened");}
 }
 
 void Valve_2_2::set_close_way()
 {
     digitalWrite(pin_control, LOW);
     state = close_way;
-    output.println("Valve " + ID + " closed");
+    if (VERBOSE_VALVES){output.println("Valve " + ID + " closed");}
 }
 
 void Valve_2_2::switch_way()

@@ -12,6 +12,8 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include "C_output.h"
+#include "Settings.h"
+
 
 extern C_output output;
 
@@ -74,7 +76,7 @@ void Trustability_ABP_Gage::read()
 
         pressure = output_pressure * BAR_FACTORa - BAR_FACTORb;
         temperature = output_temp * TEMP_FACTOREa - TEMP_FACTOREb;
-        if (pressure > max_pressure)
+        if ((pressure > max_pressure) && PRESSURE_SENSOR_ERROR)
         {
             output.println("ERROR | Pressure to high on sensor " + ID + " (" + String(pressure) + " bar)");
         }

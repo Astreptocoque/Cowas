@@ -648,3 +648,461 @@ void test_purge()
     delay(1000);
     valve_purge.set_close_way();
 }
+
+
+
+void test_characteristic_new_pump()
+{
+
+    output.println("========== Adjust height ===============");
+    output.println("Press start button to start pumping =========================");
+    output.println("Press left button to move spool up ==========================");
+    output.println("Press right button to move spool down =======================");
+    output.println("Press reset button on due button to come back here ==========");
+    output.flush();
+
+    uint8_t speedy = 60;
+    while (!button_start.isPressed())
+    {
+        if (button_left.isPressed())
+        {
+            spool.set_speed(speedy, up);
+            spool.start();
+            while (button_left.isPressed())
+                delay(5);
+            spool.stop();
+        }
+        if (button_right.isPressed())
+        {
+            spool.set_speed(speedy, down);
+            spool.start();
+            while (button_right.isPressed())
+                delay(5);
+            spool.stop();
+        }
+        delay(10);
+    }
+
+    valve_1.set_close_way();
+    valve_23.set_I_way();
+    delay(1000);
+
+    uint32_t time1 = millis();
+    bool run = true;
+
+    pump.set_power(POWER_PUMP);
+    pump.start();
+    int compteur=0;
+    float pressure=0;
+    // two possibilities to stop filling : switch or time
+    do
+    {
+        delay(10); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+        if (compteur==100)
+        {
+            output.println(String(pressure));
+            compteur=0;
+        }
+
+        if (button_start.isPressed())
+        {
+            run = false;
+            output.println("Fill container stopped by button");
+        }
+
+        else if (millis() - time1 > FILL_CONTAINER_TIME)
+        {
+            run = false;
+            output.println("Fill container stopped by security timer");
+        }
+        compteur++;
+    } while (run); // conditions are ouside loop to print what condition is responible for stopping
+
+    pump.stop();
+    output.println("Time to fill container : " + String(millis() - time1) + " ms");
+
+    delay(1000);
+
+    // set the valves
+    uint8_t num_filter = 1;
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        if (i == num_filter)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+
+    delay(1000); // delay to make sure the valves are sets
+    const uint8_t power_stx = 50;    
+    pump.set_power(power_stx);
+
+    output.println("Prepare water to fill up the tubes and press start");
+    output.flush();
+     while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    
+    // start by filling all tubes with water to have enough pressure (sensor)
+    pump.start(FILL_TUBES_WITH_WATER_TIME);
+
+    output.println("System ready");
+    output.println("Fill 1 liter of water and press start to start pumping");
+    output.flush();
+     while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    pump.start(FILL_TUBES_WITH_WATER_TIME); 
+    pump.start();
+    time1 = millis();
+    uint8_t validation_tick = 0;
+    run = true;
+    compteur=0;
+    float Pout_max=3.0f;
+    float Pout_min =2.7f;
+    float empty_water_pressure_stx_threshold = 0.1f;
+
+    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
+    do
+    {
+        
+        delay(10); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+        
+        if (compteur==50)
+        {
+            output.println(String(pressure)+String(pump.get_power()));
+            compteur=0;
+        }
+
+        // adapt pump power to pressure to not go over limit of 3 bar
+        // simple incremental controler. Not the best one but does the job
+        if (pressure > Pout_max)
+            pump.set_power(pump.get_power() - 2);
+        else if (pressure < Pout_min)
+            pump.set_power(pump.get_power() + 2);
+
+        // if pressure low enough, engage stopping processure
+        if (pressure < empty_water_pressure_stx_threshold)
+            validation_tick++;
+        else
+            validation_tick = 0;
+
+        if (validation_tick >= 250)
+        {
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }
+
+        compteur++;
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+    
+    // pump a little bit more to flush all water
+    //pump.start(EMPTY_WATER_STX_SECURITY_TIME);
+
+    output.println("The system stop after:");
+    output.println(String(millis()-time1-250));
+    //output.flush();
+
+    
+}
+
+void test_control_loop_Kp()
+{
+    int compteur=0;
+    float pressure=0;
+    uint32_t time1 = millis();
+    bool run = true;
+    // set the valves
+    uint8_t num_filter = 1;
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        if (i == num_filter)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+
+    delay(1000); // delay to make sure the valves are sets
+    const uint8_t power_stx = 50;    
+    pump.set_power(power_stx);
+
+    output.println("Prepare water to fill up the tubes and press start");
+    output.flush();
+     while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    
+    // start by filling all tubes with water to have enough pressure (sensor)
+    pump.start(FILL_TUBES_WITH_WATER_TIME);
+
+    output.println("System ready");
+    output.println("Fill 1 liter of water and press start to start pumping");
+    output.flush();
+     while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+
+    pump.start(FILL_TUBES_WITH_WATER_TIME); 
+    pump.start();
+    time1 = millis();
+    uint8_t validation_tick = 0;
+    run = true;
+    compteur=0;
+    float Pout_target=3;
+    float empty_water_pressure_stx_threshold = 0.1f;
+    float error = 0;
+    float gain = 0;
+    float offset = 0;
+    float Kp = 90;
+
+    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
+    do
+    {
+        
+        delay(10); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+        
+        if (compteur==50)
+        {
+            output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
+            compteur=0;
+        }
+
+        // adapt pump power to pressure to not go over limit of 3 bar
+        error=Pout_target-pressure;
+        gain=error*Kp + offset;
+
+        if (gain > 100)
+        {
+            gain=100;
+        }
+        else if (gain < 40)
+        {
+            gain=0;
+        }
+        pump.set_power(gain);
+
+        // if pressure low enough, engage stopping processure
+        if (pressure < empty_water_pressure_stx_threshold)
+            validation_tick++;
+        else
+            validation_tick = 0;
+
+        if (validation_tick >= 250)
+        {
+            run = false;
+            output.println("Purge stopped by low pressure");
+        }
+
+        compteur++;
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+    
+    // pump a little bit more to flush all water
+    pump.start(EMPTY_WATER_STX_SECURITY_TIME);
+
+    output.println("The system stop after:");
+    output.println(String(millis()-time1-250));
+    //output.flush();
+
+}
+
+void test_flux_pompe()
+{
+    // set the valves
+    uint8_t num_filter = 1;
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        if (i == num_filter)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    delay(1000); // delay to make sure the valves are sets
+
+    const uint8_t power_stx = 100;  
+    int compteur=0;
+    float pressure=0;  
+
+    pump.set_power(power_stx);
+    pump.start();
+    output.println("Press button to stop");
+     while (!button_start.isPressed())
+    {
+        delay(10); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+
+        if (compteur==50)
+        {
+            output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
+            compteur=0;
+        }
+        compteur++;
+    }
+    pump.stop();
+}
+
+void test_vanes()
+{
+    output.println("Valve 1 checkout start");
+      while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    uint8_t num_filter = 0;
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        if (i == num_filter)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+
+    delay(1000); // delay to make sure the valves are sets
+
+    output.println("Valve 2 checkout start");
+      while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    num_filter = 1;
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        if (i == num_filter)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    output.println("STOP checks");
+      while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    delay(1000); // delay to make sure the valves are sets
+
+}
+
+
+void test_demonstration()
+{
+
+     static bool one_time_code_idle_mode = true;
+     static bool auto_demo = true;
+
+    // ========= ONE TIME CODE IN IDLE ============
+    if (one_time_code_idle_mode)
+    {
+        output.println("Next sample scheduled :");
+        display_sample(0);
+        one_time_code_idle_mode = false;
+        // TODO : send this information to server
+    }
+
+    // ======== FILTER REFILLING COMMAND ==========
+    // Manual command. Potentiometer on the left and button left pressed
+    // TODO : refill validation through server
+    if ((potentiometer.get_value() < 50 && button_left.isPressed()) || auto_demo){
+        // choose number of filter inserted. For now always 2.
+        reload_filters(2);
+        output.println("Filter refilled");
+    }
+
+    // ============== SAMPLING STEPS ==============
+    if (now() > get_next_sample_time() - PREPARATION_TIME || button_start.isPressed() || auto_demo)
+    {
+        // if there is still new filters in the system
+        if (is_filter_available())
+        {
+            uint32_t time_sampling = millis();
+
+
+            set_system_state(state_sampling);
+
+            // get first sample in list
+            Sample sample = get_sample(0);
+
+            output.println("Start sampling");
+            output.println("Sample started at depth " + String(sample.get_depth()) + "cm in filter " + String(get_next_filter_place()));
+
+            // Sampling steps
+            step_dive(sample.get_depth());
+            for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+                step_fill_container();
+                step_purge();
+            }
+
+            step_fill_container();
+
+            step_rewind();
+
+            step_sampling(get_next_filter_place()); // sample place is a human number, start at 1
+            // step_dry(get_next_sample_place());   // not completely done yet
+            
+            // changes variables accordingly and log done sample
+            validate_sample();
+
+            output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
+
+            // Check new filter availability
+            if(is_filter_available() == false){
+                set_system_state(state_refill);
+                output.println("Out of filter stock");
+            }else{
+                set_system_state(state_idle);
+            }
+        }
+        else
+        {
+            output.println("ERROR - sample not done - no filter available");
+            validate_sample();
+        }
+
+        one_time_code_idle_mode = true;
+    }
+    delay(UPDATE_TIME);
+}

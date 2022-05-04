@@ -35,7 +35,8 @@ extern Button button_spool_down;
 void Motor::begin()
 {
     md.init();
-    output.println("Motor " + ID + " initiated");
+    if (VERBOSE_INIT){output.println("Motor " + ID + " initiated");}
+    
 }
 
 /**
@@ -63,7 +64,8 @@ void Motor::start()
     // Do not start if already at the very top or very down and order to go further
     if ((direction == up && endstop_up) || (direction == down && endstop_down))
     {
-        output.println("Reach end of tube, order cancelled | cannot wind up more");
+        if (VERBOSE_MOTOR){output.println("Reach end of tube, order cancelled | cannot wind up more");}
+        
     }
     else
     {
@@ -71,7 +73,7 @@ void Motor::start()
         endstop_down = false;
         // set here direction of motor
         md.setM1Speed(speed * (direction == up ? 1 : -1));
-        output.println("Motor started with speed " + String(speed) + " in direction " + (direction == up ? "up" : "down"));
+        if (VERBOSE_MOTOR){output.println("Motor started with speed " + String(speed) + " in direction " + (direction == up ? "up" : "down"));}
     }
 }
 
@@ -113,7 +115,7 @@ void Motor::start(int _depth)
     else
         set_speed(0, down);
 
-    output.println("Motor started to go at " + String(_depth));
+    if (VERBOSE_MOTOR){output.println("Motor started to go at " + String(_depth));}
 
     // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
     start();
@@ -149,7 +151,7 @@ void Motor::start_origin()
     {
         set_speed(30, up);
 
-        output.println("Motor started to go at origin");
+        if (VERBOSE_MOTOR){output.println("Motor started to go at origin");}
 
         start();
         while (button_spool_up.getState() == 1)
@@ -174,7 +176,7 @@ void Motor::start_origin()
 void Motor::stop()
 {
     md.setM1Brake(300);
-    output.println("Motor stopped");
+    if (VERBOSE_MOTOR){output.println("Motor stopped");}
 }
 
 /**
@@ -203,7 +205,7 @@ void ISR_emergency_stop_up()
         spool.endstop_up = true;
         md.setM1Brake(400);
         encoder.reset();
-        output.println("Endstop up touched");
+        if (VERBOSE_MOTOR){output.println("Endstop up touched");}
     }
 }
 
@@ -218,7 +220,7 @@ void ISR_emergency_stop_down()
     {
         spool.endstop_down = true;
         md.setM1Brake(400);
-        output.println("Endstop down touched - system stopped");
+        if (VERBOSE_MOTOR){output.println("Endstop down touched - system stopped");}
 
         // TODO : system alert and user warning
     }

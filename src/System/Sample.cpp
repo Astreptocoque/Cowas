@@ -17,7 +17,7 @@
 extern C_output output;
 
 std::list<Sample> samples; // list of samples
-uint8_t filter_number = 1; // next sample on real system to be used. Filter number.
+uint8_t filter_number = 2; // next sample on real system to be used. Filter number.
 
 
 // ====== SAMPLE OBJECTS FUNCTIONS =========
