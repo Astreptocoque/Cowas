@@ -51,7 +51,7 @@ public:
 template <typename T>
 void C_output::print(T output)
 {
-    if (ENABLE_OUTPUT)
+    if (ENABLE_OUTPUT && DEBUG_MODE_PRINT)
     {
         if (serial_type == terminal || serial_type == terminalANDsdCard)
             Serial.print(output);
@@ -80,7 +80,7 @@ void C_output::print(T output)
 template <typename T>
 void C_output::println(T output)
 {
-    if (ENABLE_OUTPUT)
+    if (ENABLE_OUTPUT && DEBUG_MODE_PRINT)
     {
         // add time before printing in format yyyy-mm-dd hh:mm:ss
         String data;

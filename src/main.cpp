@@ -40,7 +40,7 @@ void main_program();
 // ============ EXECUTION MODE ===================
 // comment this line if no system check at startup
 #define  SYSTEM_CHECKUP
-
+#define  SYSTEM_CHECKUP
 // ============ PIN DEFINITIONS ==================
 // See in Settings.h
 
@@ -71,6 +71,7 @@ Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 struct Timer timer_control_pressure2;       // Timer for interrupts with pressure sensor 2
 GPIO wifi_message;                          // Input for message line report from wifi card
+
 
 void setup()
 {
@@ -144,24 +145,32 @@ void setup()
 
     green_led.on();
     status_led.on();
+#if (DEBUG_MODE_PRINT)
     before_start_program();
     button_start.waitPressedAndReleased();
+#endif
     green_led.off();
     status_led.off();
 
 #ifdef SYSTEM_CHECKUP
-    system_checkup();
-    output.println("System checked\n");
+    #if(DEBUG_MODE_PRINT)
+        system_checkup();
+        output.println("System checked\n");
+    #endif
 #endif
 
     output.println("Programm started\n");
     // System states are command for the server to allow or not some manipulations
     set_system_state(state_idle);
+
+    // Communication with rapsberry
+    Serial.begin(9600);
 }
+
 
 void loop()
 {
-    //main_program();
+    main_program();
     
     // test_hardware_general();
 
@@ -183,88 +192,72 @@ void loop()
     // test_flux_pompe();
     // test_vanes();
 
-    int nb_sample=0;
+    /*int nb_sample=0;
     while(nb_sample<4){
         test_demonstration();
         nb_sample++;
-    }
+    }*/
 }
 
 void main_program()
 {
-    static bool one_time_code_idle_mode = true;
 
-    // =============== IDLE CODE ==================    
-    // TODO : Wi-Fi and communication stuffs
-
-
-    // ========= ONE TIME CODE IN IDLE ============
-    if (one_time_code_idle_mode)
-    {
-        output.println("Next sample scheduled :");
-        display_sample(0);
-        one_time_code_idle_mode = false;
-        // TODO : send this information to server
-    }
-
-    // ======== FILTER REFILLING COMMAND ==========
-    // Manual command. Potentiometer on the left and button left pressed
-    // TODO : refill validation through server
-    if (potentiometer.get_value() < 50 && button_left.isPressed()){
-        // choose number of filter inserted. For now always 2.
-        reload_filters(2);
-        output.println("Filter refilled");
-    }
-
-    // ============== SAMPLING STEPS ==============
-    if (now() > get_next_sample_time() - PREPARATION_TIME || button_start.isPressed())
-    {
-        // if there is still new filters in the system
-        if (is_filter_available())
-        {
-            uint32_t time_sampling = millis();
-
-            set_system_state(state_sampling);
-
-            // get first sample in list
-            Sample sample = get_sample(0);
-
-            output.println("It's sampling time !");
-            output.println("Sample started at depth " + String(sample.get_depth()) + "cm in filter " + String(get_next_filter_place()));
-
-            // Sampling steps
-            step_dive(sample.get_depth());
-            for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-                step_fill_container();
-                step_purge();
+    // TODO verify if there is still sterivex   with is_filter_available()
+    if (Serial.available() > 0) {
+        String data = Serial.readStringUntil('\n');
+        uint16_t depth=0;
+        String cmp_temp="sample";
+        if (data.startsWith(cmp_temp)){
+            Serial.print("  recognized sample ! ");
+            if (data.length()==15){
+                Serial.print("  data == 15");
+                depth=data.substring(14,14).toInt();
             }
+            else if (data.length()==16){
+                Serial.print("  data == 16");
+                depth=data.substring(14,15).toInt();
+            }
+            else{
+                Serial.println("Error depth");
+            }
+            data="sampleFunction";
+        }
+
+        if(data == "purgeSterivexFunction"){
+            int valve=1;
+            purge_sterivex(valve);
+        }
+        else if(data == "purgeContainerFunction"){
+            step_purge();
+        }
+        else if(data == "purgeTubesFunction"){
+            purge_Tubes();
+        }
+        else if(data == "fillContainerFunction"){
             step_fill_container();
-            step_rewind();
-            step_sampling(get_next_filter_place()); // sample place is a human number, start at 1
-            // step_dry(get_next_sample_place());   // not completely done yet
-            
-            // changes variables accordingly and log done sample
-            validate_sample();
-
-            output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
-
-            // Check new filter availability
-            if(is_filter_available() == false){
-                set_system_state(state_refill);
-                output.println("Out of filter stock");
-            }else{
-                set_system_state(state_idle);
-            }
         }
-        else
-        {
-            output.println("ERROR - sample not done - no filter available");
-            validate_sample();
+        else if(data == "sampleFunction"){
+            depth*=100; // convert m -> cm
+            sample_process(depth); 
+        }
+        else if(data == "rollingFunctionUp"){
+            uint8_t speedy = 60;
+            spool.set_speed(speedy, up);
+            spool.start();
+        }
+        else if(data == "rollingFunctionDown"){
+            uint8_t speedy = 60;
+            spool.set_speed(speedy, down);
+            spool.start();
+        }
+        else if(data == "stopRolling"){
+            spool.stop();
         }
 
-        one_time_code_idle_mode = true;
+        Serial.print(" - function accomplished - ");
+        Serial.println(data);
+        Serial.flush();
     }
-    delay(UPDATE_TIME);
 }
 
 void before_start_program()

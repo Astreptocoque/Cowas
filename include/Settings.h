@@ -22,9 +22,11 @@ const uint8_t POWER_PUMP = 50;                              // over 100. Power w
 const uint8_t POWER_FLUSH = 100;                            // over 100. Power when pumping from container
 const uint8_t POWER_STX = 45;                               // over 100. Experimental. Start power for sterivex but code adapts it.
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
+const uint32_t EMPTY_TUBE_TIME = 60*1000*1;                 // ms. Experimental. Time after which Tubes should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;         // ms. Experimental. Time to fill tubes for purge and sampling before sensor take over
 const uint32_t FILL_CONTAINER_TIME = 60*1000*11;            // ms. Experimental.
+
 
 // vacuum pump variables
 const float VACUUM_TO_ACHIEVE = 0.13;               // bar from atmsophere. Vacuum to achieve
@@ -42,8 +44,8 @@ const uint8_t PURGE_NUMBER = 1;                                 // number of wat
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
 const uint8_t MAX_FILTER_NUMBER = 2;                            // max filters possible in the system
 extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
-const bool ENABLE_TIME_LOG = true;                              // If true, print the time before each printed output
 extern bool ENABLE_OUTPUT;                                      // Enable or disable output printing, even if trying
+const bool DEBUG_MODE_PRINT = false;
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -82,6 +84,7 @@ void enable_output(bool enable);
 
 // ============ VERBOSE DEFINITIONS ==================
 // To print or not the infos of a subsystem in the terminal
+const bool ENABLE_TIME_LOG = true;                              // If true, print the time before each printed output
 const bool VERBOSE_INIT = false;
 const bool VERBOSE_VALVES = false;
 const bool VERBOSE_MOTOR = false;

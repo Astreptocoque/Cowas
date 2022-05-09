@@ -29,7 +29,7 @@ void C_output::begin(serial_type_enum _serial_type)
     {
         Serial.begin(9600);
         delay(100);
-        Serial.println("Serial initialized");
+        if (DEBUG_MODE_PRINT){Serial.println("Serial initialized");}
     }
     if (serial_type == sdCard || serial_type == terminalANDsdCard)
     {

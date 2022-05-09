@@ -319,6 +319,17 @@ void step_sampling(uint8_t num_filter)
     step_purge();
 
     // after purge, all tube are mainly empty. Push air through sterivex again to really flush last water in filter tubing
+    purge_sterivex(valve);
+
+    if(VERBOSE_SAMPLE){output.println("Step sample through filter ended");}
+}
+
+/**
+ * @brief Purge Sterivex
+ * 
+ */
+void purge_sterivex(int valve)
+{
     valve_23.set_L_way();
     valve_purge.set_close_way();
     valve_stx_in[valve].set_open_way();
@@ -332,7 +343,6 @@ void step_sampling(uint8_t num_filter)
     valve_stx_in[valve].set_close_way();
     valve_stx_out[valve].set_L_way();
 
-    if(VERBOSE_SAMPLE){output.println("Step sample through filter ended");}
 }
 
 /**
@@ -411,4 +421,64 @@ void step_dry(uint8_t num_filter)
     }
 
     output.println("Step drying ended");
+}
+
+void purge_Tubes(){
+    step_rewind();
+        if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
+
+    valve_1.set_close_way();
+    valve_23.set_I_way();
+    delay(DELAY_ACTIONS);
+
+    uint32_t time1 = millis();
+    bool run = true;
+
+    pump.set_power(POWER_PUMP);
+    pump.start();
+
+    // two possibilities to stop filling : switch or time
+    do
+    {
+        if (millis() - time1 > EMPTY_TUBE_TIME)
+        {
+            run = false;
+        }
+    } while (run); // conditions are ouside loop to print what condition is responible for stopping
+
+    pump.stop();
+    delay(DELAY_ACTIONS);
+    valve_23.set_L_way();
+}
+
+void sample_process(uint16_t depth){
+    uint32_t time_sampling = millis();
+
+    set_system_state(state_sampling);
+    output.println("It's sampling time !");
+    output.println("Sample started at depth " + String(depth) + "cm in filter ");
+    // Sampling steps
+    step_dive(depth);
+    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+        step_fill_container();
+        step_purge();
+    }
+    step_fill_container();
+    step_rewind();
+    step_sampling(get_next_filter_place()); // sample place is a human number, start at 1
+    // step_dry(get_next_sample_place());   // not completely done yet
+    
+    // changes variables accordingly and log done sample
+    validate_sample();
+
+    output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
+
+    /* Check new filter availability
+    if(is_filter_available() == false){
+        set_system_state(state_refill);
+        output.println("Out of filter stock");
+    }else{
+        set_system_state(state_idle);
+    }*/
+
 }
