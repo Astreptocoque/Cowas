@@ -56,7 +56,7 @@ Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
  * @param _depth The depth of the sample, in centimeters
  * @param _frequency The days after which the sample is repeated.
  */
-Sample::Sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
+Sample::Sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, int _depth, uint8_t _frequency)
 {
     Sample(timeToEpoch(_hour, _minute, _day, _month, _year), _depth, _frequency);
 }
@@ -88,7 +88,7 @@ uint8_t Sample::get_frequency() { return frequency; }
  * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
  * @return the index in the list of the sample (ordered in time)
  */
-uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
+uint8_t add_sample(time_t _epoch, int _depth, uint8_t _frequency)
 {
 
     Sample sample(_epoch, _depth, _frequency);
@@ -140,7 +140,7 @@ uint8_t add_sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
  * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
  * @return the index in the list of the sample (ordered in time)
  */
-uint8_t add_sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, uint16_t _depth, uint8_t _frequency)
+uint8_t add_sample(uint8_t _hour, uint8_t _minute, uint8_t _day, uint8_t _month, uint16_t _year, int _depth, uint8_t _frequency)
 {
     return add_sample(timeToEpoch(_hour, _minute, _day, _month, _year), _depth, _frequency);
 }

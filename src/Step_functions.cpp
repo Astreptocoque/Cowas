@@ -451,7 +451,7 @@ void purge_Tubes(){
     valve_23.set_L_way();
 }
 
-void sample_process(uint16_t depth){
+void sample_process(int depth){
     uint32_t time_sampling = millis();
 
     set_system_state(state_sampling);

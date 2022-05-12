@@ -170,7 +170,23 @@ void setup()
 
 void loop()
 {
-    main_program();
+    //step_rewind();
+    //int depth = 1;
+    //step_dive(depth);
+    int distance=20;
+    encoder.set_distance_to_reach(distance);
+    int counter=0;
+    while (encoder.get_distance() < distance)
+        {
+
+            if(counter>500000){
+                Serial.print("\nDistance encoder down: "+String(encoder.get_distance())+",   Step encoder: "+String(encoder.step_counter()));
+                counter=0;
+            }
+            counter++;
+        }
+
+    //main_program();
     
     // test_hardware_general();
 
@@ -205,21 +221,24 @@ void main_program()
     // TODO verify if there is still sterivex   with is_filter_available()
     if (Serial.available() > 0) {
         String data = Serial.readStringUntil('\n');
-        uint16_t depth=0;
+        int depth=0;
         String cmp_temp="sample";
         if (data.startsWith(cmp_temp)){
             Serial.print("  recognized sample ! ");
             if (data.length()==15){
                 Serial.print("  data == 15");
-                depth=data.substring(14,14).toInt();
+                Serial.print(String(data.substring(14,15)));
+                depth=data.substring(14,15).toInt();
             }
             else if (data.length()==16){
                 Serial.print("  data == 16");
-                depth=data.substring(14,15).toInt();
+                Serial.print(String(data.substring(14,16)));
+                depth=data.substring(14,16).toInt();
             }
             else{
                 Serial.println("Error depth");
             }
+            Serial.print(", Depth ="+String(depth));
             data="sampleFunction";
         }
 

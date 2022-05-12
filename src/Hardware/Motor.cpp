@@ -106,14 +106,18 @@ void Motor::start(int _depth)
     depth_goal = _depth;                           // distance from water level
     int distance = depth_goal + HEIGHT_FROM_WATER; // absolute distance from sensor
     encoder.set_distance_to_reach(distance);
-
+    Serial.print("\nDepth goal ="+String(depth_goal));
+    Serial.print("\nDistcance ="+String(distance));
     // movement setup depending of absolute depth
-    if (depth_goal > depth_current)
+    if (depth_goal > depth_current){
         set_speed(SPEED_DOWN, down);
-    else if (depth_goal < depth_current)
+        Serial.print("\nGo down1");}
+    else if (depth_goal < depth_current){
         set_speed(SPEED_UP, up);
-    else
+        Serial.print("\nGo up");}
+    else{
         set_speed(0, down);
+        Serial.print("\nGo down2");}
 
     if (VERBOSE_MOTOR){output.println("Motor started to go at " + String(_depth));}
 
@@ -125,12 +129,14 @@ void Motor::start(int _depth)
         while (encoder.get_distance() < distance)
         {
             encoder.step_counter();
+            Serial.print("\nDistance encoder down: "+String(encoder.get_distance())+",   Step encoder: "+String(encoder.step_counter()));
         }
     }
     else
     {
-        while (encoder.get_distance() > distance)
+        while (encoder.get_distance() > distance){
             encoder.step_counter();
+            Serial.print("\nDistance encoder up: "+String(encoder.get_distance()));}
     }
     stop();
 

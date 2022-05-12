@@ -56,7 +56,9 @@ encoder_direction Encoder::get_direction() { return direction; }
 
 int32_t Encoder::get_goal_pulses() { return goal_pulses_A; }
 
-int Encoder::get_distance() { return (int)(rad_per_pulse * diameter * pulses_A); }
+int Encoder::get_distance() { 
+    //Serial.print("\nEncoder distance: "+String(rad_per_pulse * diameter * pulses_A)+ " ,  cast in int ="+ String((int)(rad_per_pulse * diameter * pulses_A)));
+    return (int)(rad_per_pulse * diameter * pulses_A); }
 
 /**
  * @brief Step counter of rotary encoder
