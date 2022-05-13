@@ -170,23 +170,11 @@ void setup()
 
 void loop()
 {
-    //step_rewind();
-    //int depth = 1;
-    //step_dive(depth);
-    int distance=20;
-    encoder.set_distance_to_reach(distance);
-    int counter=0;
-    while (encoder.get_distance() < distance)
-        {
+    // step_rewind();
+    // int depth = 20;
+    // step_dive(depth);
 
-            if(counter>500000){
-                Serial.print("\nDistance encoder down: "+String(encoder.get_distance())+",   Step encoder: "+String(encoder.step_counter()));
-                counter=0;
-            }
-            counter++;
-        }
-
-    //main_program();
+    main_program();
     
     // test_hardware_general();
 
@@ -207,7 +195,8 @@ void loop()
     // test_control_loop_Kp();
     // test_flux_pompe();
     // test_vanes();
-
+    // test_demonstration();
+    
     /*int nb_sample=0;
     while(nb_sample<4){
         test_demonstration();

@@ -29,7 +29,7 @@ uint8_t filter_number = 2; // next sample on real system to be used. Filter numb
  * @param _depth The depth of the sample, in centimeters
  * @param _frequency The days after which the sample is repeated. 0 for unique sampling.
  */
-Sample::Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency)
+Sample::Sample(time_t _epoch, int _depth, uint8_t _frequency)
 {
     date.time.hour = hour(_epoch);
     date.time.minute = minute(_epoch);

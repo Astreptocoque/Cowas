@@ -20,12 +20,12 @@ class Sample
 private:
     static uint8_t sample_number;   // the next sample to be used
     struct Date date;               // store hour of sampling
-    uint16_t depth;                 // depth of the sample in cm
+    int depth;                 // depth of the sample in cm
     uint8_t frequency;              // frequency of sampling if sampling is regular
     Sampling_type type;             // if sample is regular or unique
    
 public:
-    Sample(time_t _epoch, uint16_t _depth, uint8_t _frequency);
+    Sample(time_t _epoch, int _depth, uint8_t _frequency);
     Sample(uint8_t _hour, uint8_t _minute,  uint8_t _day, uint8_t _month, uint16_t _year, int _depth, uint8_t _frequency);
     uint8_t get_day();
     uint8_t get_hour();

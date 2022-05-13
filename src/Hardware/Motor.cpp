@@ -106,37 +106,28 @@ void Motor::start(int _depth)
     depth_goal = _depth;                           // distance from water level
     int distance = depth_goal + HEIGHT_FROM_WATER; // absolute distance from sensor
     encoder.set_distance_to_reach(distance);
-    Serial.print("\nDepth goal ="+String(depth_goal));
-    Serial.print("\nDistcance ="+String(distance));
     // movement setup depending of absolute depth
     if (depth_goal > depth_current){
-        set_speed(SPEED_DOWN, down);
-        Serial.print("\nGo down1");}
+        set_speed(SPEED_DOWN, down);}
     else if (depth_goal < depth_current){
-        set_speed(SPEED_UP, up);
-        Serial.print("\nGo up");}
+        set_speed(SPEED_UP, up);}
     else{
-        set_speed(0, down);
-        Serial.print("\nGo down2");}
+        set_speed(0, down);}
 
     if (VERBOSE_MOTOR){output.println("Motor started to go at " + String(_depth));}
 
     // INFO | function can be accelerated and made more precises ATMEL hardware encoder core
     start();
     // loop take ~6 us.
-    if (direction == down)
-    {
-        while (encoder.get_distance() < distance)
-        {
+    if (direction == down){
+        while (encoder.get_distance() < distance){
             encoder.step_counter();
-            Serial.print("\nDistance encoder down: "+String(encoder.get_distance())+",   Step encoder: "+String(encoder.step_counter()));
         }
     }
-    else
-    {
+    else{
         while (encoder.get_distance() > distance){
             encoder.step_counter();
-            Serial.print("\nDistance encoder up: "+String(encoder.get_distance()));}
+        }
     }
     stop();
 
@@ -194,8 +185,7 @@ void Motor::stopIfFault()
     if (md.getM1Fault())
     {
         output.println("M1 fault");
-        while (1)
-            ;
+        while (1);
     }
 }
 
