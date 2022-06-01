@@ -84,7 +84,7 @@ void enable_output(bool enable);
 
 // ============ VERBOSE DEFINITIONS ==================
 // To print or not the infos of a subsystem in the terminal
-const bool ENABLE_TIME_LOG = true;                              // If true, print the time before each printed output
+const bool ENABLE_TIME_LOG = false;                              // If true, print the time before each printed output
 const bool VERBOSE_INIT = false;
 const bool VERBOSE_VALVES = false;
 const bool VERBOSE_MOTOR = false;
@@ -137,5 +137,7 @@ const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
 const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
 
+const uint8_t PUMP_TEST_INPUT = 9;
+const uint8_t PUMP_TEST_OUTPUT = 10;
 
 #endif

@@ -454,6 +454,7 @@ void purge_Tubes(){
 void sample_process(int depth){
     uint32_t time_sampling = millis();
 
+    step_rewind();
     set_system_state(state_sampling);
     output.println("It's sampling time !");
     output.println("Sample started at depth " + String(depth) + "cm in filter ");

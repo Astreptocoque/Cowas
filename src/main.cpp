@@ -58,6 +58,7 @@ Valve_2_2 valve_purge;                      // see schematics
 Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
 Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER]; // see schematics
 Pump pump;                                  // see schematics
+Pump pump_test;
 Pump pump_vacuum;                           // see schematics
 Motor spool;                                // see schematics
 Encoder encoder;                            // see schematics
@@ -98,6 +99,7 @@ void setup()
         valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
     }
     pump.begin(PUMP_PIN, true, "P1");
+    pump_test.begin(PUMP_TEST_INPUT, true, "P_TEST");
     pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
@@ -170,6 +172,49 @@ void setup()
 
 void loop()
 {
+
+    // uint32_t time1 = millis();
+    // bool run = true;
+    // uint8_t power_test=100;
+    // pump.set_power(power_test);
+    // pump.start();
+    // int compteur=0;
+    // // two possibilities to stop filling : switch or time
+    // do
+    // {
+    //     delay(100);
+    //     if (button_left.isPressed()){
+    //         power_test++;
+    //         if(power_test>100){power_test=100;}
+    //         if(power_test<0){power_test=0;}
+    //         Serial.println("Power :"+String(power_test));
+    //         pump.set_power(power_test);
+    //     }
+
+    //     if (button_right.isPressed()){
+    //         power_test--;
+    //         if(power_test>100){power_test=100;}
+    //         if(power_test<0){power_test=0;}
+    //         Serial.println("Power :"+String(power_test));
+    //         pump.set_power(power_test);
+    //     }
+
+    //     if (button_start.isPressed()){
+    //         run = false;
+    //         output.println("Fill container stopped by button");
+    //     }
+
+    //     else if (millis() - time1 > FILL_CONTAINER_TIME){
+    //         run = false;
+    //         output.println("Fill container stopped by security timer");
+    //     }
+    //     compteur++;
+    // } while (run); // conditions are ouside loop to print what condition is responible for stopping
+
+    // pump.stop();
+
+
+
     // step_rewind();
     // int depth = 20;
     // step_dive(depth);
@@ -197,11 +242,11 @@ void loop()
     // test_vanes();
     // test_demonstration();
     
-    /*int nb_sample=0;
-    while(nb_sample<4){
-        test_demonstration();
-        nb_sample++;
-    }*/
+    // int nb_sample=0;
+    // while(nb_sample<4){
+        // test_demonstration();
+    //     nb_sample++;
+    // }
 }
 
 void main_program()
@@ -213,21 +258,15 @@ void main_program()
         int depth=0;
         String cmp_temp="sample";
         if (data.startsWith(cmp_temp)){
-            Serial.print("  recognized sample ! ");
             if (data.length()==15){
-                Serial.print("  data == 15");
-                Serial.print(String(data.substring(14,15)));
                 depth=data.substring(14,15).toInt();
             }
             else if (data.length()==16){
-                Serial.print("  data == 16");
-                Serial.print(String(data.substring(14,16)));
                 depth=data.substring(14,16).toInt();
             }
             else{
                 Serial.println("Error depth");
             }
-            Serial.print(", Depth ="+String(depth));
             data="sampleFunction";
         }
 

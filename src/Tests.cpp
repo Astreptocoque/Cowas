@@ -1018,12 +1018,21 @@ void test_vanes()
             valve_stx_out[i].set_L_way();
         }
     }
+    delay(1000); // delay to make sure the valves are sets
+
+     output.println("Valve I checkout start");
+      while (!button_start.isPressed())
+    {
+        delay(1000);
+    }
+    num_filter = 1;
+    valve_23.set_I_way();
+
     output.println("STOP checks");
       while (!button_start.isPressed())
     {
         delay(1000);
     }
-    delay(1000); // delay to make sure the valves are sets
 
 }
 
