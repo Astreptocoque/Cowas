@@ -31,6 +31,8 @@
 #include "Step_functions.h"
 #include "GPIO.h"
 #include "TimeLib.h"
+#include "Manifold.h"
+
 
 // ============ MAIN FUNCTION DECLARATION =======
 void system_checkup();
@@ -58,7 +60,6 @@ Valve_2_2 valve_purge;                      // see schematics
 Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
 Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER]; // see schematics
 Pump pump;                                  // see schematics
-Pump pump_test;
 Pump pump_vacuum;                           // see schematics
 Motor spool;                                // see schematics
 Encoder encoder;                            // see schematics
@@ -72,6 +73,7 @@ Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 struct Timer timer_control_pressure2;       // Timer for interrupts with pressure sensor 2
 GPIO wifi_message;                          // Input for message line report from wifi card
+Manifold manifold;                          // Manifold
 
 
 void setup()
@@ -80,7 +82,7 @@ void setup()
     // ========== SYSTEM INITIALIZATION ============
     SPI.begin();
     output.begin(terminal); // choose output of logs
-    esp8266.begin();        // connect to wifi card
+    // esp8266.begin();        // connect to wifi card
 
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};    // timer of 1 second (4)
     timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};    // timer of 1 second (4)
@@ -99,8 +101,7 @@ void setup()
         valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
     }
     pump.begin(PUMP_PIN, true, "P1");
-    pump_test.begin(PUMP_TEST_INPUT, true, "P_TEST");
-    pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
+    // pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
@@ -115,22 +116,13 @@ void setup()
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
-    wifi_message.begin(ESP8266_COMM_PIN, INPUT);
-
-/*
-    // ========= DATE FROM WIFI CARD ============
-    output.println("Get date");
-    struct Date current_date;
-    esp8266.start_communication();
-    current_date = esp8266.receive_time();
-    setTime(current_date.epoch);
-    // manual time settup
-    setTime(timeToEpoch(16, 00, 22, 01, 2022));
-    output.println("It is " + format_date_friendly(now()));
-*/
+    // wifi_message.begin(ESP8266_COMM_PIN, INPUT);
+    manifold.begin();
 
 
     //  Test samples intialized
+    add_sample(16, 35, 25, 01, 2022, 20, 1);
+    add_sample(16, 35, 25, 01, 2022, 20, 1);
     add_sample(16, 35, 25, 01, 2022, 20, 1);
 
     display_samples();
@@ -172,10 +164,9 @@ void setup()
 
 void loop()
 {
-
     // uint32_t time1 = millis();
     // bool run = true;
-    // uint8_t power_test=100;
+    // uint8_t power_test=0;
     // pump.set_power(power_test);
     // pump.start();
     // int compteur=0;
@@ -212,6 +203,7 @@ void loop()
     // } while (run); // conditions are ouside loop to print what condition is responible for stopping
 
     // pump.stop();
+    // delay(60000);
 
 
 
@@ -219,7 +211,17 @@ void loop()
     // int depth = 20;
     // step_dive(depth);
 
-    main_program();
+    // main_program();
+    // step_purge();
+    // delay(8000);
+
+    // manifold.change_state(13, unaivailable);
+    // for(int i=0; i < NB_SLOT; i++){
+    //     Serial.println("----------------");
+    //     Serial.println(manifold.get_state(i));
+    //     Serial.println(manifold.get_id(i));
+    // }
+    // delay(30000);
     
     // test_hardware_general();
 
@@ -235,6 +237,10 @@ void loop()
     // TESTS 3
     // test_3_sterivex_1();
 
+
+    // test_pressure_sensor();
+
+
     // Test characteristic new pump
     // test_characteristic_new_pump();
     // test_control_loop_Kp();
@@ -242,11 +248,86 @@ void loop()
     // test_vanes();
     // test_demonstration();
     
+
+
+
+    // step_rewind();
+    // before_start_program();
+    // button_start.waitPressedAndReleased();
     // int nb_sample=0;
-    // while(nb_sample<4){
-        // test_demonstration();
+    // while(nb_sample<2){
+    //     output.println("----------------------------------------------");
+    //     test_demonstration();
+    //     delay(90000);
     //     nb_sample++;
     // }
+
+    step_rewind();
+    before_start_program();
+    button_start.waitPressedAndReleased();
+    step_sampling(get_next_filter_place());
+
+
+    // ----------------------------------------------------------------------
+    // set the valves
+    /*
+    int valve = 1; // 0 for right, 1 for left
+    valve_23.set_L_way();
+    valve_purge.set_close_way();
+    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
+    {
+        //if (i == num_filter)
+        if (i == valve)
+        {
+            valve_stx_in[i].set_open_way();
+            valve_stx_out[i].set_I_way();
+        }
+        else
+        {
+            valve_stx_in[i].set_close_way();
+            valve_stx_out[i].set_L_way();
+        }
+    }
+    delay(1000);
+    float pressure;
+    bool run = true;
+    float MIN_POWER_MOTOR=20;
+    float MAX_POWER_MOTOR=100;
+    int compteur=0;
+
+    // P-Controler parameters
+    float POUT_TARGET = 3;
+    float error = 0;
+    float gain = 0;
+    float offset = 0;
+    float Kp = 90;
+
+    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
+    do
+    {
+        delay(500); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+        output.println(pressure);
+        
+        // adapt pump power to pressure to not go over limit of 3 bar
+        error=POUT_TARGET-pressure;
+        gain=error*Kp + offset;
+
+        if (gain > MAX_POWER_MOTOR){
+            gain=100;
+        }
+        else if (gain < MIN_POWER_MOTOR){
+            gain=0;
+        }
+        pump.set_power(gain);
+        if (compteur >= 1000){
+            run = false;
+        }
+        compteur++;
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+
+    delay(600000);*/
+
 }
 
 void main_program()

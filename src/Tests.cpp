@@ -1046,7 +1046,7 @@ void test_demonstration()
     // ========= ONE TIME CODE IN IDLE ============
     if (one_time_code_idle_mode)
     {
-        output.println("Next sample scheduled :");
+        // output.println("Next sample scheduled :");
         display_sample(0);
         one_time_code_idle_mode = false;
         // TODO : send this information to server
@@ -1058,7 +1058,7 @@ void test_demonstration()
     if ((potentiometer.get_value() < 50 && button_left.isPressed()) || auto_demo){
         // choose number of filter inserted. For now always 2.
         reload_filters(2);
-        output.println("Filter refilled");
+        // output.println("Filter refilled");
     }
 
     // ============== SAMPLING STEPS ==============
@@ -1114,4 +1114,24 @@ void test_demonstration()
         one_time_code_idle_mode = true;
     }
     delay(UPDATE_TIME);
+}
+
+void test_pressure_sensor(){
+    float pressure;
+    bool run = true;
+    int compteur=0;
+     do
+    {
+        delay(10); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+        
+        if (compteur==10)
+        {
+            output.println("Pressure = " + String(pressure));
+            compteur=0;
+        }
+
+    compteur++;
+    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+
 }

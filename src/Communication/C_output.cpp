@@ -31,15 +31,15 @@ void C_output::begin(serial_type_enum _serial_type)
         delay(100);
         if (DEBUG_MODE_PRINT){Serial.println("Serial initialized");}
     }
-    if (serial_type == sdCard || serial_type == terminalANDsdCard)
-    {
-        validated = SD.begin(SD_CARD_SS_PIN);
-        delay(100);
-        if (validated)
-            Serial.println("SD card initialized");
-        else
-            Serial.println("SD card failed initalization");
-    }
+    // if (serial_type == sdCard || serial_type == terminalANDsdCard)
+    // {
+    //     validated = SD.begin(SD_CARD_SS_PIN);
+    //     delay(100);
+    //     if (validated)
+    //         Serial.println("SD card initialized");
+    //     else
+    //         Serial.println("SD card failed initalization");
+    // }
 }
 
 /**

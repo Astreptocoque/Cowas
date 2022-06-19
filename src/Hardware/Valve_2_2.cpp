@@ -8,7 +8,7 @@ void Valve_2_2::begin(byte _pin_control)
     pin_control = _pin_control;
     pinMode(pin_control, OUTPUT);
     set_close_way();
-    if (VERBOSE_INIT){output.println("Valve " + ID + " initated");}
+    if (VERBOSE_INIT){output.println("Valve " + ID + " initiated");}
 }
 
 /**

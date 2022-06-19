@@ -221,25 +221,25 @@ void display_samples()
 void display_sample(uint8_t number)
 {
 
-    output.println("Display sample command executed");
+    if(VERBOSE_SAMPLE){output.println("Display sample command executed");}
 
     auto it = samples.begin();
     uint8_t list_size = samples.size();
     if (number >= list_size)
     {
-        output.println("Unable to display requested sample, index out of range, taking last sample");
+        if(VERBOSE_SAMPLE){output.println("Unable to display requested sample, index out of range, taking last sample");}
         number = list_size - 1;
     }
     else if (list_size == 0)
     {
-        output.println("No samples are currently set");
+        if(VERBOSE_SAMPLE){output.println("No samples are currently set");}
     }
     advance(it, number);
 
     String depth = String(it->get_depth());
     String frequency = String(it->get_frequency());
     time_t t = it->get_epoch();
-    output.println("Sample in filter " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);
+    if(VERBOSE_SAMPLE){output.println("Sample in filter " + String(filter_number) + " : " + format_date_friendly(t) + " at depth " + depth + "cm and day frequency " + frequency);}
     output.flush();
 }
 
@@ -252,7 +252,7 @@ void validate_sample()
 {
     // log the sample
     display_sample(0);
-    output.println("Ended at time " + format_date_logging(now()));
+    if(VERBOSE_SAMPLE){output.println("Ended at time " + format_date_logging(now()));}
 
     // set next sample on real hardware
     filter_number++;

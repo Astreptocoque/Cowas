@@ -90,6 +90,7 @@ void step_fill_container()
 {
     if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
 
+
     valve_1.set_close_way();
     valve_23.set_I_way();
     delay(DELAY_ACTIONS);
@@ -287,8 +288,7 @@ void step_sampling(uint8_t num_filter)
 
         // if pressure low enough, engage stopping processure
         if (pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
-            validation_tick++;
-            output.println("validation_tick= "+String(validation_tick));}
+            validation_tick++;}
         else
             validation_tick = 0;
 

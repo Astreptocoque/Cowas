@@ -14,7 +14,7 @@ class Valve_2_2
 
 private:
     int pin_control;
-    valve_2_2_state state; // 1 open, 0 closed
+    valve_2_2_state state; // 1 closed, 0 open
     String ID = "no_ID";
 
 public:

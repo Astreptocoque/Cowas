@@ -18,9 +18,9 @@ const uint8_t SPEED_DOWN = 100;             // over 100. Speed when moving down 
 const uint16_t TUBE_LENGTH = 4900;              // cm. length of tube (not sure of this number)
 
 // water pump variables
-const uint8_t POWER_PUMP = 50;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
-const uint8_t POWER_FLUSH = 100;                            // over 100. Power when pumping from container
-const uint8_t POWER_STX = 45;                               // over 100. Experimental. Start power for sterivex but code adapts it.
+const uint8_t POWER_PUMP = 90;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
+const uint8_t POWER_FLUSH = 80;                            // over 100. Power when pumping from container
+const uint8_t POWER_STX = 40;                               // over 100. Experimental. Start power for sterivex but code adapts it.
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
 const uint32_t EMPTY_TUBE_TIME = 60*1000*1;                 // ms. Experimental. Time after which Tubes should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
@@ -33,10 +33,14 @@ const float VACUUM_TO_ACHIEVE = 0.13;               // bar from atmsophere. Vacu
 const float VACUUM_MINIMUM = 0.20;                  // bar from atmosphere. Vacuum before restarting vacuum pump
 const uint32_t DRYING_TIME = 2*60*1000-10*1000;     // ms. Time for pumping hysteris and heating
 
+
+// manifold variables
+const int NB_SLOT = 14;         // number of available slot in the manifold
+
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
-const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.06f;//0.08f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.5f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 10*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
@@ -45,7 +49,7 @@ const uint32_t SYNC_TIME = 32400;                               // ms. Time befo
 const uint8_t MAX_FILTER_NUMBER = 2;                            // max filters possible in the system
 extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
 extern bool ENABLE_OUTPUT;                                      // Enable or disable output printing, even if trying
-const bool DEBUG_MODE_PRINT = false;
+
 
 // ============= TIME MANAGEMENT ==============
 struct Time{
@@ -84,13 +88,15 @@ void enable_output(bool enable);
 
 // ============ VERBOSE DEFINITIONS ==================
 // To print or not the infos of a subsystem in the terminal
+const bool DEBUG_MODE_PRINT = true;
+
 const bool ENABLE_TIME_LOG = false;                              // If true, print the time before each printed output
 const bool VERBOSE_INIT = false;
 const bool VERBOSE_VALVES = false;
 const bool VERBOSE_MOTOR = false;
 const bool VERBOSE_PURGE = false;
 const bool VERBOSE_PURGE_PRESSURE = false;
-const bool VERBOSE_SAMPLE = false;
+const bool VERBOSE_SAMPLE = true;
 const bool VERBOSE_SAMPLE_PRESSURE = true;
 const bool VERBOSE_PUMP = false;
 const bool VERBOSE_REWIND = false;
@@ -104,13 +110,13 @@ const bool PRESSURE_SENSOR_ERROR = false;
 // To update with pinout table sheet
 const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
-const uint8_t PRESSURE1_PIN = 3;
+const uint8_t PRESSURE1_PIN = 7;
 const uint8_t PRESSURE2_PIN = 4;
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
 const uint8_t VALVE_PURGE = 30; // heater 1 but valve purge for now (miss a cable)
-const uint8_t PUMP_PIN = 6;
-const uint8_t PUMP_VACUUM = 34;
+const uint8_t PUMP_PIN = DAC0;
+// const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;
 const uint8_t ENCODER_B_PIN = 33;
 const uint8_t ENCODER_Z_PIN = 35;
@@ -121,13 +127,13 @@ const uint8_t BUTTON_SPOOL_DOWN = 29;
 const uint8_t BUTTON_LEFT_PIN = 25;
 const uint8_t BUTTON_RIGHT_PIN = 26;
 const uint8_t POTENTIOMETER_PIN = A0;
-const uint8_t SD_CARD_SS_PIN = 5;
-const uint8_t ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
+// const uint8_t SD_CARD_SS_PIN = 5;
+// const uint8_t ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
 const uint8_t VALVE_STX_IN_PIN[MAX_FILTER_NUMBER] = {36, 38};
 const uint8_t VALVE_STX_OUT_PIN[MAX_FILTER_NUMBER] = {32, 40};
 const uint8_t MOTOR_INA1_PIN = 53;
 const uint8_t MOTOR_INB1_PIN = 51;
-const uint8_t MOTOR_PWM1_PIN = 7;
+const uint8_t MOTOR_PWM1_PIN = 3;
 const uint8_t MOTOR_EN1DIAG1_PIN = 49;
 const uint8_t MOTOR_CS1_PIN = A11;
 const uint8_t MOTOR_INA2_PIN = 52;
@@ -136,8 +142,6 @@ const uint8_t MOTOR_PW2_PIN = 48;
 const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
 const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
-
-const uint8_t PUMP_TEST_INPUT = 9;
-const uint8_t PUMP_TEST_OUTPUT = 10;
+const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
 
 #endif

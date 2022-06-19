@@ -26,5 +26,7 @@ void test_flux_pompe();
 void test_vanes();
 void test_demonstration();
 
+void test_pressure_sensor();
+
 
 #endif
