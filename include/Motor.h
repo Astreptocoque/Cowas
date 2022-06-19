@@ -21,6 +21,7 @@ public:
     bool endstop_down = false; // public for interrupt
     bool endstop_up = false;
     void begin();
+    void begin(String _ID);
     void set_speed(uint8_t _speed, motor_direction _direction);
     void start();
     void start(uint8_t _speed, motor_direction _direction);

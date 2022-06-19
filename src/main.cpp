@@ -62,6 +62,7 @@ Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER]; // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
 Motor spool;                                // see schematics
+Motor manifold_motor;                       // see schematics
 Encoder encoder;                            // see schematics
 Button button_start;                        // User button. Normally open
 Button button_left;                         // User button. Normally open
@@ -103,6 +104,7 @@ void setup()
     pump.begin(PUMP_PIN, true, "P1");
     // pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
+    manifold_motor.begin("MANIFOLD");
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
     button_left.begin(BUTTON_LEFT_PIN, "B_left");
     button_right.begin(BUTTON_RIGHT_PIN, "B_right");
@@ -164,6 +166,7 @@ void setup()
 
 void loop()
 {
+    // test_manifold();
     // uint32_t time1 = millis();
     // bool run = true;
     // uint8_t power_test=0;

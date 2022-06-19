@@ -104,6 +104,7 @@ const bool VERBOSE_FILL_CONTAINER = false;
 const bool VERBOSE_DIVE = false;
 const bool TIMER = true;
 const bool PRESSURE_SENSOR_ERROR = false;
+const bool VERBOSE_MANIFOLD = false;
 
 
 // ============ PIN DEFINITIONS ==================
@@ -143,5 +144,6 @@ const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
 const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
 const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
+const uint8_t ENCODER_MANIFOLD = 45;
 
 #endif

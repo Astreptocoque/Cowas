@@ -40,6 +40,16 @@ void Motor::begin()
 }
 
 /**
+ * @brief Constructor for a motor with polulu driver
+ *
+ */
+void Motor::begin(String _ID)
+{
+    ID=_ID;
+    begin();
+}
+
+/**
  * @brief set speed
  *
  * @param _speed Between 0 and 100. Always positive.
@@ -61,19 +71,25 @@ void Motor::set_speed(uint8_t _speed, motor_direction _direction)
  */
 void Motor::start()
 {
-    // Do not start if already at the very top or very down and order to go further
-    if ((direction == up && endstop_up) || (direction == down && endstop_down))
-    {
-        if (VERBOSE_MOTOR){output.println("Reach end of tube, order cancelled | cannot wind up more");}
-        
-    }
-    else
-    {
-        endstop_up = false;
-        endstop_down = false;
-        // set here direction of motor
-        md.setM1Speed(speed * (direction == up ? 1 : -1));
-        if (VERBOSE_MOTOR){output.println("Motor started with speed " + String(speed) + " in direction " + (direction == up ? "up" : "down"));}
+     if (ID=="MANIFOLD")
+        {
+            md.setM2Speed(speed * direction == up ? 1 : -1);
+        }
+    else{
+        // Do not start if already at the very top or very down and order to go further
+        if ((direction == up && endstop_up) || (direction == down && endstop_down))
+        {
+            if (VERBOSE_MOTOR){output.println("Reach end of tube, order cancelled | cannot wind up more");}
+            
+        }
+        else
+        {
+            endstop_up = false;
+            endstop_down = false;
+            // set here direction of motor
+            md.setM1Speed(speed * (direction == up ? 1 : -1));
+            if (VERBOSE_MOTOR){output.println("Motor started with speed " + String(speed) + " in direction " + (direction == up ? "up" : "down"));}
+        }
     }
 }
 
@@ -172,7 +188,11 @@ void Motor::start_origin()
  */
 void Motor::stop()
 {
-    md.setM1Brake(300);
+    if(ID=="MANIFOLD"){
+        md.setM2Brake(400);
+    }
+    else{
+        md.setM1Brake(300);}
     if (VERBOSE_MOTOR){output.println("Motor stopped");}
 }
 

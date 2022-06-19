@@ -25,6 +25,7 @@
 #include "Serial_device.h"
 #include "Tests.h"
 #include "Step_functions.h"
+#include "Manifold.h"
 
 extern C_output output;
 extern Serial_device serial;
@@ -1133,5 +1134,16 @@ void test_pressure_sensor(){
 
     compteur++;
     } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+
+}
+
+void test_manifold(){
+    for (int j = 1  ; j < 15; j++)
+        {
+        rotateMotor(0);
+        delay(5000);
+        rotateMotor(j);
+        delay(5000);
+        }
 
 }

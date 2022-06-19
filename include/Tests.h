@@ -28,5 +28,7 @@ void test_demonstration();
 
 void test_pressure_sensor();
 
+void test_manifold();
+
 
 #endif
