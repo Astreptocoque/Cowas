@@ -23,12 +23,12 @@
 #include "Led.h"
 #include <SPI.h>
 #include "C_output.h"
-#include "sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
 #include "Timer.h"
 #include "Serial_device.h"
 #include "Step_functions.h"
+#include "Manifold.h"
 
 // Delay when actuating valves
 #define DELAY_ACTIONS 1000
@@ -41,9 +41,7 @@ extern Trustability_ABP_Gage pressure1;
 extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
-extern Valve_2_2 valve_purge;
-extern Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];
-extern Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER];
+extern Valve_2_2 valve_manifold;
 extern Pump pump;
 extern Pump pump_vacuum;
 extern Motor spool;
@@ -56,6 +54,7 @@ extern Button button_left;
 extern Button button_right;
 extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
+extern Manifold manifold;
 
 /**
  * @brief Unroll the spool at the correct depth
@@ -140,10 +139,9 @@ void step_purge()
     
 
     // set the valves
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-        valve_stx_in[i].set_close_way();
+    rotateMotor(PURGE_SLOT); // purge slot
+    valve_manifold.set_open_way();
     valve_23.set_L_way();
-    valve_purge.set_open_way();
     delay(DELAY_ACTIONS);
 
     pump.set_power(POWER_FLUSH);
@@ -202,7 +200,7 @@ void step_purge()
     if(VERBOSE_PURGE || TIMER){output.println("Time to purge container : " + String(millis() - time1) + " ms");}
 
     delay(DELAY_ACTIONS);
-    valve_purge.set_close_way();
+    valve_manifold.set_close_way();
 
     if(VERBOSE_PURGE){output.println("Step purge container ended");}
 }
@@ -212,30 +210,14 @@ void step_purge()
  * 
  * @param num_filter The filter in which the sampling is made
  */
-void step_sampling(uint8_t num_filter)
+void step_sampling(int slot_manifold)
 {
     if(VERBOSE_SAMPLE){output.println("Step sample through filter started");}
 
-    num_filter -= 1; //convert human filter place to computer array numbering
-    int valve = 1; // 0 for right, 1 for left
-
     // set the valves
+    rotateMotor(slot_manifold);
     valve_23.set_L_way();
-    valve_purge.set_close_way();
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        //if (i == num_filter)
-        if (i == valve)
-        {
-            valve_stx_in[i].set_open_way();
-            valve_stx_out[i].set_I_way();
-        }
-        else
-        {
-            valve_stx_in[i].set_close_way();
-            valve_stx_out[i].set_L_way();
-        }
-    }
+    valve_manifold.set_open_way();
     delay(DELAY_ACTIONS);
 
     pump.set_power(POWER_STX);
@@ -312,14 +294,13 @@ void step_sampling(uint8_t num_filter)
     if(VERBOSE_SAMPLE || TIMER){output.println("Time to sample water : " + String(millis() - time1) + " ms");}
 
     delay(DELAY_ACTIONS);
-    valve_stx_in[valve].set_close_way();
-    valve_stx_out[valve].set_L_way();
+    valve_manifold.set_close_way();
 
     // Do a purge to facilitate emptying the tubes from remaining water (hard trough filter)
     step_purge();
 
     // after purge, all tube are mainly empty. Push air through sterivex again to really flush last water in filter tubing
-    purge_sterivex(valve);
+    purge_sterivex(slot_manifold);
 
     if(VERBOSE_SAMPLE){output.println("Step sample through filter ended");}
 }
@@ -328,20 +309,19 @@ void step_sampling(uint8_t num_filter)
  * @brief Purge Sterivex
  * 
  */
-void purge_sterivex(int valve)
+void purge_sterivex(int slot_manifold)
 {
+    rotateMotor(slot_manifold);
     valve_23.set_L_way();
-    valve_purge.set_close_way();
-    valve_stx_in[valve].set_open_way();
-    valve_stx_out[valve].set_I_way();
+    valve_manifold.set_open_way();
+
     delay(DELAY_ACTIONS);
 
     pump.set_power(100);
     pump.start(EMPTY_WATER_SECURITY_TIME * 4);
     delay(DELAY_ACTIONS);
 
-    valve_stx_in[valve].set_close_way();
-    valve_stx_out[valve].set_L_way();
+    valve_manifold.set_close_way();
 
 }
 
@@ -386,15 +366,8 @@ void step_dry(uint8_t num_filter)
     // temporaire
 
     // set the valves
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        valve_stx_in[i].set_close_way();
+    // TODO add valves
 
-        if (i == num_filter)
-            valve_stx_out[i].set_L_way();
-        else
-            valve_stx_out[i].set_I_way();
-    }
     delay(DELAY_ACTIONS);
 
     // TODO : function interrupt for pressure2
@@ -415,15 +388,12 @@ void step_dry(uint8_t num_filter)
         }
     }
 
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        valve_stx_out[i].set_L_way();
-    }
+    // TODO : close valves
 
     output.println("Step drying ended");
 }
 
-void purge_Tubes(){
+void purge_Pipes(){
     step_rewind();
         if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
 
@@ -452,6 +422,24 @@ void purge_Tubes(){
 }
 
 void sample_process(int depth){
+    // Verify if available filter
+    bool filter_available= false;
+    int manifold_slot=0;
+    for(int i=1; i < NB_SLOT; i++){
+        if(manifold.get_state(i) == available){
+            manifold.change_state(i, unaivailable);
+            filter_available= true;
+            manifold_slot=i;
+            break;
+        }
+    }
+
+    if(filter_available == false){
+        output.println("No filter available");
+        return;
+    }
+
+
     uint32_t time_sampling = millis();
 
     step_rewind();
@@ -466,20 +454,9 @@ void sample_process(int depth){
     }
     step_fill_container();
     step_rewind();
-    step_sampling(get_next_filter_place()); // sample place is a human number, start at 1
+    step_sampling(manifold_slot); // sample place is a human number, start at 1
     // step_dry(get_next_sample_place());   // not completely done yet
-    
-    // changes variables accordingly and log done sample
-    validate_sample();
 
     output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
-
-    /* Check new filter availability
-    if(is_filter_available() == false){
-        set_system_state(state_refill);
-        output.println("Out of filter stock");
-    }else{
-        set_system_state(state_idle);
-    }*/
 
 }

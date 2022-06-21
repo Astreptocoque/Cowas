@@ -11,6 +11,6 @@ void step_rewind();
 void step_dry(uint8_t num_sterivex);
 void sample_process(int depth);
 void purge_sterivex(int valve);
-void purge_Tubes();
+void purge_Pipes();
 
 #endif

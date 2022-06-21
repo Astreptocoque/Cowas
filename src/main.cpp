@@ -22,7 +22,6 @@
 #include "Led.h"
 #include <SPI.h>
 #include "C_output.h"
-#include "Sample.h"
 #include "Settings.h"
 #include "Critical_error.h"
 #include "Timer.h"
@@ -49,16 +48,12 @@ void main_program();
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
 C_output output;                       // custom print function to handle multiple outputs
-Serial_device esp8266;                      // enable communication with wifi card
 Led status_led;                             // general purpose LED
 Led green_led;                              // general purpose LED, used here for start signals
 Trustability_ABP_Gage pressure1;            // see schematics
-Trustability_ABP_Gage pressure2;            // see schematics
 Valve_2_2 valve_1;                          // see schematics
 Valve_3_2 valve_23;                         // see schematics
-Valve_2_2 valve_purge;                      // see schematics
-Valve_2_2 valve_stx_in[MAX_FILTER_NUMBER];  // see schematics
-Valve_3_2 valve_stx_out[MAX_FILTER_NUMBER]; // see schematics
+Valve_2_2 valve_manifold;                   // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
 Motor spool;                                // see schematics
@@ -72,8 +67,6 @@ Button button_spool_up;                     // Control button. Normally closed
 Button button_spool_down;                   // Control button. Normally closed
 Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
-struct Timer timer_control_pressure2;       // Timer for interrupts with pressure sensor 2
-GPIO wifi_message;                          // Input for message line report from wifi card
 Manifold manifold;                          // Manifold
 
 
@@ -83,26 +76,16 @@ void setup()
     // ========== SYSTEM INITIALIZATION ============
     SPI.begin();
     output.begin(terminal); // choose output of logs
-    // esp8266.begin();        // connect to wifi card
-
     timer_control_pressure1 = {TC1, 0, TC3_IRQn, 4};    // timer of 1 second (4)
-    timer_control_pressure2 = {TC1, 1, TC4_IRQn, 4};    // timer of 1 second (4)
 
     // ========== HARDWARE INITIALIZATION ==========
     status_led.begin(STATUS_LED_PIN, "status");
     green_led.begin(GREEN_LED_PIN, "green");
     pressure1.begin(PRESSURE1_PIN, 3, "P1");
-    pressure2.begin(PRESSURE2_PIN, 3, "P2");
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
-    valve_purge.begin(VALVE_PURGE, "V_purge");
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        valve_stx_in[i].begin(VALVE_STX_IN_PIN[i], "Vstx_in_" + String(i));
-        valve_stx_out[i].begin(VALVE_STX_OUT_PIN[i], "Vstx_out_" + String(i));
-    }
+    valve_manifold.begin(VALVE_MANIFOLD, "V_manifold");
     pump.begin(PUMP_PIN, true, "P1");
-    // pump_vacuum.begin(PUMP_VACUUM, false, "Pvac");
     spool.begin();
     manifold_motor.begin("MANIFOLD");
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
@@ -118,16 +101,8 @@ void setup()
     spool.endstop_up = false;
     spool.endstop_down = false;
     potentiometer.begin(POTENTIOMETER_PIN);
-    // wifi_message.begin(ESP8266_COMM_PIN, INPUT);
     manifold.begin();
-
-
-    //  Test samples intialized
-    add_sample(16, 35, 25, 01, 2022, 20, 1);
-    add_sample(16, 35, 25, 01, 2022, 20, 1);
-    add_sample(16, 35, 25, 01, 2022, 20, 1);
-
-    display_samples();
+    manifold.change_state(PURGE_SLOT, unaivailable); // The purge has no filter
 
 
     output.println("system initalized\n");
@@ -166,67 +141,8 @@ void setup()
 
 void loop()
 {
-    // test_manifold();
-    // uint32_t time1 = millis();
-    // bool run = true;
-    // uint8_t power_test=0;
-    // pump.set_power(power_test);
-    // pump.start();
-    // int compteur=0;
-    // // two possibilities to stop filling : switch or time
-    // do
-    // {
-    //     delay(100);
-    //     if (button_left.isPressed()){
-    //         power_test++;
-    //         if(power_test>100){power_test=100;}
-    //         if(power_test<0){power_test=0;}
-    //         Serial.println("Power :"+String(power_test));
-    //         pump.set_power(power_test);
-    //     }
 
-    //     if (button_right.isPressed()){
-    //         power_test--;
-    //         if(power_test>100){power_test=100;}
-    //         if(power_test<0){power_test=0;}
-    //         Serial.println("Power :"+String(power_test));
-    //         pump.set_power(power_test);
-    //     }
-
-    //     if (button_start.isPressed()){
-    //         run = false;
-    //         output.println("Fill container stopped by button");
-    //     }
-
-    //     else if (millis() - time1 > FILL_CONTAINER_TIME){
-    //         run = false;
-    //         output.println("Fill container stopped by security timer");
-    //     }
-    //     compteur++;
-    // } while (run); // conditions are ouside loop to print what condition is responible for stopping
-
-    // pump.stop();
-    // delay(60000);
-
-
-
-    // step_rewind();
-    // int depth = 20;
-    // step_dive(depth);
-
-    // main_program();
-    // step_purge();
-    // delay(8000);
-
-    // manifold.change_state(13, unaivailable);
-    // for(int i=0; i < NB_SLOT; i++){
-    //     Serial.println("----------------");
-    //     Serial.println(manifold.get_state(i));
-    //     Serial.println(manifold.get_id(i));
-    // }
-    // delay(30000);
-    
-    // test_hardware_general();
+    main_program();
 
     // TESTS 1
     // test_1_depth_20m();
@@ -240,103 +156,22 @@ void loop()
     // TESTS 3
     // test_3_sterivex_1();
 
-
+    // TESTS SYSTEM
     // test_pressure_sensor();
+    // test_manifold();
 
 
-    // Test characteristic new pump
-    // test_characteristic_new_pump();
-    // test_control_loop_Kp();
-    // test_flux_pompe();
-    // test_vanes();
-    // test_demonstration();
-    
-
-
-
+    // HHHHHHHHHHEEEEEEEEEEEERRRRRRRRRREEEEEEEEEEE
     // step_rewind();
     // before_start_program();
     // button_start.waitPressedAndReleased();
-    // int nb_sample=0;
-    // while(nb_sample<2){
-    //     output.println("----------------------------------------------");
-    //     test_demonstration();
-    //     delay(90000);
-    //     nb_sample++;
-    // }
-
-    step_rewind();
-    before_start_program();
-    button_start.waitPressedAndReleased();
-    step_sampling(get_next_filter_place());
-
-
-    // ----------------------------------------------------------------------
-    // set the valves
-    /*
-    int valve = 1; // 0 for right, 1 for left
-    valve_23.set_L_way();
-    valve_purge.set_close_way();
-    for (uint8_t i = 0; i < MAX_FILTER_NUMBER; i++)
-    {
-        //if (i == num_filter)
-        if (i == valve)
-        {
-            valve_stx_in[i].set_open_way();
-            valve_stx_out[i].set_I_way();
-        }
-        else
-        {
-            valve_stx_in[i].set_close_way();
-            valve_stx_out[i].set_L_way();
-        }
-    }
-    delay(1000);
-    float pressure;
-    bool run = true;
-    float MIN_POWER_MOTOR=20;
-    float MAX_POWER_MOTOR=100;
-    int compteur=0;
-
-    // P-Controler parameters
-    float POUT_TARGET = 3;
-    float error = 0;
-    float gain = 0;
-    float offset = 0;
-    float Kp = 90;
-
-    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
-    do
-    {
-        delay(500); // don't read pressure to fast
-        pressure = pressure1.getPressure();
-        output.println(pressure);
-        
-        // adapt pump power to pressure to not go over limit of 3 bar
-        error=POUT_TARGET-pressure;
-        gain=error*Kp + offset;
-
-        if (gain > MAX_POWER_MOTOR){
-            gain=100;
-        }
-        else if (gain < MIN_POWER_MOTOR){
-            gain=0;
-        }
-        pump.set_power(gain);
-        if (compteur >= 1000){
-            run = false;
-        }
-        compteur++;
-    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
-
-    delay(600000);*/
+    // sample_process(40);
 
 }
 
 void main_program()
 {
 
-    // TODO verify if there is still sterivex   with is_filter_available()
     if (Serial.available() > 0) {
         String data = Serial.readStringUntil('\n');
         int depth=0;
@@ -354,15 +189,17 @@ void main_program()
             data="sampleFunction";
         }
 
-        if(data == "purgeSterivexFunction"){
-            int valve=1;
-            purge_sterivex(valve);
+        if(data == "reloadManifoldFunction"){
+            manifold.reload();
+        }
+        else if(data == "purgeSterivexFunction"){
+            purge_sterivex(PURGE_SLOT);
         }
         else if(data == "purgeContainerFunction"){
             step_purge();
         }
-        else if(data == "purgeTubesFunction"){
-            purge_Tubes();
+        else if(data == "purgePipesFunction"){
+            purge_Pipes();
         }
         else if(data == "fillContainerFunction"){
             step_fill_container();

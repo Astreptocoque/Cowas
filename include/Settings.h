@@ -35,7 +35,9 @@ const uint32_t DRYING_TIME = 2*60*1000-10*1000;     // ms. Time for pumping hyst
 
 
 // manifold variables
-const int NB_SLOT = 14;         // number of available slot in the manifold
+const int NB_SLOT = 14;             // number of available slot in the manifold
+const int PURGE_SLOT = 0;           // purge slot in the manifold
+const bool MANIFOLD_USE = false;    // use the manifold in the system
 
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
@@ -46,7 +48,7 @@ const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 10*1000;         // ms. Time to e
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
 const uint8_t PURGE_NUMBER = 1;                                 // number of water container purge before sampling
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
-const uint8_t MAX_FILTER_NUMBER = 2;                            // max filters possible in the system
+const uint8_t MAX_FILTER_NUMBER = 14;                            // max filters possible in the system
 extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
 extern bool ENABLE_OUTPUT;                                      // Enable or disable output printing, even if trying
 
@@ -96,8 +98,8 @@ const bool VERBOSE_VALVES = false;
 const bool VERBOSE_MOTOR = false;
 const bool VERBOSE_PURGE = false;
 const bool VERBOSE_PURGE_PRESSURE = false;
-const bool VERBOSE_SAMPLE = true;
-const bool VERBOSE_SAMPLE_PRESSURE = true;
+const bool VERBOSE_SAMPLE = false;
+const bool VERBOSE_SAMPLE_PRESSURE = false;
 const bool VERBOSE_PUMP = false;
 const bool VERBOSE_REWIND = false;
 const bool VERBOSE_FILL_CONTAINER = false;
@@ -112,10 +114,9 @@ const bool VERBOSE_MANIFOLD = false;
 const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
 const uint8_t PRESSURE1_PIN = 7;
-const uint8_t PRESSURE2_PIN = 4;
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
-const uint8_t VALVE_PURGE = 30; // heater 1 but valve purge for now (miss a cable)
+const uint8_t VALVE_MANIFOLD = 30; // valve manifold
 const uint8_t PUMP_PIN = DAC0;
 // const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;
@@ -128,22 +129,18 @@ const uint8_t BUTTON_SPOOL_DOWN = 29;
 const uint8_t BUTTON_LEFT_PIN = 25;
 const uint8_t BUTTON_RIGHT_PIN = 26;
 const uint8_t POTENTIOMETER_PIN = A0;
-// const uint8_t SD_CARD_SS_PIN = 5;
-// const uint8_t ESP8266_COMM_PIN = 12; // communication signal pin with wifi card
-const uint8_t VALVE_STX_IN_PIN[MAX_FILTER_NUMBER] = {36, 38};
-const uint8_t VALVE_STX_OUT_PIN[MAX_FILTER_NUMBER] = {32, 40};
 const uint8_t MOTOR_INA1_PIN = 53;
 const uint8_t MOTOR_INB1_PIN = 51;
 const uint8_t MOTOR_PWM1_PIN = 3;
 const uint8_t MOTOR_EN1DIAG1_PIN = 49;
 const uint8_t MOTOR_CS1_PIN = A11;
-const uint8_t MOTOR_INA2_PIN = 52;
-const uint8_t MOTOR_INB2_PIN = 50;
-const uint8_t MOTOR_PW2_PIN = 48;
+const uint8_t MOTOR_INA2_PIN = 4;
+const uint8_t MOTOR_INB2_PIN = 5;
+const uint8_t MOTOR_PW2_PIN = 6;
 const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
 const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
-const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
+const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO change pin
 const uint8_t ENCODER_MANIFOLD = 45;
 
 #endif

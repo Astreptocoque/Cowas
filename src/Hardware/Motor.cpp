@@ -73,7 +73,20 @@ void Motor::start()
 {
      if (ID=="MANIFOLD")
         {
-            md.setM2Speed(speed * direction == up ? 1 : -1);
+            if (VERBOSE_MOTOR){output.println("Start motor manifold");}
+            // md.setM2Speed(speed * direction == up ? 1 : -1);
+            float a;
+            if (direction==up){
+                md.setM2Speed(speed);
+                if (VERBOSE_MOTOR){output.println("ENTER");}
+                a=speed;
+            }
+            else{
+                md.setM2Speed(-speed);
+                if (VERBOSE_MOTOR){output.println("ENTER");}
+                a=-speed;
+            }
+            if (VERBOSE_MOTOR){output.println("Speed : "+String(speed)+ " , direction : "+ String(direction)+ " , Resultat : "+String(a));}
         }
     else{
         // Do not start if already at the very top or very down and order to go further

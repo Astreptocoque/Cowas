@@ -7,7 +7,7 @@ extern C_output output;
 extern Motor manifold_motor;
 
 //----- MOTOR -----//
-const uint16_t speed = 160; // Refers to power, min 70 to move
+const uint16_t speed = 40; // Refers to power, min 70 to move
 
 
 motor_direction direction = down; // 1 or -1
@@ -78,7 +78,6 @@ void Manifold::begin()
             sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
         }
     }
-
     if (VERBOSE_INIT){output.println("Manifold initiated");}
 }
 
@@ -97,8 +96,21 @@ slot_state Manifold::get_state(int i)
     return slots[i].get_state();
 }
 
+
+void Manifold::reload()
+{
+    for(int i=0; i < NB_SLOT; i++){
+          slots[i].change_state(available);
+      }   
+}
+
 void rotateMotor(int index)
 {
+  // if the manifold is not connected to the system, exit function
+  if(MANIFOLD_USE == false){
+    return;
+  }
+
   // SETUP//
   bool end_rotation = false;
   nb_turns = 0; //counts number of turns in case the position is <0deg or >360deg.
