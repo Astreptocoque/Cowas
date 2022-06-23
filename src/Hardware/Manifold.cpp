@@ -96,7 +96,6 @@ slot_state Manifold::get_state(int i)
     return slots[i].get_state();
 }
 
-
 void Manifold::reload()
 {
     for(int i=0; i < NB_SLOT; i++){
@@ -211,7 +210,7 @@ void readEncoder(bool init_setup)
   if (encoderPosition == 0xFFFF) //position is bad, let the user know how many times we tried
   {
     if(VERBOSE_MANIFOLD){output.print("Encoder 0 error. Attempts: ");
-    output.print(attempts);
+    output.println(attempts);
     output.println(DEC);} //print out the number in decimal format. attempts - 1 is used since we post incremented the loop
   }
   else //position was good, print to serial stream

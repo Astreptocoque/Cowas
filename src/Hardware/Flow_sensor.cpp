@@ -1,6 +1,6 @@
 /**
  * @file Flow_sensor.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Not implemented
  * @version 0.1
  * @date 2022-01-29

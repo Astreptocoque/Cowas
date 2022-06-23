@@ -1,6 +1,6 @@
 /**
  * @file C_output.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Custom output class to print in Terminal and other places seamlessly
  * @version 0.1
  * @date 2022-01-29

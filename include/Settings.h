@@ -20,9 +20,9 @@ const uint16_t TUBE_LENGTH = 4900;              // cm. length of tube (not sure 
 // water pump variables
 const uint8_t POWER_PUMP = 90;                              // over 100. Power when pumping from water. Experimentaly tested to not go over 500mA
 const uint8_t POWER_FLUSH = 80;                            // over 100. Power when pumping from container
-const uint8_t POWER_STX = 40;                               // over 100. Experimental. Start power for sterivex but code adapts it.
+const uint8_t POWER_STX = 60;                               // over 100. Experimental. Start power for sterivex but code adapts it.
 const uint32_t EMPTY_CONTAINER_TIME_PURGE = 60*1000*8;      // ms. Experimental. Time after which container should be empty
-const uint32_t EMPTY_TUBE_TIME = 60*1000*1;                 // ms. Experimental. Time after which Tubes should be empty
+const uint32_t EMPTY_TUBE_TIME = 60*1000*2.3;                 // ms. Experimental. Time after which Tubes should be empty
 const uint32_t EMPTY_CONTAINER_TIME_FILTER = 60*1000*18;    // ms. Experimental.
 const uint32_t FILL_TUBES_WITH_WATER_TIME = 5*1000;         // ms. Experimental. Time to fill tubes for purge and sampling before sensor take over
 const uint32_t FILL_CONTAINER_TIME = 60*1000*11;            // ms. Experimental.
@@ -37,14 +37,14 @@ const uint32_t DRYING_TIME = 2*60*1000-10*1000;     // ms. Time for pumping hyst
 // manifold variables
 const int NB_SLOT = 14;             // number of available slot in the manifold
 const int PURGE_SLOT = 0;           // purge slot in the manifold
-const bool MANIFOLD_USE = false;    // use the manifold in the system
+const bool MANIFOLD_USE = true;    // use the manifold in the system
 
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
 const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.06f;//0.08f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
-const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 1.5f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
+const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 0.8f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
-const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 10*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
+const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 60*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
 const uint8_t PURGE_NUMBER = 1;                                 // number of water container purge before sampling
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
@@ -139,7 +139,7 @@ const uint8_t MOTOR_INB2_PIN = 5;
 const uint8_t MOTOR_PW2_PIN = 6;
 const uint8_t MOTOR_EN2DIAG2_PIN = 47;
 const uint8_t MOTOR_CS2_PIN = A10;
-const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; //{30, 42};
+// const uint8_t HEATER_PIN[MAX_FILTER_NUMBER] = {30}; // TODO add heater for conservation
 const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO change pin
 const uint8_t ENCODER_MANIFOLD = 45;
 

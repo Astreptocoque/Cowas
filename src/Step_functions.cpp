@@ -1,6 +1,6 @@
 /**
  * @file Step_functions.cpp
- * @author Timothée Hirt & Christophe Deloose
+ * @author Timothée Hirt & Christophe Deloose & Paco Mermoud
  * @brief All detailed steps of a sampling process. Each function shall be independant
  *        from the other and make sure the valves are correctely set
  *        See fluidic diagram for all details and understand the steps
@@ -274,7 +274,7 @@ void step_sampling(int slot_manifold)
         else
             validation_tick = 0;
 
-        if (validation_tick >= 500)
+        if (validation_tick >= 2000)
         {
             run = false;
             if(VERBOSE_SAMPLE){output.println("Sampling stopped by low pressure");}

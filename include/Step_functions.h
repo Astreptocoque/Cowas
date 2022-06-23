@@ -6,7 +6,7 @@
 void step_dive(int _depth);
 void step_purge();
 void step_fill_container();
-void step_sampling(uint8_t num_sterivex);
+void step_sampling(int slot_manifold);
 void step_rewind();
 void step_dry(uint8_t num_sterivex);
 void sample_process(int depth);

@@ -1,6 +1,6 @@
 /**
  * @file Critical_error.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief NOT IMPLEMENTED YET. Functions to handle critical errors along the program
  * @version 0.1
  * @date 2022-01-29

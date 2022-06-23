@@ -1,6 +1,6 @@
 /**
  * @file Trustability_ABP_Gage.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Class for a Trustability ABP gage pressure sensor
  * @version 0.1
  * @date 2022-01-29

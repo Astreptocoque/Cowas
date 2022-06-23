@@ -1,6 +1,6 @@
 /**
  * @file Encoder_atmel.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Use of hardware encoder of cortex M3. Not implemented.
  * @version 0.1
  * @date 2022-01-29

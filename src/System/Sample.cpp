@@ -1,6 +1,6 @@
 /**
  * @file Sample.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Handle samples. There is a class "sample" to handle the samples as objects.
  *        Then there is global function to handle the sample array, containing all sample objects.
  * @version 0.1

@@ -1,6 +1,6 @@
 /**
  * @file Timer.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief See Cortex M3 datasheet.
  * @version 0.1
  * @date 2022-01-29

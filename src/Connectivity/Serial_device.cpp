@@ -1,6 +1,6 @@
 /**
  * @file Serial_device.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Class to intiatlize communication with another device on Serial lines.
  *        Here for Wi-Fi card
  * @version 0.1

@@ -1,6 +1,6 @@
 /**
  * @file Valve_3_2.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Class for valve 3/2 from SMC
  * @version 0.1
  * @date 2022-01-29

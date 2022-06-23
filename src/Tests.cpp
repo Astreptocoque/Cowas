@@ -1,6 +1,6 @@
 /**
  * @file Tests.cpp
- * @author Timothée Hirt
+ * @author Timothée Hirt & Paco Mermoud
  * @brief Try things, be free. No guarantie that those functions work.
  * @version 0.1
  * @date 2022-01-29
