@@ -142,23 +142,7 @@ void setup()
 void loop()
 {
 
-    // main_program();
-
-    // step_sampling(1);
-    for(int i=0; i < NB_SLOT; i++){
-        manifold.change_state(i, unaivailable);
-    }
-
-    manifold.change_state(3, available);
-    manifold.change_state(6, available);
-
-    sample_process(20);
-    sample_process(20);
-
-    delay(6000000);
-    // rotateMotor(PURGE_SLOT);
-    // test_pressure_sensor();
-
+    main_program();
 
     // TESTS 1
     // test_1_depth_20m();
