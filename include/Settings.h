@@ -104,7 +104,7 @@ const bool VERBOSE_PUMP = false;
 const bool VERBOSE_REWIND = false;
 const bool VERBOSE_FILL_CONTAINER = false;
 const bool VERBOSE_DIVE = false;
-const bool TIMER = true;
+const bool TIMER = false;
 const bool PRESSURE_SENSOR_ERROR = false;
 const bool VERBOSE_MANIFOLD = false;
 

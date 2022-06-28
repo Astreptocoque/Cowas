@@ -444,8 +444,8 @@ void sample_process(int depth){
 
     step_rewind();
     set_system_state(state_sampling);
-    output.println("It's sampling time !");
-    output.println("Sample started at depth " + String(depth) + "cm in filter ");
+    if(VERBOSE_SAMPLE){output.println("It's sampling time !");}
+    if(VERBOSE_SAMPLE){output.println("Sample started at depth " + String(depth) + "cm in filter ");}
     // Sampling steps
     step_dive(depth);
     for(uint8_t i = 0; i < PURGE_NUMBER; i++){
@@ -457,6 +457,6 @@ void sample_process(int depth){
     step_sampling(manifold_slot); // sample place is a human number, start at 1
     // step_dry(get_next_sample_place());   // not completely done yet
 
-    output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");
+    if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
 }
