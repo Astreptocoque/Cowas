@@ -68,7 +68,7 @@ Button button_spool_down;                   // Control button. Normally closed
 Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 Manifold manifold;                          // Manifold
-
+int manifold_slot; // Armand presentation
 
 void setup()
 {
@@ -136,12 +136,16 @@ void setup()
 
     // Communication with rapsberry
     Serial.begin(9600);
+
+    // For Armand Presentation
+    manifold_slot=0;
 }
 
 
 void loop()
 {
 
+    add_button_manifold_demo();
     main_program();
 
     // TESTS 1

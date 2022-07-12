@@ -26,6 +26,7 @@
 #include "Step_functions.h"
 #include "Manifold.h"
 
+extern int manifold_slot;
 extern C_output output;
 extern Serial_device serial;
 extern Led status_led;
@@ -461,4 +462,19 @@ void test_manifold(){
         // delay(5000);
         // step_purge();
         delay(600000);
+}
+
+void add_button_manifold_demo(){
+    if (button_start.isPressed())
+    {
+        rotateMotor(manifold_slot);
+        valve_manifold.set_open_way();
+        valve_23.set_L_way();
+        delay(100);
+        pump.set_power(POWER_FLUSH);
+        pump.start(30000);
+        delay(100);
+        valve_manifold.set_close_way();
+        manifold_slot++;
+    }
 }

@@ -21,5 +21,7 @@ void test_pressure_sensor();
 
 void test_manifold();
 
+void add_button_manifold_demo();
+
 
 #endif
