@@ -71,6 +71,56 @@ void test_serial_device()
     }
 }
 
+void test_all_components(){
+    // call all sub-functions
+    String test_command;
+    while (42){
+        if (Serial1.available()){
+            test_command = Serial1.readString();
+
+        // all valves, both motors, pump, pressure sensors, push buttons(spool), 
+        // leds, control buttons + potentiometer, container
+            if (test_command == "valves"){
+                // 1, 2, 3, 4 with a second delay each
+                test_valves();
+            }
+            if (test_command == "motor_spool"){
+                test_motor_spool();
+            }
+            if (test_command == "motor_manifold"){
+                // test straight if manifold is working? or motor and encoder seperate and then together
+
+            }
+            if (test_command == "encoder_manifold"){
+                
+            }
+            if (test_command == "manifold"){
+                test_manifold();    // all manifold, test first motor and encoder
+            }
+            if (test_command == "pressure_sensors"){
+                
+            }
+            if (test_command == "pump"){
+                test_pump();
+            }
+            if (test_command == "micro_switch"){
+                
+            }
+            if (test_command == "buttons_command"){
+                
+            }
+            if (test_command == "container"){
+                
+            }
+
+
+            if (test_command == "stop"){
+                break;
+            }
+        }
+    }
+}
+
 void test_pressure()
 {
 
@@ -476,5 +526,34 @@ void add_button_manifold_demo(){
         delay(100);
         valve_manifold.set_close_way();
         manifold_slot++;
+    }
+}
+
+void test_pump(){
+    pump.set_power(20);
+    pump.start(1000);       // running for 1s
+}
+
+void test_motor_spool(){
+    spool.set_speed(20, down);
+    spool.start();
+    delay(1000);
+    spool.stop()
+    delay(500);
+    spool.set_speed(20, up);
+    spool.start();
+    delay(1000);
+    spool.stop();
+}
+
+void test_valves(){
+    // extern valve_1;valve_23; valve_manifold;
+    for (uint8_t i = 0; i < 2; i++){
+        valve_1.switch_way();
+        delay(500);
+        valve_23.switch_way();
+        delay(500);
+        valve_manifold.switch_way();
+        delay(500);
     }
 }
