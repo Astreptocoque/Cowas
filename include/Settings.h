@@ -94,13 +94,13 @@ const bool DEBUG_MODE_PRINT = true;
 
 const bool ENABLE_TIME_LOG = false;                              // If true, print the time before each printed output
 const bool VERBOSE_INIT = false;
-const bool VERBOSE_VALVES = false;
+const bool VERBOSE_VALVES = true;   // !
 const bool VERBOSE_MOTOR = false;
 const bool VERBOSE_PURGE = false;
 const bool VERBOSE_PURGE_PRESSURE = false;
 const bool VERBOSE_SAMPLE = false;
 const bool VERBOSE_SAMPLE_PRESSURE = false;
-const bool VERBOSE_PUMP = false;
+const bool VERBOSE_PUMP = true;         // !
 const bool VERBOSE_REWIND = false;
 const bool VERBOSE_FILL_CONTAINER = false;
 const bool VERBOSE_DIVE = false;
