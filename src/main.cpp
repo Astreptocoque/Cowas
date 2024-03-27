@@ -139,6 +139,9 @@ void setup()
 
     // For Armand Presentation
     manifold_slot=0;
+
+    // ! calling testing function
+    // test_all_components();
 }
 
 
