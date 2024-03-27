@@ -141,7 +141,7 @@ void setup()
     manifold_slot=0;
 
     // ! calling testing function
-    test_all_components();
+    // test_all_components();
 }
 
 
