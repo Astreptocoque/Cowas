@@ -93,7 +93,7 @@ void test_all_components(){
                 Serial.println("testing valves");
                 test_valves();
             }
-            if (test_command == "spool"){
+            if (test_command == "motor_spool"){
                 Serial.println("testing motor");
                 test_motor_spool();
             }
@@ -560,6 +560,8 @@ void add_button_manifold_demo(){
 void test_pump(){
     pump.set_power(100);
     pump.start(2000);       // running for 1s
+    pump.set_power(50);
+    pump.start(2000); 
 }
 
 void test_motor_spool(){
