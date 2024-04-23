@@ -46,6 +46,7 @@ const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 0.8f;  //1.7f;          // bar 
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 60*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
+// ! we need at least 3
 const uint8_t PURGE_NUMBER = 1;                                 // number of water container purge before sampling
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
 const uint8_t MAX_FILTER_NUMBER = 14;                            // max filters possible in the system
@@ -118,6 +119,9 @@ const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 46;
 const uint8_t VALVE_MANIFOLD = 36; // valve manifold
 const uint8_t PUMP_PIN = DAC1;      // !changed
+// Output controlled by transistor, digital pin is toggeling voltage on and off
+const uint8_t ON_OFF_5V = 13;
+const uint8_t ON_OFF_33V = 47;
 // const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;
 const uint8_t ENCODER_B_PIN = 33;

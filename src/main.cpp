@@ -16,6 +16,7 @@
 #include "Valve_3_2.h"
 #include "Valve_2_2.h"
 #include "Pump.h"
+#include "Micro_pump.h"
 #include "Motor.h"
 #include "Encoder.h"
 #include "Potentiometer.h"
@@ -56,6 +57,8 @@ Valve_3_2 valve_23;                         // see schematics
 Valve_2_2 valve_manifold;                   // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
+Micro_Pump micro_pump;                      // For DNA shield
+Micro_Pump test_33V_micro_pump;
 Motor spool;                                // see schematics
 Motor manifold_motor;                       // see schematics
 Encoder encoder;                            // see schematics
@@ -86,6 +89,8 @@ void setup()
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_manifold.begin(VALVE_MANIFOLD, "V_manifold");
     pump.begin(PUMP_PIN, true, "P1");
+    micro_pump.begin(ON_OFF_5V, "DNA Shield pump");
+    test_33V_micro_pump.begin(ON_OFF_33V, "Test ON/OFF 3.3V pump");
     spool.begin();
     manifold_motor.begin("MANIFOLD");
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);

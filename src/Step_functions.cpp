@@ -457,6 +457,8 @@ void sample_process(int depth){
     step_sampling(manifold_slot); // sample place is a human number, start at 1
     // step_dry(get_next_sample_place());   // not completely done yet
 
+    // ! TODO: add DNA shield here
+
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
 }
