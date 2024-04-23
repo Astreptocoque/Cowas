@@ -14,6 +14,7 @@
 #include "Valve_3_2.h"
 #include "Valve_2_2.h"
 #include "Pump.h"
+#include "Micro_pump.h"
 #include "Motor.h"
 #include "Encoder.h"
 #include "Potentiometer.h"
@@ -37,6 +38,10 @@ extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_manifold;
 extern Pump pump;
+
+extern Micro_Pump micro_pump;
+extern Micro_Pump test_33V_micro_pump;
+
 extern Motor spool;
 // extern Motor manifold_motor;
 extern Encoder encoder;
@@ -74,6 +79,20 @@ void test_serial_device()
 
 void test_all_components(){
     // call all sub-functions
+
+    // testing ON/OFF connectors
+    while (42)
+    {
+        micro_pump.start();
+        test_33V_micro_pump.start();
+        delay(5000);
+        micro_pump.stop();
+        test_33V_micro_pump.stop();
+        delay(4000);
+    }
+    
+
+
     String test_command;
     while (42){
         if (Serial.available()){

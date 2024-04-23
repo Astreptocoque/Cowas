@@ -11,12 +11,12 @@ extern Micro_Pump micro_pump;
  * @param _control_pin Output connection on the board
  *
  */
-void Pump::begin(byte _control_pin)
+void Micro_Pump::begin(byte _control_pin)
 {
     control_pin = _control_pin;
     pinMode(control_pin, OUTPUT);
     stop();
-    output.println("Pump " + ID + " initiated");
+    output.println("Micro Pump " + ID + " initiated");
 }
 
 /**
@@ -25,7 +25,7 @@ void Pump::begin(byte _control_pin)
  * @param _ID Name of hardware component used for outputs
  *
  */
-void Pump::begin(byte _control_pin, String _ID)
+void Micro_Pump::begin(byte _control_pin, String _ID)
 {
     ID = _ID;
     begin(_control_pin);
@@ -35,14 +35,14 @@ void Pump::begin(byte _control_pin, String _ID)
  * @brief Start the pump with current power setting until stop command.
  *
  */
-void Pump::start()
+void Micro_Pump::start()
 {
     digitalWrite(control_pin, HIGH);
 
     // display starting info only if previous state was OFF
     if (!running)
     {
-        if(VERBOSE_PUMP){output.println("Pump " + ID + " started with power " + power_percent);}
+        if(VERBOSE_PUMP){output.println("Micro Pump " + ID + " started ");}
         running = true;
     }
 }
@@ -52,7 +52,7 @@ void Pump::start()
  *
  * @param time_ms The time is millisecond to run the pump.
  */
-void Pump::start(uint32_t _time_ms)
+void Micro_Pump::start(uint32_t _time_ms)
 {
     start();
     uint32_t current_time = millis();
@@ -67,11 +67,11 @@ void Pump::start(uint32_t _time_ms)
  * @brief Stop the pump.
  *
  */
-void Pump::stop()
+void Micro_Pump::stop()
 {
     digitalWrite(control_pin, 0);
     running = false;
-    if(VERBOSE_PUMP){output.println("Pump " + ID + " stopped");}
+    if(VERBOSE_PUMP){output.println("Micro Pump " + ID + " stopped");}
 }
 
 
