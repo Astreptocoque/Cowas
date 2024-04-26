@@ -66,5 +66,7 @@ uint8_t spiWriteRead(uint8_t sendByte, uint8_t encoder, uint8_t releaseLine);
 uint16_t getPositionSPI(uint8_t encoder, uint8_t resolution);
 void setCSLine (uint8_t encoder, uint8_t csLine);
 
+void calibrateEncoder(uint16_t speed = 40);
+
 
 #endif

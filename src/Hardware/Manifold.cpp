@@ -1,11 +1,12 @@
 #include <Arduino.h>
 #include "Manifold.h"
+#include "Button.h"
 #include "C_output.h"
 #include <SPI.h>
 
 extern C_output output;
 extern Motor manifold_motor;
-
+extern Button button_start;
 //----- MOTOR -----//
 const uint16_t speed = 40; // Refers to power, min 70 to move
 
@@ -316,4 +317,25 @@ uint8_t spiWriteRead(uint8_t sendByte, uint8_t encoder, uint8_t releaseLine)
   setCSLine(encoder, releaseLine); //if releaseLine is high set it high else it stays low
 
   return data;
+}
+
+void calibrateEncoder(uint16_t speed){
+    output.println("Calibrating encoder of the manifold");
+    output.println("Be ready to press button when motor is aligned with slot 0");
+    output.println("Press button or type text to start motor");
+
+    manifold_motor.start(speed, down);
+    
+    while (!Serial.available() || button_start.isPressed()){
+        delay(1);
+    }
+
+    manifold_motor.stop();
+
+    uint16_t pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
+    Serial.print("Manifold encoder value : ");
+    Serial.println(pos);
+    
+    output.println("Please replace the purge angle of manifold by : ");
+    output.println(pos);
 }
