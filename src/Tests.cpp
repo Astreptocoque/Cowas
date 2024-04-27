@@ -81,15 +81,15 @@ void test_all_components(){
     // call all sub-functions
 
     // testing ON/OFF connectors
-    while (42)
-    {
-        micro_pump.start();
-        test_33V_micro_pump.start();
-        delay(5000);
-        micro_pump.stop();
-        test_33V_micro_pump.stop();
-        delay(4000);
-    }
+    // while (42)
+    // {
+    //     micro_pump.start();
+    //     test_33V_micro_pump.start();
+    //     delay(5000);
+    //     micro_pump.stop();
+    //     test_33V_micro_pump.stop();
+    //     delay(4000);
+    // }
     
 
 
@@ -161,6 +161,11 @@ void test_all_components(){
             if (test_command == "stop"){
                 Serial.println("stop testing mode");
                 break;
+            }
+
+            if (test_command == "cal"){
+                Serial.println("Calibrating encoder Manifold");
+                calibrateEncoder(20);       // ! maybe need change
             }
         }
     }
@@ -522,7 +527,7 @@ void test_pressure_sensor(){
     int compteur=0;
     do
     {
-        delay(10); // don't read pressure to fast
+        delay(100); // don't read pressure to fast
         pressure = pressure1.getPressure();
         
         if (compteur>=10)
