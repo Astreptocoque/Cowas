@@ -324,15 +324,30 @@ void calibrateEncoder(uint16_t speed){
     output.println("Be ready to press button when motor is aligned with slot 0");
     output.println("Press button or type text to start motor");
 
+    while (!Serial.available())
+    {
+      delay(10);
+    }
+
+    output.println("Starting to rotate");
+    Serial.flush();
+    delay(3000);
+
     manifold_motor.start(speed, down);
     
-    while (!Serial.available() || button_start.isPressed()){
+    while (Serial.available())
+    {
+      Serial.read();
+    }
+    
+    while (!Serial.available()){
         delay(1);
     }
 
     manifold_motor.stop();
 
-    uint16_t pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
+    // read encoder value and convert to degrees
+    uint16_t pos = getPositionSPI(ENCODER_MANIFOLD, RES12) * encoder_to_deg;
     Serial.print("Manifold encoder value : ");
     Serial.println(pos);
     
