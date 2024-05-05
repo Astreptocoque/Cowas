@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 
+// looking from motor to manifold:
+// down : Clockwise
+// up : Counterclockwise
 enum motor_direction{down, up};
 
 class Motor
