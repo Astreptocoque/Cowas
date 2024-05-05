@@ -68,13 +68,15 @@ void Manifold::begin()
     {
         if (i < omitted_angle_nb)
         {
-        sterivex_angle[i] = purge_angle + i * 22.5;
+        // sterivex_angle[i] = purge_angle + i * 22.5;
+        sterivex_angle[i] = 360.0 + purge_angle - i * 22.5;
         if (sterivex_angle[i] > 360)
             sterivex_angle[i] = sterivex_angle[i] - 360;
         }
         else if (i > omitted_angle_nb)
         {
-        sterivex_angle[i - 1] = purge_angle + i * 22.5;
+        // sterivex_angle[i - 1] = purge_angle + i * 22.5;
+        sterivex_angle[i - 1] = 360.0 + purge_angle - i * 22.5;
         if (sterivex_angle[i - 1] > 360)
             sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
         }
@@ -192,7 +194,7 @@ void readEncoder(bool init_setup)
   deg_previousEncoderPosition = deg_encoderPosition;
 
   //if you want to set the zero position before beggining uncomment the following function call
-  //setZeroSPI(ENCODER_MANIFOLD);
+  // setZeroSPI(ENCODER_MANIFOLD);
 
   //set attemps counter at 0 so we can try again if we get bad position
   attempts = 0;
@@ -331,9 +333,9 @@ void calibrateEncoder(uint16_t speed){
 
     output.println("Starting to rotate");
     Serial.flush();
-    delay(3000);
+    delay(1000);
 
-    manifold_motor.start(speed, down);
+    manifold_motor.start(speed, up);
     
     while (Serial.available())
     {
@@ -347,10 +349,23 @@ void calibrateEncoder(uint16_t speed){
     manifold_motor.stop();
 
     // read encoder value and convert to degrees
-    uint16_t pos = getPositionSPI(ENCODER_MANIFOLD, RES12) * encoder_to_deg;
+    float pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
     Serial.print("Manifold encoder value : ");
     Serial.println(pos);
     
     output.println("Please replace the purge angle of manifold by : ");
-    output.println(pos);
+    output.println(pos * encoder_to_deg);
+}
+
+void setZeroSPI(uint8_t encoder)
+{
+  spiWriteRead(AMT22_NOP, encoder, false);
+
+  //this is the time required between bytes as specified in the datasheet.
+  //We will implement that time delay here, however the arduino is not the fastest device so the delay
+  //is likely inherantly there already
+  delayMicroseconds(3); 
+  
+  spiWriteRead(AMT22_ZERO, encoder, true);
+  delay(250); //250 second delay to allow the encoder to reset
 }
