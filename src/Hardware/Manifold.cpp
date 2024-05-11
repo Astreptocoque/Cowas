@@ -369,3 +369,30 @@ void setZeroSPI(uint8_t encoder)
   spiWriteRead(AMT22_ZERO, encoder, true);
   delay(250); //250 second delay to allow the encoder to reset
 }
+
+uint16_t getRotationSPI(uint8_t encoder){
+    //read the two bytes for position from the encoder, starting with the high byte
+    uint16_t encoderPosition = spiWriteRead(AMT22_NOP, encoder, false) << 8; //shift up 8 bits because this is the high byte
+    delayMicroseconds(3);
+    encoderPosition |= spiWriteRead(AMT22_TURNS, encoder, false); //we send the turns command (0xA0) here, to tell the encoder to send us the turns count after the position
+
+    //wait 40us before reading the turns counter
+    delayMicroseconds(40);
+
+    //read the two bytes for turns from the encoder, starting with the high byte
+    uint16_t encoderTurns = spiWriteRead(AMT22_NOP, encoder, false) << 8; //shift up 8 bits because this is the high byte
+    delayMicroseconds(3);
+
+    // releasing the line
+    encoderTurns |= spiWriteRead(AMT22_NOP, encoder, true);
+    delayMicroseconds(3);
+
+    encoderPosition &= 0x3FFF;
+    encoderTurns &= 0x3FFF;
+
+    Serial.print("Manifold encoder turns : ");
+    Serial.println(encoderTurns);
+    Serial.print("With angle value : ");
+    Serial.println(encoderPosition * encoder_to_deg);
+    return encoderTurns;
+}

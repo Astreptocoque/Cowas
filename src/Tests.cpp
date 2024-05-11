@@ -126,6 +126,10 @@ void test_all_components(){
                 Serial.println("testing encoder Manifold");
                 test_encoder();
             }
+            if (test_command == "enc_rot"){
+                // Serial.println("");
+                getRotationSPI(ENCODER_MANIFOLD);
+            }
             if (test_command == "encoder_spool"){
                 Serial.println("testing encoder SPOOL");
                 test_encoder_spool();
@@ -534,23 +538,37 @@ void test_3_sterivex_2(){
 //! tested??
 void test_pressure_sensor(){
     float pressure;
-    uint16_t nb_prints = 10*5;
-    int compteur=0;
-    do
-    {
-        delay(100); // don't read pressure to fast
-        pressure = pressure1.getPressure();
-        
-        if (compteur>=10)
-        {
-            output.println("Pressure = " + String(pressure));
-            Serial1.println("Pressure = " + String(pressure));
-            compteur=0;
-        }
+    // uint16_t nb_prints = 10*5;
+    // int compteur=0;
 
-        compteur++;
-        nb_prints--;
-    } while (nb_prints); // conditions outside while loop to allow printing which condition is responsible for stop
+    while (!Serial.available()){
+        delay(500); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+
+
+        Serial.print("Pressure encoder value : ");
+        Serial.println(pressure);
+        // Serial.print(",    Angle in degrees : ");
+        // Serial.println(angle_deg);
+        delay(500);
+    }
+
+
+    // do
+    // {
+    //     delay(100); // don't read pressure to fast
+    //     pressure = pressure1.getPressure();
+        
+    //     if (compteur>=10)
+    //     {
+    //         output.println("Pressure = " + String(pressure));
+    //         Serial1.println("Pressure = " + String(pressure));
+    //         compteur=0;
+    //     }
+
+    //     compteur++;
+    //     nb_prints--;
+    // } while (nb_prints); // conditions outside while loop to allow printing which condition is responsible for stop
 
 }
 
@@ -726,7 +744,7 @@ void test_encoder(){
     uint16_t pos;
     float angle_deg;
 
-    manifold_motor.start(30, up);
+    manifold_motor.start(30, down);
 
     while (!Serial.available()){
         pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
