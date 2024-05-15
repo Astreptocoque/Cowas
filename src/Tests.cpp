@@ -40,7 +40,7 @@ extern Valve_2_2 valve_manifold;
 extern Pump pump;
 
 extern Micro_Pump micro_pump;
-extern Micro_Pump test_33V_micro_pump;
+extern Micro_Pump test_5V_micro_pump;
 
 extern Motor spool;
 extern Motor manifold_motor;
@@ -84,14 +84,14 @@ void test_all_components(){
     // while (42)
     // {
     //     micro_pump.start();
-    //     test_33V_micro_pump.start();
+    //     test_5V_micro_pump.start();
     //     delay(5000);
     //     micro_pump.stop();
-    //     test_33V_micro_pump.stop();
+    //     test_5V_micro_pump.stop();
     //     delay(4000);
     // }
     
-    go_to_zero();
+    // go_to_zero();
 
 
     String test_command;
@@ -102,8 +102,9 @@ void test_all_components(){
             //test_command = Serial.readStringUntil('b');
             Serial.println(test_command);
 
-            if (test_command == "a"){
-                Serial.println("test ok");
+            if (test_command == "sample1m"){
+                Serial.println("test Sampling at 1 meter");
+                sample_process(1*100);
             }
 
         // all valves, both motors, pump, pressure sensors, push buttons(spool), 
@@ -181,6 +182,15 @@ void test_all_components(){
             if (test_command == "zero"){
                 // Serial.println("Calibrating encoder Manifold");
                 go_to_zero();       // ! maybe need change
+            }
+
+            if (test_command == "micro_pump"){
+                Serial.println("Testing micro pumps");
+                micro_pump.start();
+                // test_5V_micro_pump.start();
+                delay(10000);
+                micro_pump.stop();
+                // test_5V_micro_pump.stop();
             }
 
         }
