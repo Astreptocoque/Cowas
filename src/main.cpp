@@ -38,13 +38,19 @@
 void system_checkup();
 void before_start_program();
 void main_program();
+void button_control();
 
 // ============ EXECUTION MODE ===================
 // comment this line if no system check at startup
 #define  SYSTEM_CHECKUP
-#define  SYSTEM_CHECKUP
 // ============ PIN DEFINITIONS ==================
 // See in Settings.h
+
+// states to manually control CoWaS with buttons
+bool ctrl_button;       // if possible to control CoWaS with buttons
+enum ctrl_state {ctrl_pump, ctrl_motor_spool, ctrl_v23, ctrl_v1, ctrl_vman, ctrl_man_slot};
+uint8_t ctrl_state_len = 6; // to update when modifying lenght of control states
+ctrl_state control_state;
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
@@ -58,7 +64,7 @@ Valve_2_2 valve_manifold;                   // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
 Micro_Pump micro_pump;                      // For DNA shield
-Micro_Pump test_33V_micro_pump;
+Micro_Pump test_5V_micro_pump;
 Motor spool;                                // see schematics
 Motor manifold_motor;                       // see schematics
 Encoder encoder;                            // see schematics
@@ -71,7 +77,10 @@ Button button_spool_down;                   // Control button. Normally closed
 Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 Manifold manifold;                          // Manifold
+
+
 int manifold_slot; // Armand presentation
+
 
 void setup()
 {
@@ -89,8 +98,8 @@ void setup()
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_manifold.begin(VALVE_MANIFOLD, "V_manifold");
     pump.begin(PUMP_PIN, true, "P1");
-    micro_pump.begin(ON_OFF_5V, "DNA Shield pump");
-    test_33V_micro_pump.begin(ON_OFF_33V, "Test ON/OFF 3.3V pump");
+    micro_pump.begin(ON_OFF_33V, "DNA Shield pump");
+    test_5V_micro_pump.begin(ON_OFF_5V, "Test ON/OFF 5V pump");
     spool.begin();
     manifold_motor.begin("MANIFOLD");
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);
@@ -145,6 +154,8 @@ void setup()
     // For Armand Presentation
     manifold_slot=0;
 
+    ctrl_button = true;
+
     // ! calling testing function
     test_all_components();
 }
@@ -153,7 +164,9 @@ void setup()
 void loop()
 {
 
-    add_button_manifold_demo();
+    // add_button_manifold_demo();
+    
+    button_control();
     main_program();
 
     // TESTS 1
@@ -176,7 +189,6 @@ void loop()
 
 void main_program()
 {
-
     if (Serial.available() > 0) {
         String data = Serial.readStringUntil('\n');
         int depth=0;
@@ -327,4 +339,109 @@ void system_checkup()
             delay(500);
     }
 }
+
+
+/*
+    For valves: left close, right open
+    Valves 23: left I way, right L way
+    Motor spool: left up, right down, push and hold
+    manifold: left, decrement slot and right increment
+    Pump: right start, left stop
+*/
+void button_control(){
+    static uint8_t current_slot = 0;
+    if (!ctrl_button){
+        return;
+    }
+
+    switch (control_state){
+        case ctrl_pump:{
+            if (button_right.isPressed()) {
+                pump.set_power(80);
+                pump.start();
+                button_right.waitPressedAndReleased();
+            }
+            if (button_left.isPressed()){
+                pump.stop();
+                button_left.waitPressedAndReleased();
+            } 
+            break;
+        }  
+        case ctrl_v23:{
+            if (button_left.isPressed()){
+                valve_23.set_L_way();
+                button_left.waitPressedAndReleased();
+            }
+            if (button_right.isPressed()){
+                valve_23.set_I_way();
+                button_right.waitPressedAndReleased();
+            }
+            break;
+        }
+        case ctrl_v1: {
+            if (button_left.isPressed()){
+                valve_1.set_close_way();
+                button_left.waitPressedAndReleased();
+            }
+            if (button_right.isPressed()){
+                valve_1.set_open_way();
+                button_right.waitPressedAndReleased();
+            }
+            break;
+        }
+        case ctrl_vman: {
+            if (button_left.isPressed()){
+                valve_manifold.set_close_way();
+                button_left.waitPressedAndReleased();
+            }
+            if (button_right.isPressed()){
+                valve_manifold.set_open_way();
+                button_right.waitPressedAndReleased();
+            }
+            break;
+        }
+        case ctrl_man_slot: {
+            if (button_right.isPressed()){
+                current_slot++;
+                current_slot = current_slot % 15;
+                Serial.println(current_slot);
+                button_right.waitPressedAndReleased();
+                rotateMotor(current_slot);
+            }
+            if (button_left.isPressed()){
+                current_slot--;
+                if (current_slot > 14) current_slot = 14;
+                Serial.println(current_slot);
+                button_left.waitPressedAndReleased();
+                rotateMotor(current_slot);
+            }
+            current_slot = current_slot % 15;
+            break;
+        }
+        case ctrl_motor_spool: {
+            if (button_right.isPressed()){
+                spool.set_speed(100, down);
+                spool.start();
+                button_right.waitPressedAndReleased();
+                spool.stop();
+            }
+            if (button_left.isPressed()){
+                spool.set_speed(100, up);
+                spool.start();
+                button_left.waitPressedAndReleased();
+                spool.stop();
+            }
+        }
+        default: break;
+    }
+
+    // check if going onto next mode
+    if (button_start.isPressed()){
+        control_state = static_cast<ctrl_state>((static_cast<uint8_t>(control_state) + 1) % ctrl_state_len);
+        button_start.waitPressedAndReleased();
+        Serial.print("New control state : ");
+        Serial.println(control_state);
+    }
+}
+
 #endif
