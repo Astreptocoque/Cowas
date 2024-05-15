@@ -41,7 +41,7 @@ const bool MANIFOLD_USE = true;    // use the manifold in the system
 
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.06f;//0.08f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.05f;//0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
 const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 0.8f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 60*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
@@ -97,16 +97,16 @@ const bool ENABLE_TIME_LOG = false;                              // If true, pri
 const bool VERBOSE_INIT = false;
 const bool VERBOSE_VALVES = true;   // !
 const bool VERBOSE_MOTOR = false;
-const bool VERBOSE_PURGE = false;
-const bool VERBOSE_PURGE_PRESSURE = false;
-const bool VERBOSE_SAMPLE = false;
-const bool VERBOSE_SAMPLE_PRESSURE = false;
+const bool VERBOSE_PURGE = true;
+const bool VERBOSE_PURGE_PRESSURE = true;
+const bool VERBOSE_SAMPLE = true;
+const bool VERBOSE_SAMPLE_PRESSURE = true;
 const bool VERBOSE_PUMP = true;         // !
-const bool VERBOSE_REWIND = false;
-const bool VERBOSE_FILL_CONTAINER = false;
-const bool VERBOSE_DIVE = false;
+const bool VERBOSE_REWIND = true;
+const bool VERBOSE_FILL_CONTAINER = true;
+const bool VERBOSE_DIVE = true;
 const bool TIMER = false;
-const bool PRESSURE_SENSOR_ERROR = false;
+const bool PRESSURE_SENSOR_ERROR = true;
 const bool VERBOSE_MANIFOLD = false;
 
 

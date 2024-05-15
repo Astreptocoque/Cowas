@@ -177,7 +177,7 @@ void Motor::start_origin()
     {
         set_speed(30, up);
 
-        if (VERBOSE_MOTOR){output.println("Motor started to go at origin");}
+        if (VERBOSE_MOTOR || VERBOSE_REWIND){output.println("Motor started to go at origin");}
 
         start();
         while (button_spool_up.getState() == 1)
