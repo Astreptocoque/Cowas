@@ -13,4 +13,6 @@ void sample_process(int depth);
 void purge_sterivex(int valve);
 void purge_Pipes();
 
+void demo_sample_process();
+
 #endif
