@@ -235,7 +235,7 @@ void step_sampling(int slot_manifold)
     int compteur=0;
 
     // P-Controler parameters
-    float POUT_TARGET = 3;
+    float POUT_TARGET = 2;      // ! was 3
     float error = 0;
     float gain = 0;
     float offset = 0;
@@ -425,7 +425,7 @@ void sample_process(int depth){
     // Verify if available filter
     bool filter_available= false;
     int manifold_slot=0;
-    for(int i=1; i < NB_SLOT; i++){
+    for(int i=1; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
         if(manifold.get_state(i) == available){
             manifold.change_state(i, unaivailable);
             filter_available= true;
@@ -454,6 +454,52 @@ void sample_process(int depth){
     }
     step_fill_container();
     step_rewind();
+    step_sampling(manifold_slot); // sample place is a human number, start at 1
+    // step_dry(get_next_sample_place());   // not completely done yet
+
+    // ! TODO: add DNA shield here
+
+    if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
+
+}
+
+void demo_sample_process(){
+    // Verify if available filter
+    bool filter_available= false;
+    int manifold_slot=0;
+    for(int i=1; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
+        if(manifold.get_state(i) == available){
+            manifold.change_state(i, unaivailable);
+            filter_available= true;
+            manifold_slot=i;
+            break;
+        }
+    }
+
+    if(filter_available == false){
+        output.println("No filter available");
+        return;
+    }
+
+
+    uint32_t time_sampling = millis();
+
+    // step_rewind();
+    set_system_state(state_sampling);
+    if(VERBOSE_SAMPLE){output.println("It's sampling time !");}
+    if(VERBOSE_SAMPLE){output.println("Sample started");}
+    // Sampling steps
+    // step_dive(depth);
+    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+        button_start.waitPressedAndReleased();
+        step_fill_container();
+        button_start.waitPressedAndReleased();
+        step_purge();
+    }
+    button_start.waitPressedAndReleased();
+    step_fill_container();
+    button_start.waitPressedAndReleased();
+    // step_rewind();
     step_sampling(manifold_slot); // sample place is a human number, start at 1
     // step_dry(get_next_sample_place());   // not completely done yet
 
