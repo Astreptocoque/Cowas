@@ -41,7 +41,7 @@ const bool MANIFOLD_USE = true;    // use the manifold in the system
 
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.05f;//0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04f;//0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
 const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 0.8f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 60*1000;         // ms. Time to ensure a correct flush of the conainter when filtering

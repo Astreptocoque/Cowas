@@ -107,6 +107,11 @@ void test_all_components(){
                 sample_process(1*100);
             }
 
+            if (test_command == "demo"){
+                Serial.println("Demo sampling");
+                demo_sample_process();
+            }
+
         // all valves, both motors, pump, pressure sensors, push buttons(spool), 
         // leds, control buttons + potentiometer, container
             if (test_command == "valves"){

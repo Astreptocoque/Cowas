@@ -32,6 +32,7 @@
 #include "GPIO.h"
 #include "TimeLib.h"
 #include "Manifold.h"
+#include "maintenance.h"
 
 
 // ============ MAIN FUNCTION DECLARATION =======
@@ -157,6 +158,7 @@ void setup()
     ctrl_button = true;
 
     // ! calling testing function
+    purge_pipes_manifold();
     test_all_components();
 }
 
@@ -167,7 +169,7 @@ void loop()
     // add_button_manifold_demo();
     
     button_control();
-    main_program();
+    // main_program();
 
     // TESTS 1
     // test_1_depth_20m();
@@ -420,7 +422,7 @@ void button_control(){
         }
         case ctrl_motor_spool: {
             if (button_right.isPressed()){
-                spool.set_speed(100, down);
+                spool.set_speed(50, down);
                 spool.start();
                 button_right.waitPressedAndReleased();
                 spool.stop();
