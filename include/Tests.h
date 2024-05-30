@@ -34,7 +34,4 @@ void test_manifold();
 void go_to_zero();
 void reset_encoder();
 
-void add_button_manifold_demo();
-
-
 #endif

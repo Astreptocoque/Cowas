@@ -29,6 +29,7 @@
 #include "Serial_device.h"
 #include "Step_functions.h"
 #include "Manifold.h"
+#include "Micro_pump.h"
 
 // Delay when actuating valves
 #define DELAY_ACTIONS 1000
@@ -55,6 +56,7 @@ extern Button button_right;
 extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern Manifold manifold;
+extern Micro_Pump micro_pump;
 
 /**
  * @brief Unroll the spool at the correct depth
@@ -97,7 +99,8 @@ void step_fill_container()
     uint32_t time1 = millis();
     bool run = true;
 
-    pump.set_power(POWER_PUMP);
+    // pump.set_power(POWER_PUMP);
+    pump.set_power(100);
     pump.start();
 
     // two possibilities to stop filling : switch or time
@@ -132,11 +135,12 @@ void step_fill_container()
  * @brief Empty the container through purge channel. Step_fill_container first.
  * 
  */
-void step_purge()
+void step_purge(bool stop_pressure)
 {
 
     if(VERBOSE_PURGE){output.println("Step purge container started");}
     
+    if(VERBOSE_PURGE && !stop_pressure){output.println("Press right button when container is empty -> will stop purgung");}
 
     // set the valves
     rotateMotor(PURGE_SLOT); // purge slot
@@ -157,6 +161,7 @@ void step_purge()
     float pressure;
 
     bool run = true;
+    int compteur = 0;
 
     // loop stops after 2.5 seconds under threshold pressure or when time max is reach
     do
@@ -164,7 +169,14 @@ void step_purge()
         delay(10); // don't read pressure to fast
 
         pressure = pressure1.getPressure();
-        if(VERBOSE_PURGE_PRESSURE){output.println("Pressure equal : " + String(pressure));}
+        if (compteur > 100){
+            if(VERBOSE_PURGE_PRESSURE){
+                output.println("Pressure equal : " + String(pressure));
+            }
+            compteur = 0;
+        }
+        
+        compteur++;
         
 
         // adapt pump power to pressure to not go over limit of 3 bar
@@ -180,16 +192,22 @@ void step_purge()
         else
             validation_tick = 0;
 
-        if (validation_tick >= 250)
+        // stop purge only if the setting is true
+        if (validation_tick >= 250 && stop_pressure)
         {
             run = false;
-            if(VERBOSE_PURGE){output.println("Purge stopped by low pressure");}
+            if(VERBOSE_PURGE && stop_pressure){output.println("Purge stopped by low pressure");}
         }
         else if (millis() - time1 > EMPTY_CONTAINER_TIME_PURGE)
         {
             run = false;
             if(VERBOSE_PURGE){output.println("Purge stopped by security timer");}
             // TODO : raise a system warning to user
+        }
+        // stop if button pressed
+        else if (button_right.isPressed()){
+            run = false;
+            if(VERBOSE_PURGE){output.println("Purge stopped, button pressed");}
         }
 
     } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
@@ -210,9 +228,11 @@ void step_purge()
  * 
  * @param num_filter The filter in which the sampling is made
  */
-void step_sampling(int slot_manifold)
+void step_sampling(int slot_manifold, bool stop_pressure)
 {
     if(VERBOSE_SAMPLE){output.println("Step sample through filter started");}
+
+    if(VERBOSE_SAMPLE && !stop_pressure){output.println("Press right button when container is empty -> will stop sampling sterivex");}
 
     // set the valves
     rotateMotor(slot_manifold);
@@ -235,7 +255,7 @@ void step_sampling(int slot_manifold)
     int compteur=0;
 
     // P-Controler parameters
-    float POUT_TARGET = 2;      // ! was 3
+    float POUT_TARGET = 2.5;      // ! was 3
     float error = 0;
     float gain = 0;
     float offset = 0;
@@ -247,7 +267,7 @@ void step_sampling(int slot_manifold)
         delay(10); // don't read pressure to fast
         pressure = pressure1.getPressure();
         
-        if (compteur==10 && VERBOSE_SAMPLE_PRESSURE)
+        if (compteur==100 && VERBOSE_SAMPLE_PRESSURE)
         {
             output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
             compteur=0;
@@ -274,7 +294,7 @@ void step_sampling(int slot_manifold)
         else
             validation_tick = 0;
 
-        if (validation_tick >= 2000)
+        if (validation_tick >= 2000 && stop_pressure)
         {
             run = false;
             if(VERBOSE_SAMPLE){output.println("Sampling stopped by low pressure");}
@@ -285,6 +305,13 @@ void step_sampling(int slot_manifold)
             if(VERBOSE_SAMPLE){output.println("Sampling stopped by security timer");}
             // TODO : raise a system warning to user
         }
+
+        // stop if button pressed
+        else if (button_right.isPressed()){
+            run = false;
+            if(VERBOSE_SAMPLE){output.println("Sampling stopped, button pressed");}
+        }
+
         compteur++;
     } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
@@ -395,7 +422,7 @@ void step_dry(uint8_t num_filter)
 
 void purge_Pipes(){
     step_rewind();
-        if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
+    if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
 
     valve_1.set_close_way();
     valve_23.set_I_way();
@@ -421,17 +448,24 @@ void purge_Pipes(){
     valve_23.set_L_way();
 }
 
-void sample_process(int depth){
+void sample_process(int depth, int manifold_slot){
     // Verify if available filter
     bool filter_available= false;
-    int manifold_slot=0;
-    for(int i=1; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
-        if(manifold.get_state(i) == available){
-            manifold.change_state(i, unaivailable);
-            filter_available= true;
-            manifold_slot=i;
-            break;
+    if (manifold_slot == -1){
+        for(int i=1; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
+            if(manifold.get_state(i) == available){
+                manifold.change_state(i, unaivailable);
+                filter_available= true;
+                manifold_slot=i;
+                break;
+            }
         }
+    }
+    else {
+        if(manifold.get_state(manifold_slot) == available){
+                manifold.change_state(manifold_slot, unaivailable);
+                filter_available= true;
+            }
     }
 
     if(filter_available == false){
@@ -458,6 +492,7 @@ void sample_process(int depth){
     // step_dry(get_next_sample_place());   // not completely done yet
 
     // ! TODO: add DNA shield here
+    step_DNA_shield(manifold_slot);
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
@@ -504,7 +539,30 @@ void demo_sample_process(){
     // step_dry(get_next_sample_place());   // not completely done yet
 
     // ! TODO: add DNA shield here
+    step_DNA_shield(manifold_slot);
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
+}
+
+void step_DNA_shield(int slot_manifold){
+    if(VERBOSE_SHIELD){output.println("Step DNA-shield started");}
+
+    // go to right slot
+    rotateMotor(slot_manifold);
+
+    micro_pump.start(FILL_STERIVEX_TIME);
+
+    delay(500);
+
+    pump.set_power(PUMP_SHIELD_POWER);
+    valve_23.set_L_way();
+    valve_manifold.set_open_way();
+    delay(500);
+    pump.start(PUMP_SHIELD_TIME);
+    delay(500);
+
+    valve_manifold.set_close_way();
+
+    if(VERBOSE_SHIELD){output.println("Step DNA-shield finished");}
 }

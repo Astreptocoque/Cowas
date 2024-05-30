@@ -41,6 +41,9 @@ void before_start_program();
 void main_program();
 void button_control();
 
+void cross_cont_exp();
+void exp_explore_2905();
+
 // ============ EXECUTION MODE ===================
 // comment this line if no system check at startup
 #define  SYSTEM_CHECKUP
@@ -49,8 +52,8 @@ void button_control();
 
 // states to manually control CoWaS with buttons
 bool ctrl_button;       // if possible to control CoWaS with buttons
-enum ctrl_state {ctrl_pump, ctrl_motor_spool, ctrl_v23, ctrl_v1, ctrl_vman, ctrl_man_slot};
-uint8_t ctrl_state_len = 6; // to update when modifying lenght of control states
+enum ctrl_state {ctrl_pump, ctrl_motor_spool, ctrl_v23, ctrl_v1, ctrl_vman, ctrl_man_slot, ctrl_micro_pump};
+uint8_t ctrl_state_len = 7; // to update when modifying lenght of control states
 ctrl_state control_state;
 
 // ============= REAL HARDWARE =================
@@ -60,7 +63,7 @@ Led status_led;                             // general purpose LED
 Led green_led;                              // general purpose LED, used here for start signals
 Trustability_ABP_Gage pressure1;            // see schematics
 Valve_2_2 valve_1;                          // see schematics
-Valve_3_2 valve_23;                         // see schematics
+Valve_3_2 valve_23;                         // see schematics, voltage off: L_way
 Valve_2_2 valve_manifold;                   // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
@@ -158,34 +161,23 @@ void setup()
     ctrl_button = true;
 
     // ! calling testing function
-    purge_pipes_manifold();
+    // purge_pipes_manifold();
+    
     test_all_components();
+    // cross_cont_exp();
+
+
+    // filling the DNA shield pipe
+    fill_DNA_shield_tube();
+    exp_explore_2905();
 }
 
 
 void loop()
 {
-
-    // add_button_manifold_demo();
     
     button_control();
     // main_program();
-
-    // TESTS 1
-    // test_1_depth_20m();
-    // test_1_depth_40m();
-    // test_1_depth_40m_direct();
-
-    // TESTS 2
-    // test_2_remplissage_container_1m();
-    // test_2_remplissage_container_40m();
-
-    // TESTS 3
-    // test_3_sterivex_1();
-
-    // TESTS SYSTEM
-    // test_pressure_sensor();
-    // test_manifold();
 
 }
 
@@ -239,6 +231,12 @@ void main_program()
         }
         else if(data == "stopRolling"){
             spool.stop();
+        }
+        else if(data == "startDNA"){
+            micro_pump.start();
+        }
+        else if(data == "stopDNA"){
+            micro_pump.stop();
         }
 
         Serial.print(" - function accomplished - ");
@@ -433,6 +431,18 @@ void button_control(){
                 button_left.waitPressedAndReleased();
                 spool.stop();
             }
+            break;
+        }
+        case ctrl_micro_pump: {
+            if (button_right.isPressed()) {
+                micro_pump.start();
+                button_right.waitPressedAndReleased();
+            }
+            if (button_left.isPressed()){
+                micro_pump.stop();
+                button_left.waitPressedAndReleased();
+            } 
+            break;
         }
         default: break;
     }
@@ -444,6 +454,115 @@ void button_control(){
         Serial.print("New control state : ");
         Serial.println(control_state);
     }
+}
+
+void cross_cont_exp(){
+    output.println("Cross contamination test started");
+    output.println("");
+    output.println("Reuse the purged water in recipient, to filter and reuse later");
+    output.println("When pipe is destilled water, press start");
+
+    // using 4 liter of distilled water
+
+    button_start.waitPressedAndReleased();
+
+    // sample 1, distilled water
+    // !!!!!!!! -----------------
+    step_fill_container();
+    step_purge(false);
+    // !! ------------
+
+
+    output.println("REUSE filtered water in 5L container");
+    output.println("When pipe is in NEW destilled water, press start to start SAMPLE N°1");
+
+    button_start.waitPressedAndReleased();
+
+    step_fill_container();
+    step_sampling(1, false);
+
+    // sample 2, no need to rinse as sample before was with destilled water
+    output.println("Put filtered water in seperate recipient to discard colony later"); // !
+    output.println("When pipe is in bacterial colony, press start for SAMPLING N°2");
+
+    button_start.waitPressedAndReleased();
+    
+    step_fill_container();
+    step_sampling(2, false);
+
+    output.println("");
+    output.println("Discard the water with the bacterial colony");
+    
+
+    output.println("Reuse water in a recipient");
+    output.println("When pipe is in distilled water container 5L (2L, filtered from sample 1), press start");
+    button_start.waitPressedAndReleased();
+
+    // rinsing bacterial colony, before sample 3
+
+    step_fill_container();
+    delay(3000);
+    step_purge(false);
+
+    output.println("Filter the 4L of water (from last purge and first purge) through a serivex into the 5L container");
+    output.println("When filtered, put pipe into the 5L container (containing 4L of distilled water)");
+    output.println("Press start button when ready");
+
+    button_start.waitPressedAndReleased();
+
+    for(uint8_t i = 0; i < 2; i++){
+        step_fill_container();
+        delay(3000);
+        step_purge(false);
+    }
+
+
+
+    output.println("Purge finished");
+    output.println("When pipe is in NEW (the last 2L) distilled water, press start for SAMPLE N°3");
+    button_start.waitPressedAndReleased();
+
+    step_fill_container();
+    step_sampling(3, false);
+}
+
+
+void exp_explore_2905(){
+    output.println("Start of experiment - L'EXPLORE");
+    output.println("--------------------------------------------");
+
+    // output.println("Start of sample 1 in slot 1");
+    // output.println("Depth : 39m");
+    // output.println("Press start when ready");
+    // button_start.waitPressedAndReleased();
+    // sample_process(39*100, 1);
+
+    output.println("Start of sample 2 in slot 4");
+    output.println("Depth : 5m");
+    output.println("Press start when ready");
+    button_start.waitPressedAndReleased();
+    sample_process(5*100, 4);
+
+    output.println("Start of sample 3 in slot 8");
+    output.println("Depth : 5m");
+    output.println("Press start when ready");
+    button_start.waitPressedAndReleased();
+    sample_process(5*100, 8);
+
+    output.println("Start of sample 4 in slot 11");
+    output.println("Depth : 5m");
+    output.println("Press start when ready");
+    button_start.waitPressedAndReleased();
+    sample_process(5*100, 11);
+
+    output.println("Start of sample 5 in slot 14");
+    output.println("Depth : 3m");
+    output.println("Press start when ready");
+    button_start.waitPressedAndReleased();
+    sample_process(3*100, 14);
+
+    output.println("Well done, get a drink and enjoy the succesfull experiene");
+    output.println("------------------------------------------------------------");
 }
 
 #endif

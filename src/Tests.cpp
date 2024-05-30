@@ -26,6 +26,7 @@
 #include "Tests.h"
 #include "Step_functions.h"
 #include "Manifold.h"
+#include "maintenance.h"
 
 extern int manifold_slot;
 extern C_output output;
@@ -54,19 +55,6 @@ extern Button button_right;
 // extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern struct Timer timer_control_pressure2;
-
-void tests()
-{
-
-    if (serial.available())
-    {
-        output.println(serial.receive());
-    }
-    // output.println(pressure1.getPressure());
-    // output.println(pressure1.getTemperature());
-    // delay(500);
-}
-
 
 void test_serial_device()
 {
@@ -110,6 +98,11 @@ void test_all_components(){
             if (test_command == "demo"){
                 Serial.println("Demo sampling");
                 demo_sample_process();
+            }
+
+            if (test_command == "cal_DNA"){
+                Serial.println("Cal DNA shield");
+                calibrate_DNA_pump();
             }
 
         // all valves, both motors, pump, pressure sensors, push buttons(spool), 
@@ -620,26 +613,16 @@ void test_manifold(){
         // delay(600000);
 }
 
-void add_button_manifold_demo(){
-    if (button_start.isPressed())
-    {
-        rotateMotor(manifold_slot);
-        valve_manifold.set_open_way();
-        valve_23.set_L_way();
-        delay(100);
-        pump.set_power(POWER_FLUSH);
-        pump.start(30000);
-        delay(100);
-        valve_manifold.set_close_way();
-        manifold_slot++;
-    }
-}
-
 void test_pump(){
+    // open manifold valve to avoid building up pressure
+    valve_manifold.set_open_way();
+
     pump.set_power(100);
-    pump.start(2000);       // running for 1s
+    pump.start(2000);       // running for 2s
     pump.set_power(50);
     pump.start(2000); 
+
+    valve_manifold.set_close_way();
 }
 
 void test_motor_spool(){
