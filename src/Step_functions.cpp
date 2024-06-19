@@ -420,6 +420,35 @@ void step_dry(uint8_t num_filter)
     output.println("Step drying ended");
 }
 
+/**
+ * @brief empties the deployment module and system, call at the end of sample
+*/
+void step_empty(){
+    // filling container with water remaning in deployment module
+    valve_1.set_close_way();
+    valve_23.set_I_way();
+    delay(DELAY_ACTIONS);
+
+    // pump.set_power(POWER_PUMP);
+    pump.set_power(100);
+
+    uint32_t start_pump = millis();
+    bool empty = false;
+
+    pump.start();
+
+    // for now, only empties max 1 container. When close to the surface, it is most probably not enough
+    while ((millis() - start_pump < EMPTY_DEPLOYMENT_TIME) && button_container.isReleased())
+    {
+        delay(20);
+    }
+    
+    delay(DELAY_ACTIONS);
+
+    // emptying the container and the rest of the system
+    step_purge();
+}
+
 void purge_Pipes(){
     step_rewind();
     if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
@@ -452,7 +481,7 @@ void sample_process(int depth, int manifold_slot){
     // Verify if available filter
     bool filter_available= false;
     if (manifold_slot == -1){
-        for(int i=1; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
+        for(int i=8; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
             if(manifold.get_state(i) == available){
                 manifold.change_state(i, unaivailable);
                 filter_available= true;
@@ -489,10 +518,22 @@ void sample_process(int depth, int manifold_slot){
     step_fill_container();
     step_rewind();
     step_sampling(manifold_slot); // sample place is a human number, start at 1
-    // step_dry(get_next_sample_place());   // not completely done yet
 
-    // ! TODO: add DNA shield here
+    // adding DNA-shield to sterivex
     step_DNA_shield(manifold_slot);
+    delay(DELAY_ACTIONS);
+
+    // go back to purge slot, to avoid that DNA-shield goes through pipe
+    rotateMotor(0);
+
+    // emptying system
+    if (VERBOSE_SAMPLE) {output.println("Last step: emptying system from water");}
+    step_empty();
+
+    // closing all valves
+    valve_1.set_close_way();
+    valve_23.set_off();
+    valve_manifold.set_close_way();
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
@@ -541,6 +582,9 @@ void demo_sample_process(){
     // ! TODO: add DNA shield here
     step_DNA_shield(manifold_slot);
 
+    // empty deployment module
+
+
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
 }
@@ -555,9 +599,11 @@ void step_DNA_shield(int slot_manifold){
 
     delay(500);
 
-    pump.set_power(PUMP_SHIELD_POWER);
     valve_23.set_L_way();
     valve_manifold.set_open_way();
+
+    pump.set_power(PUMP_SHIELD_POWER);
+
     delay(500);
     pump.start(PUMP_SHIELD_TIME);
     delay(500);
