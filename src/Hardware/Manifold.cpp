@@ -20,7 +20,6 @@ float deg_previousEncoderPosition = 0;
 // first element is the purge angle. The following elements are the sterivex angles in the order we want them to be used.
 float sterivex_angle[15];
 
-
 /**
  * @brief Constructor for the manifold slots
  * @param pin_control Output connection on the board of the slot
@@ -63,24 +62,39 @@ void Manifold::begin()
     digitalWrite(ENCODER_MANIFOLD, HIGH);
 
     // Creation of array with sterivex position in angle
-    int omitted_angle_nb = 12; //angle[12] is omitted as there is no sterivex at this angles
-    for (int i = 0; i < 16; i++)
-    {
-        if (i < omitted_angle_nb)
-        {
-        // sterivex_angle[i] = purge_angle + i * 22.5;
-        sterivex_angle[i] = 360.0 + purge_angle - i * 22.5;
-        if (sterivex_angle[i] > 360)
-            sterivex_angle[i] = sterivex_angle[i] - 360;
-        }
-        else if (i > omitted_angle_nb)
-        {
-        // sterivex_angle[i - 1] = purge_angle + i * 22.5;
-        sterivex_angle[i - 1] = 360.0 + purge_angle - i * 22.5;
-        if (sterivex_angle[i - 1] > 360)
-            sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
-        }
+    //int omitted_angle_nb = 12; //angle[12] is omitted as there is no sterivex at this angles
+    //float angle_between_slots = 22.5;
+
+    for (int slot = 0; slot < 16; slot++){
+      if (slot == omitted_angle_nb){
+        continue;
+      }
+      float angle;
+      angle = purge_angle - slot*angle_between_slots;
+      if (angle < 0){
+        angle += 360.0;
+      }
+      // if before omitted angle, index (slot) is right, when after need to correct index
+      sterivex_angle[(slot < omitted_angle_nb ? slot : slot - 1)] = angle;
     }
+
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     if (i < omitted_angle_nb)
+    //     {
+    //     // sterivex_angle[i] = purge_angle + i * 22.5;
+    //     sterivex_angle[i] = 360.0 + purge_angle - i * 22.5;
+    //     if (sterivex_angle[i] > 360)
+    //         sterivex_angle[i] = sterivex_angle[i] - 360;
+    //     }
+    //     else if (i > omitted_angle_nb)
+    //     {
+    //     // sterivex_angle[i - 1] = purge_angle + i * 22.5;
+    //     sterivex_angle[i - 1] = 360.0 + purge_angle - i * 22.5;
+    //     if (sterivex_angle[i - 1] > 360)
+    //         sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
+    //     }
+    // }
     if (VERBOSE_INIT){output.println("Manifold initiated");}
 }
 
@@ -123,23 +137,45 @@ void rotateMotor(int index)
   directionDetermination(angle_to_reach);
 
   manifold_motor.start(speed, direction);
+  if (VERBOSE_MANIFOLD){
+    output.print("Motor started with direction ");
+    output.println(direction == down ? "DOWN (CW)" : "UP (CCW)");
+  }
 
-
+  uint32_t last_print = 0;
   //ROTATE//
+  float scaled_goal = scale_angle(angle_to_reach);
+  float adapted_goal_angle;
+  if (direction == down) {
+      adapted_goal_angle = scaled_goal - angle_offset_pos;
+  }
+  else if (direction == up){
+      adapted_goal_angle = scaled_goal + angle_offset_neg;
+  }
+  // should never overflow
+
   while (end_rotation == false)
   {
     readEncoder(false);
 
-    if(VERBOSE_MANIFOLD){output.print("   Angle to reach: ");
-    output.print(angle_to_reach);
-    output.println(2);}
+    if(VERBOSE_MANIFOLD && (millis() - last_print > 500)){
+      output.print("   Angle to reach: ");
+      output.println(angle_to_reach);
+      last_print = millis();
+    }
 
-    if ((direction == down && current_angle >= (angle_to_reach-angle_offset_pos)) ||
-        (direction == up && current_angle <= (angle_to_reach+angle_offset_neg)))
+    if ((direction == down && (scale_angle(current_angle) >= adapted_goal_angle)) ||
+        (direction == up && (scale_angle(current_angle) <= adapted_goal_angle)))
     {
       manifold_motor.stop();
       end_rotation = true;
     }
+    // if ((direction == down && current_angle >= (angle_to_reach-angle_offset_pos)) ||
+    //     (direction == up && current_angle <= (angle_to_reach+angle_offset_neg)))
+    // {
+    //   manifold_motor.stop();
+    //   end_rotation = true;
+    // }
 
     delay(1);//smaller delay -> better precision
   }
@@ -147,47 +183,61 @@ void rotateMotor(int index)
 
 void directionDetermination(float goal_angle)
 {
-  if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle)) {
-    direction = down;
-  }
-  else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0))) {
-    direction = up;
-  }
-  //special case: the current_angle is not contained in both of the above ranges (-180deg < goal_angle < +180deg)
-  //in this case we first try to add 1 turn (+360deg) or remove one (-360deg)
-  else
-  {
-    current_angle = current_angle + 360;
-    if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
-    {
-      direction = down;
-      nb_turns = nb_turns + 1;
-    }
-    else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
-    {
-      direction = up;
-      nb_turns = nb_turns + 1;
-    }
-    else
-    {
-      current_angle = current_angle - 2 * 360;
-      if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
-      {
-        direction = down;
-        nb_turns = nb_turns - 1;
-      }
-      else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
-      {
-        direction = up;
-        nb_turns = nb_turns - 1;
-      }
-    }
-  }
+  float diff_angle;
+  diff_angle = scale_angle(goal_angle) - scale_angle(current_angle);
+  output.print("Scaled angle goal : ");
+  output.println(scale_angle(goal_angle));
+  output.print("Scaled current angle : ");
+  output.println(scale_angle(current_angle));
+  output.print("Difference : ");
+  output.println(diff_angle);
+
+  // if diff >= 0 then down (CW), else going up (CCW)
+  direction = diff_angle >= 0 ? down : up;
+
+  // if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle)) {
+  //   direction = down;
+  // }
+  // else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0))) {
+  //   direction = up;
+  // }
+  // //special case: the current_angle is not contained in both of the above ranges (-180deg < goal_angle < +180deg)
+  // //in this case we first try to add 1 turn (+360deg) or remove one (-360deg)
+  // else
+  // {
+  //   current_angle = current_angle + 360;
+  //   if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
+  //   {
+  //     direction = down;
+  //     nb_turns = nb_turns + 1;
+  //   }
+  //   else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
+  //   {
+  //     direction = up;
+  //     nb_turns = nb_turns + 1;
+  //   }
+  //   else
+  //   {
+  //     current_angle = current_angle - 2 * 360;
+  //     if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
+  //     {
+  //       direction = down;
+  //       nb_turns = nb_turns - 1;
+  //     }
+  //     else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
+  //     {
+  //       direction = up;
+  //       nb_turns = nb_turns - 1;
+  //     }
+  //   }
+  // }
 }
 
 
 void readEncoder(bool init_setup)
 {
+  static uint32_t last_print = millis();
+
   uint16_t encoderPosition; //a 16 bit variable to hold the encoders position (goes up to 4096)
   uint8_t attempts; //count how many times we've tried to obtain the position in case there are errors
 
@@ -230,9 +280,12 @@ void readEncoder(bool init_setup)
       current_angle = deg_encoderPosition + 360 * nb_turns;
     }
 
-    if(VERBOSE_MANIFOLD){output.print("Encoder: ");
-    output.print(current_angle);
-    output.print(2);}
+    if(VERBOSE_MANIFOLD && (millis() - last_print > 500)){
+        output.print("Encoder: ");
+        output.println(current_angle);
+
+        last_print = millis();
+      }
   }
 }
 
@@ -395,4 +448,22 @@ uint16_t getRotationSPI(uint8_t encoder){
     Serial.print("With angle value : ");
     Serial.println(encoderPosition * encoder_to_deg);
     return encoderTurns;
+}
+
+float scale_angle(float angle){
+  float new_angle;
+
+  new_angle = angle - purge_angle + 11.25;
+
+  uint8_t loop_nb = 0;
+  while ((new_angle < -180 || new_angle >= 180) && loop_nb < 3){
+    if (new_angle < -180){
+      new_angle += 360.0;
+    }
+    else {
+      new_angle -= 360.0;
+    }
+  }
+
+  return new_angle;
 }

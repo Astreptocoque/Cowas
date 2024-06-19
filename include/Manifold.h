@@ -21,15 +21,16 @@
 #define RES12           12
 
 const float encoder_to_deg = 360.0 / 4096.0;
-const float purge_angle = 239.5; //is the angle at which the purge hole is aligned with the rotor hole
-// const float purge_angle = 353;
-// const float angle_offset_pos = 6.3; //5.2 for 160 of speed
-// const float angle_offset_neg = 4.9;
+const float purge_angle = 243.5; //is the angle at which the purge hole is aligned with the rotor hole
+const float angle_between_slots = 22.5;
 
-const float angle_offset_pos = 3.5;// 3; //5.2 for 160 of speed
+const int omitted_angle_nb = 12;
+
+const float angle_offset_pos = 0;// 3; //5.2 for 160 of speed
 //const float angle_offset_neg = 4.9+6.3;
 const float angle_offset_neg = 0;
 
+extern float sterivex_angle[15];       // ! to cahnge back to .cpp
 
 
 enum slot_state
@@ -65,6 +66,7 @@ class Manifold{
 
 
 void rotateMotor(int index); // angle: angle to reach
+float scale_angle(float angle);
 void directionDetermination(float goal_angle);
 void readEncoder(bool init_setup);
 uint8_t spiWriteRead(uint8_t sendByte, uint8_t encoder, uint8_t releaseLine);
