@@ -91,8 +91,9 @@ void test_all_components(){
             Serial.println(test_command);
 
             if (test_command == "sample1m"){
-                Serial.println("test Sampling at 1 meter");
-                sample_process(1*100);
+                Serial.println("test Sampling at 1 meter, press START");
+                button_start.waitPressedAndReleased();
+                sample_process(1*80);
             }
 
             if (test_command == "demo"){
