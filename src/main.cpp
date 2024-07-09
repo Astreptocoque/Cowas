@@ -163,21 +163,21 @@ void setup()
     // ! calling testing function
     // purge_pipes_manifold();
     
-    test_all_components();
+    // test_all_components();
     // cross_cont_exp();
 
 
     // filling the DNA shield pipe
-    fill_DNA_shield_tube();
-    exp_explore_2905();
+    // fill_DNA_shield_tube();
+    // exp_explore_2905();
 }
 
 
 void loop()
 {
     
-    button_control();
-    // main_program();
+    // button_control();
+    main_program();
 
 }
 

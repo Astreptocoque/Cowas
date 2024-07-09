@@ -480,8 +480,8 @@ void purge_Pipes(){
 void sample_process(int depth, int manifold_slot){
     // Verify if available filter
     bool filter_available= false;
-    if (manifold_slot == -1){
-        for(int i=8; i < NB_SLOT; i++){             // !!!!!!!!! -------------------------- change i to =1
+    if (manifold_slot == -1){       // if no slot is given, search for available slot
+        for(int i=1; i < NB_SLOT; i++){             // !change i to =1
             if(manifold.get_state(i) == available){
                 manifold.change_state(i, unaivailable);
                 filter_available= true;
