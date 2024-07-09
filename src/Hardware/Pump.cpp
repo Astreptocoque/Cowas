@@ -16,20 +16,22 @@ extern Pump pump;
  * @param _pwm True if the control is PWM (analog pin). False if control is only HIGH/LOW (digital pin)
  *
  */
-void Pump::begin(byte _control_pin, bool _pwm)
+void Pump::begin(byte _control_pin, bool _pwm, byte _enable_pin)
 {
     control_pin = _control_pin;
     pwm = _pwm;
+    enable_pin = _enable_pin;
     pinMode(control_pin, OUTPUT);
+    pinMode(enable_pin, OUTPUT);
     set_power(50);
     stop();
     output.println("Pump " + ID + " initiated");
 }
 
-void Pump::begin(byte _control_pin, bool _pwm, String _ID)
+void Pump::begin(byte _control_pin, bool _pwm, String _ID, byte _enable_pin)
 {
     ID = _ID;
-    begin(_control_pin, _pwm);
+    begin(_control_pin, _pwm, _enable_pin);
 }
 
 /**
@@ -78,6 +80,12 @@ uint8_t Pump::get_power()
  */
 void Pump::start()
 {
+    // activating 24V Relay for power supply
+    if (enable_pin != -1)
+    {
+        digitalWrite(enable_pin, HIGH);
+    }
+
     if (pwm)
         analogWrite(control_pin, power);
     else
@@ -116,7 +124,14 @@ void Pump::stop()
     if (pwm)
         analogWrite(control_pin, 0);
     else
-        digitalWrite(control_pin, 0);
+        digitalWrite(control_pin, LOW);
+
+    // deactivating 24V Relay for power supply
+    if (enable_pin != -1)
+    {
+        digitalWrite(enable_pin, LOW);
+    }
+
     running = false;
     if(VERBOSE_PUMP){output.println("Pump " + ID + " stopped");}
 }

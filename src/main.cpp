@@ -100,7 +100,7 @@ void setup()
     valve_1.begin(VALVE_1_PIN, "V1");
     valve_23.begin(VALVE_23_PIN, "V_23");
     valve_manifold.begin(VALVE_MANIFOLD, "V_manifold");
-    pump.begin(PUMP_PIN, true, "P1");
+    pump.begin(PUMP_PIN, true, "P1", PUMP_ENABLE);
     micro_pump.begin(ON_OFF_33V, "DNA Shield pump");
     spool.begin();
     manifold_motor.begin("MANIFOLD");
