@@ -41,7 +41,6 @@ extern Valve_2_2 valve_manifold;
 extern Pump pump;
 
 extern Micro_Pump micro_pump;
-extern Micro_Pump test_5V_micro_pump;
 
 extern Motor spool;
 extern Motor manifold_motor;
@@ -68,19 +67,7 @@ void test_serial_device()
 void test_all_components(){
     // call all sub-functions
 
-    // testing ON/OFF connectors
-    // while (42)
-    // {
-    //     micro_pump.start();
-    //     test_5V_micro_pump.start();
-    //     delay(5000);
-    //     micro_pump.stop();
-    //     test_5V_micro_pump.stop();
-    //     delay(4000);
-    // }
-    
     // go_to_zero();
-
 
     String test_command;
     while (42){
@@ -186,10 +173,8 @@ void test_all_components(){
             if (test_command == "micro_pump"){
                 Serial.println("Testing micro pumps");
                 micro_pump.start();
-                // test_5V_micro_pump.start();
                 delay(10000);
                 micro_pump.stop();
-                // test_5V_micro_pump.stop();
             }
 
         }

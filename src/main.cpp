@@ -68,7 +68,6 @@ Valve_2_2 valve_manifold;                   // see schematics
 Pump pump;                                  // see schematics
 Pump pump_vacuum;                           // see schematics
 Micro_Pump micro_pump;                      // For DNA shield
-Micro_Pump test_5V_micro_pump;
 Motor spool;                                // see schematics
 Motor manifold_motor;                       // see schematics
 Encoder encoder;                            // see schematics
@@ -103,7 +102,6 @@ void setup()
     valve_manifold.begin(VALVE_MANIFOLD, "V_manifold");
     pump.begin(PUMP_PIN, true, "P1");
     micro_pump.begin(ON_OFF_33V, "DNA Shield pump");
-    test_5V_micro_pump.begin(ON_OFF_5V, "Test ON/OFF 5V pump");
     spool.begin();
     manifold_motor.begin("MANIFOLD");
     encoder.begin(ENCODER_A_PIN, ENCODER_B_PIN, ENCODER_Z_PIN, 720, 10);

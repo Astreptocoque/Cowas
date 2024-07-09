@@ -35,7 +35,6 @@ extern Valve_2_2 valve_manifold;
 extern Pump pump;
 
 extern Micro_Pump micro_pump;
-extern Micro_Pump test_5V_micro_pump;
 
 extern Motor spool;
 extern Motor manifold_motor;

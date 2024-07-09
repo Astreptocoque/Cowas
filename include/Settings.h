@@ -123,12 +123,12 @@ const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
 const uint8_t PRESSURE1_PIN = 8;
 const uint8_t VALVE_1_PIN = 44;
-const uint8_t VALVE_23_PIN = 46;
-const uint8_t VALVE_MANIFOLD = 36; // valve manifold
-const uint8_t PUMP_PIN = DAC1;      // !changed
+const uint8_t VALVE_23_PIN = 40;
+const uint8_t VALVE_MANIFOLD = 46; // valve manifold
+const uint8_t PUMP_PIN = DAC1;
+const uint8_t PUMP_ENABLE = 42;
 // Output controlled by transistor, digital pin is toggeling voltage on and off
-const uint8_t ON_OFF_5V = 13;
-const uint8_t ON_OFF_33V = 47;
+const uint8_t ON_OFF_33V = 48;
 // const uint8_t PUMP_VACUUM = 34;
 const uint8_t ENCODER_A_PIN = 31;
 const uint8_t ENCODER_B_PIN = 33;
@@ -153,6 +153,6 @@ const uint8_t MOTOR_CS2_PIN = A11;
 // ! not used??
 const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO change pin
 // ! not used?
-const uint8_t ENCODER_MANIFOLD = 45;
+const uint8_t ENCODER_MANIFOLD = 38;
 
 #endif
