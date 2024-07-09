@@ -16,7 +16,7 @@ unsigned char EN1DIAG1 = MOTOR_EN1DIAG1_PIN; // Non attributed OUTPUT - motor 1 
 unsigned char CS1 = MOTOR_CS1_PIN;           // Non attributed// OUTPUT - motor 1 current sense
 unsigned char INA2 = MOTOR_INA2_PIN;         // Non attributed// INPUT - motor 2 direction input A
 unsigned char INB2 = MOTOR_INB2_PIN;         // Non attributed// INPUT - motor 2 direction input B
-unsigned char PWM2 = MOTOR_PW2_PIN;          // Non attributed// INPUT - motor 2 speed input
+unsigned char PWM2 = MOTOR_PWM2_PIN;          // Non attributed// INPUT - motor 2 speed input
 unsigned char EN2DIAG2 = MOTOR_EN2DIAG2_PIN; // Non attributed// OUTPUT - motor 2 enable input/fault output
 unsigned char CS2 = MOTOR_CS2_PIN;           // Non attributed// OUTPUT - motor 2 current sense
 
@@ -177,7 +177,7 @@ void Motor::start_origin()
     {
         set_speed(30, up);
 
-        if (VERBOSE_MOTOR){output.println("Motor started to go at origin");}
+        if (VERBOSE_MOTOR || VERBOSE_REWIND){output.println("Motor started to go at origin");}
 
         start();
         while (button_spool_up.getState() == 1)

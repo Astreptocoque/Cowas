@@ -1,11 +1,12 @@
 #include <Arduino.h>
 #include "Manifold.h"
+#include "Button.h"
 #include "C_output.h"
 #include <SPI.h>
 
 extern C_output output;
 extern Motor manifold_motor;
-
+extern Button button_start;
 //----- MOTOR -----//
 const uint16_t speed = 40; // Refers to power, min 70 to move
 
@@ -18,7 +19,6 @@ float deg_previousEncoderPosition = 0;
 
 // first element is the purge angle. The following elements are the sterivex angles in the order we want them to be used.
 float sterivex_angle[15];
-
 
 /**
  * @brief Constructor for the manifold slots
@@ -62,22 +62,39 @@ void Manifold::begin()
     digitalWrite(ENCODER_MANIFOLD, HIGH);
 
     // Creation of array with sterivex position in angle
-    int omitted_angle_nb = 12; //angle[12] is omitted as there is no sterivex at this angles
-    for (int i = 0; i < 16; i++)
-    {
-        if (i < omitted_angle_nb)
-        {
-        sterivex_angle[i] = purge_angle + i * 22.5;
-        if (sterivex_angle[i] > 360)
-            sterivex_angle[i] = sterivex_angle[i] - 360;
-        }
-        else if (i > omitted_angle_nb)
-        {
-        sterivex_angle[i - 1] = purge_angle + i * 22.5;
-        if (sterivex_angle[i - 1] > 360)
-            sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
-        }
+    //int omitted_angle_nb = 12; //angle[12] is omitted as there is no sterivex at this angles
+    //float angle_between_slots = 22.5;
+
+    for (int slot = 0; slot < 16; slot++){
+      if (slot == omitted_angle_nb){
+        continue;
+      }
+      float angle;
+      angle = purge_angle - slot*angle_between_slots;
+      if (angle < 0){
+        angle += 360.0;
+      }
+      // if before omitted angle, index (slot) is right, when after need to correct index
+      sterivex_angle[(slot < omitted_angle_nb ? slot : slot - 1)] = angle;
     }
+
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     if (i < omitted_angle_nb)
+    //     {
+    //     // sterivex_angle[i] = purge_angle + i * 22.5;
+    //     sterivex_angle[i] = 360.0 + purge_angle - i * 22.5;
+    //     if (sterivex_angle[i] > 360)
+    //         sterivex_angle[i] = sterivex_angle[i] - 360;
+    //     }
+    //     else if (i > omitted_angle_nb)
+    //     {
+    //     // sterivex_angle[i - 1] = purge_angle + i * 22.5;
+    //     sterivex_angle[i - 1] = 360.0 + purge_angle - i * 22.5;
+    //     if (sterivex_angle[i - 1] > 360)
+    //         sterivex_angle[i - 1] = sterivex_angle[i - 1] - 360;
+    //     }
+    // }
     if (VERBOSE_INIT){output.println("Manifold initiated");}
 }
 
@@ -120,23 +137,45 @@ void rotateMotor(int index)
   directionDetermination(angle_to_reach);
 
   manifold_motor.start(speed, direction);
+  if (VERBOSE_MANIFOLD){
+    output.print("Motor started with direction ");
+    output.println(direction == down ? "DOWN (CW)" : "UP (CCW)");
+  }
 
-
+  uint32_t last_print = 0;
   //ROTATE//
+  float scaled_goal = scale_angle(angle_to_reach);
+  float adapted_goal_angle;
+  if (direction == down) {
+      adapted_goal_angle = scaled_goal - angle_offset_pos;
+  }
+  else if (direction == up){
+      adapted_goal_angle = scaled_goal + angle_offset_neg;
+  }
+  // should never overflow
+
   while (end_rotation == false)
   {
     readEncoder(false);
 
-    if(VERBOSE_MANIFOLD){output.print("   Angle to reach: ");
-    output.print(angle_to_reach);
-    output.println(2);}
+    if(VERBOSE_MANIFOLD && (millis() - last_print > 500)){
+      output.print("   Angle to reach: ");
+      output.println(angle_to_reach);
+      last_print = millis();
+    }
 
-    if ((direction == down && current_angle >= (angle_to_reach-angle_offset_pos)) ||
-        (direction == up && current_angle <= (angle_to_reach+angle_offset_neg)))
+    if ((direction == down && (scale_angle(current_angle) >= adapted_goal_angle)) ||
+        (direction == up && (scale_angle(current_angle) <= adapted_goal_angle)))
     {
       manifold_motor.stop();
       end_rotation = true;
     }
+    // if ((direction == down && current_angle >= (angle_to_reach-angle_offset_pos)) ||
+    //     (direction == up && current_angle <= (angle_to_reach+angle_offset_neg)))
+    // {
+    //   manifold_motor.stop();
+    //   end_rotation = true;
+    // }
 
     delay(1);//smaller delay -> better precision
   }
@@ -144,54 +183,68 @@ void rotateMotor(int index)
 
 void directionDetermination(float goal_angle)
 {
-  if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle)) {
-    direction = down;
-  }
-  else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0))) {
-    direction = up;
-  }
-  //special case: the current_angle is not contained in both of the above ranges (-180deg < goal_angle < +180deg)
-  //in this case we first try to add 1 turn (+360deg) or remove one (-360deg)
-  else
-  {
-    current_angle = current_angle + 360;
-    if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
-    {
-      direction = down;
-      nb_turns = nb_turns + 1;
-    }
-    else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
-    {
-      direction = up;
-      nb_turns = nb_turns + 1;
-    }
-    else
-    {
-      current_angle = current_angle - 2 * 360;
-      if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
-      {
-        direction = down;
-        nb_turns = nb_turns - 1;
-      }
-      else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
-      {
-        direction = up;
-        nb_turns = nb_turns - 1;
-      }
-    }
-  }
+  float diff_angle;
+  diff_angle = scale_angle(goal_angle) - scale_angle(current_angle);
+  output.print("Scaled angle goal : ");
+  output.println(scale_angle(goal_angle));
+  output.print("Scaled current angle : ");
+  output.println(scale_angle(current_angle));
+  output.print("Difference : ");
+  output.println(diff_angle);
+
+  // if diff >= 0 then down (CW), else going up (CCW)
+  direction = diff_angle >= 0 ? down : up;
+
+  // if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle)) {
+  //   direction = down;
+  // }
+  // else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0))) {
+  //   direction = up;
+  // }
+  // //special case: the current_angle is not contained in both of the above ranges (-180deg < goal_angle < +180deg)
+  // //in this case we first try to add 1 turn (+360deg) or remove one (-360deg)
+  // else
+  // {
+  //   current_angle = current_angle + 360;
+  //   if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
+  //   {
+  //     direction = down;
+  //     nb_turns = nb_turns + 1;
+  //   }
+  //   else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
+  //   {
+  //     direction = up;
+  //     nb_turns = nb_turns + 1;
+  //   }
+  //   else
+  //   {
+  //     current_angle = current_angle - 2 * 360;
+  //     if (((goal_angle - 180.0) <= current_angle) && (current_angle <= goal_angle))
+  //     {
+  //       direction = down;
+  //       nb_turns = nb_turns - 1;
+  //     }
+  //     else if ((goal_angle < current_angle) && (current_angle < (goal_angle + 180.0)))
+  //     {
+  //       direction = up;
+  //       nb_turns = nb_turns - 1;
+  //     }
+  //   }
+  // }
 }
 
 
 void readEncoder(bool init_setup)
 {
+  static uint32_t last_print = millis();
+
   uint16_t encoderPosition; //a 16 bit variable to hold the encoders position (goes up to 4096)
   uint8_t attempts; //count how many times we've tried to obtain the position in case there are errors
 
   deg_previousEncoderPosition = deg_encoderPosition;
 
   //if you want to set the zero position before beggining uncomment the following function call
-  //setZeroSPI(ENCODER_MANIFOLD);
+  // setZeroSPI(ENCODER_MANIFOLD);
 
   //set attemps counter at 0 so we can try again if we get bad position
   attempts = 0;
@@ -227,9 +280,12 @@ void readEncoder(bool init_setup)
       current_angle = deg_encoderPosition + 360 * nb_turns;
     }
 
-    if(VERBOSE_MANIFOLD){output.print("Encoder: ");
-    output.print(current_angle);
-    output.print(2);}
+    if(VERBOSE_MANIFOLD && (millis() - last_print > 500)){
+        output.print("Encoder: ");
+        output.println(current_angle);
+
+        last_print = millis();
+      }
   }
 }
 
@@ -316,4 +372,98 @@ uint8_t spiWriteRead(uint8_t sendByte, uint8_t encoder, uint8_t releaseLine)
   setCSLine(encoder, releaseLine); //if releaseLine is high set it high else it stays low
 
   return data;
+}
+
+void calibrateEncoder(uint16_t speed){
+    output.println("Calibrating encoder of the manifold");
+    output.println("Be ready to press button when motor is aligned with slot 0");
+    output.println("Press button or type text to start motor");
+
+    while (!Serial.available())
+    {
+      delay(10);
+    }
+
+    output.println("Starting to rotate");
+    Serial.flush();
+    delay(1000);
+
+    manifold_motor.start(speed, up);
+    
+    while (Serial.available())
+    {
+      Serial.read();
+    }
+    
+    while (!Serial.available()){
+        delay(1);
+    }
+
+    manifold_motor.stop();
+
+    // read encoder value and convert to degrees
+    float pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
+    Serial.print("Manifold encoder value : ");
+    Serial.println(pos);
+    
+    output.println("Please replace the purge angle of manifold by : ");
+    output.println(pos * encoder_to_deg);
+}
+
+void setZeroSPI(uint8_t encoder)
+{
+  spiWriteRead(AMT22_NOP, encoder, false);
+
+  //this is the time required between bytes as specified in the datasheet.
+  //We will implement that time delay here, however the arduino is not the fastest device so the delay
+  //is likely inherantly there already
+  delayMicroseconds(3); 
+  
+  spiWriteRead(AMT22_ZERO, encoder, true);
+  delay(250); //250 second delay to allow the encoder to reset
+}
+
+uint16_t getRotationSPI(uint8_t encoder){
+    //read the two bytes for position from the encoder, starting with the high byte
+    uint16_t encoderPosition = spiWriteRead(AMT22_NOP, encoder, false) << 8; //shift up 8 bits because this is the high byte
+    delayMicroseconds(3);
+    encoderPosition |= spiWriteRead(AMT22_TURNS, encoder, false); //we send the turns command (0xA0) here, to tell the encoder to send us the turns count after the position
+
+    //wait 40us before reading the turns counter
+    delayMicroseconds(40);
+
+    //read the two bytes for turns from the encoder, starting with the high byte
+    uint16_t encoderTurns = spiWriteRead(AMT22_NOP, encoder, false) << 8; //shift up 8 bits because this is the high byte
+    delayMicroseconds(3);
+
+    // releasing the line
+    encoderTurns |= spiWriteRead(AMT22_NOP, encoder, true);
+    delayMicroseconds(3);
+
+    encoderPosition &= 0x3FFF;
+    encoderTurns &= 0x3FFF;
+
+    Serial.print("Manifold encoder turns : ");
+    Serial.println(encoderTurns);
+    Serial.print("With angle value : ");
+    Serial.println(encoderPosition * encoder_to_deg);
+    return encoderTurns;
+}
+
+float scale_angle(float angle){
+  float new_angle;
+
+  new_angle = angle - purge_angle + 11.25;
+
+  uint8_t loop_nb = 0;
+  while ((new_angle < -180 || new_angle >= 180) && loop_nb < 3){
+    if (new_angle < -180){
+      new_angle += 360.0;
+    }
+    else {
+      new_angle -= 360.0;
+    }
+  }
+
+  return new_angle;
 }

@@ -14,9 +14,10 @@
 #include "Valve_3_2.h"
 #include "Valve_2_2.h"
 #include "Pump.h"
+#include "Micro_pump.h"
 #include "Motor.h"
 #include "Encoder.h"
-#include "Potentiometer.h"
+// #include "Potentiometer.h"
 #include "Led.h"
 #include "C_output.h"
 #include "Settings.h"
@@ -25,6 +26,7 @@
 #include "Tests.h"
 #include "Step_functions.h"
 #include "Manifold.h"
+#include "maintenance.h"
 
 extern int manifold_slot;
 extern C_output output;
@@ -37,8 +39,12 @@ extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_manifold;
 extern Pump pump;
+
+extern Micro_Pump micro_pump;
+extern Micro_Pump test_5V_micro_pump;
+
 extern Motor spool;
-// extern Motor manifold_motor;
+extern Motor manifold_motor;
 extern Encoder encoder;
 extern Button button_start;    
 extern Button button_container;
@@ -46,22 +52,9 @@ extern Button button_spool_up;
 extern Button button_spool_down;
 extern Button button_left;      
 extern Button button_right;
-extern Potentiometer potentiometer;
+// extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern struct Timer timer_control_pressure2;
-
-void tests()
-{
-
-    if (serial.available())
-    {
-        output.println(serial.receive());
-    }
-    // output.println(pressure1.getPressure());
-    // output.println(pressure1.getTemperature());
-    // delay(500);
-}
-
 
 void test_serial_device()
 {
@@ -74,6 +67,21 @@ void test_serial_device()
 
 void test_all_components(){
     // call all sub-functions
+
+    // testing ON/OFF connectors
+    // while (42)
+    // {
+    //     micro_pump.start();
+    //     test_5V_micro_pump.start();
+    //     delay(5000);
+    //     micro_pump.stop();
+    //     test_5V_micro_pump.stop();
+    //     delay(4000);
+    // }
+    
+    // go_to_zero();
+
+
     String test_command;
     while (42){
         if (Serial.available()){
@@ -82,8 +90,20 @@ void test_all_components(){
             //test_command = Serial.readStringUntil('b');
             Serial.println(test_command);
 
-            if (test_command == "a"){
-                Serial.println("test ok");
+            if (test_command == "sample1m"){
+                Serial.println("test Sampling at 1 meter, press START");
+                button_start.waitPressedAndReleased();
+                sample_process(1*80);
+            }
+
+            if (test_command == "demo"){
+                Serial.println("Demo sampling");
+                demo_sample_process();
+            }
+
+            if (test_command == "cal_DNA"){
+                Serial.println("Cal DNA shield");
+                calibrate_DNA_pump();
             }
 
         // all valves, both motors, pump, pressure sensors, push buttons(spool), 
@@ -93,7 +113,7 @@ void test_all_components(){
                 Serial.println("testing valves");
                 test_valves();
             }
-            if (test_command == "spool"){
+            if (test_command == "motor_spool"){
                 Serial.println("testing motor");
                 test_motor_spool();
             }
@@ -105,6 +125,10 @@ void test_all_components(){
             if (test_command == "encoder_manifold"){
                 Serial.println("testing encoder Manifold");
                 test_encoder();
+            }
+            if (test_command == "enc_rot"){
+                // Serial.println("");
+                getRotationSPI(ENCODER_MANIFOLD);
             }
             if (test_command == "encoder_spool"){
                 Serial.println("testing encoder SPOOL");
@@ -138,34 +162,58 @@ void test_all_components(){
                 Serial.println("testing spool");
                 test_1_depth_20m();
             }
+            if (test_command == "40m"){
+                Serial.println("testing spool - 40m");
+                test_1_depth_40m();
+            }
+            
 
             if (test_command == "stop"){
                 Serial.println("stop testing mode");
                 break;
             }
+
+            if (test_command == "cal"){
+                Serial.println("Calibrating encoder Manifold");
+                calibrateEncoder(20);       // ! maybe need change
+            }
+
+            if (test_command == "zero"){
+                // Serial.println("Calibrating encoder Manifold");
+                go_to_zero();       // ! maybe need change
+            }
+
+            if (test_command == "micro_pump"){
+                Serial.println("Testing micro pumps");
+                micro_pump.start();
+                // test_5V_micro_pump.start();
+                delay(10000);
+                micro_pump.stop();
+                // test_5V_micro_pump.stop();
+            }
+
         }
     }
 }
 
 void test_pressure()
 {
-
-    int pot_last_value = potentiometer.get_value(0, 100);
-    int pot_value = 0;
-    int speedy = 60;
+    // int pot_last_value = potentiometer.get_value(0, 100);
+    // int pot_value = 0;
+    // int speedy = 60;
     while (!button_start.isPressed())
     {
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        {
-            speedy = pot_value;
-            pot_last_value = pot_value;
-            output.println("speed " + String(speedy));
-        }
+        // pot_value = potentiometer.get_value(0, 100);
+        // if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
+        // {
+        //     speedy = pot_value;
+        //     pot_last_value = pot_value;
+        //     output.println("speed " + String(speedy));
+        // }
         if (button_left.isPressed())
         {
             button_left.waitPressedAndReleased();
-            pump.set_power(speedy);
+            pump.set_power(100);
             pump.start();
         }
         if (button_right.isPressed())
@@ -398,28 +446,28 @@ void test_3_sterivex_1(){
     status_led.off();
 
     // mnaual contorl
-    int pot_last_value = potentiometer.get_value(0, 100);
-    int pot_value = 0;
-    int speedy = 60;
+    // int pot_last_value = potentiometer.get_value(0, 100);
+    // int pot_value = 0;
+    // int speedy = 60;
     while (!button_start.isPressed())
     {
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        {
-            speedy = pot_value;
-            pot_last_value = pot_value;
-            output.println("speed " + String(speedy));
-        }
+        // pot_value = potentiometer.get_value(0, 100);
+        // if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
+        // {
+        //     speedy = pot_value;
+        //     pot_last_value = pot_value;
+        //     output.println("speed " + String(speedy));
+        // }
         if (button_left.isPressed())
         {
             button_left.waitPressedAndReleased();
-            pump.set_power(speedy);
+            pump.set_power(100);
             pump.start();
         }
         if (button_right.isPressed())
         {
             button_right.waitPressedAndReleased();
-            pump.set_power(speedy);
+            pump.set_power(100);
             pump.stop();           
         }
         delay(10);
@@ -457,28 +505,28 @@ void test_3_sterivex_2(){
     status_led.off();
 
     // mnaual contorl
-    int pot_last_value = potentiometer.get_value(0, 100);
-    int pot_value = 0;
-    int speedy = 60;
+    // int pot_last_value = potentiometer.get_value(0, 100);
+    // int pot_value = 0;
+    // int speedy = 60;
     while (!button_start.isPressed())
     {
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        {
-            speedy = pot_value;
-            pot_last_value = pot_value;
-            output.println("speed " + String(speedy));
-        }
+        // pot_value = potentiometer.get_value(0, 100);
+        // if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
+        // {
+        //     // speedy = pot_value;
+        //     // pot_last_value = pot_value;
+        //     output.println("speed " + String(speedy));
+        // }
         if (button_left.isPressed())
         {
             button_left.waitPressedAndReleased();
-            pump.set_power(speedy);
+            pump.set_power(100);
             pump.start();
         }
         if (button_right.isPressed())
         {
             button_right.waitPressedAndReleased();
-            pump.set_power(speedy);
+            pump.set_power(100);
             pump.stop();           
         }
         delay(10);
@@ -499,34 +547,58 @@ void test_3_sterivex_2(){
 //! tested??
 void test_pressure_sensor(){
     float pressure;
-    uint16_t nb_prints = 10*5;
-    int compteur=0;
-    do
-    {
-        delay(10); // don't read pressure to fast
-        pressure = pressure1.getPressure();
-        
-        if (compteur>=10)
-        {
-            output.println("Pressure = " + String(pressure));
-            Serial1.println("Pressure = " + String(pressure));
-            compteur=0;
-        }
+    // uint16_t nb_prints = 10*5;
+    // int compteur=0;
 
-        compteur++;
-        nb_prints--;
-    } while (nb_prints); // conditions outside while loop to allow printing which condition is responsible for stop
+    while (!Serial.available()){
+        delay(500); // don't read pressure to fast
+        pressure = pressure1.getPressure();
+
+
+        Serial.print("Pressure encoder value : ");
+        Serial.println(pressure);
+        // Serial.print(",    Angle in degrees : ");
+        // Serial.println(angle_deg);
+        delay(500);
+    }
+
+
+    // do
+    // {
+    //     delay(100); // don't read pressure to fast
+    //     pressure = pressure1.getPressure();
+        
+    //     if (compteur>=10)
+    //     {
+    //         output.println("Pressure = " + String(pressure));
+    //         Serial1.println("Pressure = " + String(pressure));
+    //         compteur=0;
+    //     }
+
+    //     compteur++;
+    //     nb_prints--;
+    // } while (nb_prints); // conditions outside while loop to allow printing which condition is responsible for stop
 
 }
 
 void test_manifold(){
+    uint16_t pos;
+    float angle_deg;
+
     for (int j = 1  ; j < 15; j++)
         {
         rotateMotor(0);
         delay(5000);
         rotateMotor(j);
-        delay(5000);
 
+        pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
+        angle_deg = pos * encoder_to_deg;
+        Serial.print("Manifold encoder value : ");
+        Serial.print(pos);
+        Serial.print(",    Angle in degrees : ");
+        Serial.println(angle_deg);
+
+        delay(5000);
         }
         // rotateMotor(12);
         // delay(5000);
@@ -542,24 +614,16 @@ void test_manifold(){
         // delay(600000);
 }
 
-void add_button_manifold_demo(){
-    if (button_start.isPressed())
-    {
-        rotateMotor(manifold_slot);
-        valve_manifold.set_open_way();
-        valve_23.set_L_way();
-        delay(100);
-        pump.set_power(POWER_FLUSH);
-        pump.start(30000);
-        delay(100);
-        valve_manifold.set_close_way();
-        manifold_slot++;
-    }
-}
-
 void test_pump(){
+    // open manifold valve to avoid building up pressure
+    valve_manifold.set_open_way();
+
     pump.set_power(100);
-    pump.start(2000);       // running for 1s
+    pump.start(2000);       // running for 2s
+    pump.set_power(50);
+    pump.start(2000); 
+
+    valve_manifold.set_close_way();
 }
 
 void test_motor_spool(){
@@ -598,7 +662,7 @@ void test_command_box(){
     green_led.off();
     status_led.on();
     uint32_t last_led_switch = millis();
-    uint32_t last_pot_print = millis();
+    // uint32_t last_pot_print = millis();
 
     while (!Serial.available()){
         if (last_led_switch + 1000 < millis()){
@@ -607,11 +671,11 @@ void test_command_box(){
             last_led_switch = millis();
         }
 
-        if (last_pot_print + 3000 < millis()){
-            Serial.print("Pot value : ");
-            Serial.println(potentiometer.get_value());
-            last_pot_print = millis();
-        }
+        // if (last_pot_print + 3000 < millis()){
+        //     Serial.print("Pot value : ");
+        //     Serial.println(potentiometer.get_value());
+        //     last_pot_print = millis();
+        // }
 
         start = button_start.getState();
         left = button_left.getState();
@@ -677,12 +741,20 @@ void test_micro_switch(){
 
 void test_encoder(){
     uint16_t pos;
+    float angle_deg;
+
+    manifold_motor.start(30, down);
+
     while (!Serial.available()){
         pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
+        angle_deg = pos * encoder_to_deg;
         Serial.print("Manifold encoder value : ");
-        Serial.println(pos);
+        Serial.print(pos);
+        Serial.print(",    Angle in degrees : ");
+        Serial.println(angle_deg);
         delay(500);
     }
+    manifold_motor.stop();
 }
 
 void test_encoder_spool(){
@@ -700,4 +772,40 @@ void test_encoder_spool(){
         }
     }
     
+}
+
+void go_to_zero(){
+    Serial.println("Going to zero manifold");
+    // SETUP//
+    bool end_rotation = false;
+    float angle_to_reach = 0;
+
+    // readEncoder(true);
+    // readEncoder(false);
+    float current_angle;
+
+    manifold_motor.start(40, down);
+    //ROTATE//
+    while (end_rotation == false)
+    {
+        current_angle = getPositionSPI(ENCODER_MANIFOLD, RES12) * encoder_to_deg;
+
+        if(VERBOSE_MANIFOLD){
+            output.print("   Angle to reach: ");
+            output.print(angle_to_reach);
+            output.println(2);
+        }
+
+        if ((current_angle >= angle_to_reach - 5) && (current_angle <= angle_to_reach + 5))
+        {
+            manifold_motor.stop();
+            end_rotation = true;
+        }
+
+        delay(1);//smaller delay -> better precision
+    }
+}
+
+void reset_encoder(){
+    Serial.println("Resetting ");
 }
