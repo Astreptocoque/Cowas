@@ -636,10 +636,11 @@ void test_valves(){
     }
 }
 
+
 void test_command_box(){
-    bool start_last = button_start.getState();
-    bool left_last = button_left.getState();
-    bool right_last = button_right.getState();
+    bool start_last = button_start.isPressed();
+    bool left_last = button_left.isPressed();
+    bool right_last = button_right.isPressed();
     bool start;
     bool left;
     bool right;
@@ -660,11 +661,11 @@ void test_command_box(){
         //     Serial.print("Pot value : ");
         //     Serial.println(potentiometer.get_value());
         //     last_pot_print = millis();
-        // }
+        //}
 
-        start = button_start.getState();
-        left = button_left.getState();
-        right = button_right.getState();
+        start = button_start.isPressed();
+        left = button_left.isPressed();
+        right = button_right.isPressed();
 
         if (start_last != start){
             Serial.print("Button start ");

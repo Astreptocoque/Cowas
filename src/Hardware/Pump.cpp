@@ -22,7 +22,9 @@ void Pump::begin(byte _control_pin, bool _pwm, byte _enable_pin)
     pwm = _pwm;
     enable_pin = _enable_pin;
     pinMode(control_pin, OUTPUT);
-    pinMode(enable_pin, OUTPUT);
+    if (enable_pin != -1){
+        pinMode(enable_pin, OUTPUT);
+    }
     set_power(50);
     stop();
     output.println("Pump " + ID + " initiated");
@@ -129,6 +131,8 @@ void Pump::stop()
     // deactivating 24V Relay for power supply
     if (enable_pin != -1)
     {
+        // ! Do not uncomment, otherwise the pump still runs when resetting
+        delay(500);
         digitalWrite(enable_pin, LOW);
     }
 

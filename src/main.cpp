@@ -44,6 +44,8 @@ void button_control();
 void cross_cont_exp();
 void exp_explore_2905();
 
+void all_on();
+
 // ============ EXECUTION MODE ===================
 // comment this line if no system check at startup
 #define  SYSTEM_CHECKUP
@@ -161,21 +163,23 @@ void setup()
     // ! calling testing function
     // purge_pipes_manifold();
     
-    // test_all_components();
+    test_all_components();
     // cross_cont_exp();
 
 
     // filling the DNA shield pipe
     // fill_DNA_shield_tube();
     // exp_explore_2905();
+
+    // all_on();
 }
 
 
 void loop()
 {
     
-    // button_control();
-    main_program();
+    button_control();
+    // main_program();
 
 }
 
@@ -561,6 +565,23 @@ void exp_explore_2905(){
 
     output.println("Well done, get a drink and enjoy the succesfull experiene");
     output.println("------------------------------------------------------------");
+}
+
+
+void all_on() {
+    // Turn on all components here
+    // Example:
+    pump.set_power(80);
+    pump.start();
+    valve_23.set_I_way();
+    valve_1.set_open_way();
+    valve_manifold.set_open_way();
+    spool.set_speed(100, up);
+    spool.start();
+    micro_pump.start();
+
+    status_led.on();
+    green_led.on();
 }
 
 #endif

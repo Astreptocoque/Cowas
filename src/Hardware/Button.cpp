@@ -54,12 +54,12 @@ byte Button::getState()
 
 bool Button::isPressed()
 {
-    return (getState() == HIGH);
+    return (getState() == LOW);
 }
 
 bool Button::isReleased()
 {
-    return (getState() == LOW);
+    return (getState() == HIGH);
 }
 
 void Button::waitPressedAndReleased()
