@@ -17,7 +17,6 @@
 #include "Micro_pump.h"
 #include "Motor.h"
 #include "Encoder.h"
-// #include "Potentiometer.h"
 #include "Led.h"
 #include "C_output.h"
 #include "Settings.h"
@@ -178,37 +177,6 @@ void test_all_components(){
             }
 
         }
-    }
-}
-
-void test_pressure()
-{
-    // int pot_last_value = potentiometer.get_value(0, 100);
-    // int pot_value = 0;
-    // int speedy = 60;
-    while (!button_start.isPressed())
-    {
-        // pot_value = potentiometer.get_value(0, 100);
-        // if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        // {
-        //     speedy = pot_value;
-        //     pot_last_value = pot_value;
-        //     output.println("speed " + String(speedy));
-        // }
-        if (button_left.isPressed())
-        {
-            button_left.waitPressedAndReleased();
-            pump.set_power(100);
-            pump.start();
-        }
-        if (button_right.isPressed())
-        {
-            pump.stop();
-            button_right.waitPressedAndReleased();
-        }
-
-        output.println("P1 " + String(pressure1.getPressure()) + "  |   P2 " + String(pressure2.getPressure()));
-        delay(200);
     }
 }
 
@@ -430,19 +398,8 @@ void test_3_sterivex_1(){
     button_start.waitPressedAndReleased();
     status_led.off();
 
-    // mnaual contorl
-    // int pot_last_value = potentiometer.get_value(0, 100);
-    // int pot_value = 0;
-    // int speedy = 60;
     while (!button_start.isPressed())
     {
-        // pot_value = potentiometer.get_value(0, 100);
-        // if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        // {
-        //     speedy = pot_value;
-        //     pot_last_value = pot_value;
-        //     output.println("speed " + String(speedy));
-        // }
         if (button_left.isPressed())
         {
             button_left.waitPressedAndReleased();
@@ -471,8 +428,6 @@ void test_3_sterivex_1(){
 }
 
 void test_3_sterivex_2(){
-
-
     output.println("TEST 3 - sterivex 2");
 
     spool.start(1000);
@@ -529,11 +484,8 @@ void test_3_sterivex_2(){
 
 }
 
-//! tested??
 void test_pressure_sensor(){
     float pressure;
-    // uint16_t nb_prints = 10*5;
-    // int compteur=0;
 
     while (!Serial.available()){
         delay(500); // don't read pressure to fast
@@ -546,24 +498,6 @@ void test_pressure_sensor(){
         // Serial.println(angle_deg);
         delay(500);
     }
-
-
-    // do
-    // {
-    //     delay(100); // don't read pressure to fast
-    //     pressure = pressure1.getPressure();
-        
-    //     if (compteur>=10)
-    //     {
-    //         output.println("Pressure = " + String(pressure));
-    //         Serial1.println("Pressure = " + String(pressure));
-    //         compteur=0;
-    //     }
-
-    //     compteur++;
-    //     nb_prints--;
-    // } while (nb_prints); // conditions outside while loop to allow printing which condition is responsible for stop
-
 }
 
 void test_manifold(){
@@ -573,7 +507,7 @@ void test_manifold(){
     for (int j = 1  ; j < 15; j++)
         {
         rotateMotor(0);
-        delay(5000);
+        delay(3000);
         rotateMotor(j);
 
         pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
@@ -583,20 +517,8 @@ void test_manifold(){
         Serial.print(",    Angle in degrees : ");
         Serial.println(angle_deg);
 
-        delay(5000);
+        delay(3000);
         }
-        // rotateMotor(12);
-        // delay(5000);
-        // step_purge();
-        // delay(5000);
-        // rotateMotor(4);
-        // delay(5000);
-        // step_purge();
-        // delay(5000);
-        // rotateMotor(0);
-        // delay(5000);
-        // step_purge();
-        // delay(600000);
 }
 
 void test_pump(){
@@ -656,12 +578,6 @@ void test_command_box(){
             status_led.switch_state();
             last_led_switch = millis();
         }
-
-        // if (last_pot_print + 3000 < millis()){
-        //     Serial.print("Pot value : ");
-        //     Serial.println(potentiometer.get_value());
-        //     last_pot_print = millis();
-        //}
 
         start = button_start.isPressed();
         left = button_left.isPressed();
@@ -792,6 +708,7 @@ void go_to_zero(){
     }
 }
 
+// ! to implement, only needed if encoder manifold still changes absolut 0
 void reset_encoder(){
     Serial.println("Resetting ");
 }

@@ -3,17 +3,20 @@
 
 #include <Arduino.h>
 
-void step_dive(int _depth);
-void step_purge(bool stop_pressure = true);
+/**
+ * @brief Step functions used to do the sampling process
+ * @note step_process: the sample function to call, regroups all necessery steps
+ */
+
+void step_dive(int _depth);     // unroll deplayment module to given depth
+void step_purge(bool stop_pressure = true);     // emptying container
 void step_fill_container();
-void step_sampling(int slot_manifold, bool stop_pressure = true);
-void step_rewind();
-void step_dry(uint8_t num_sterivex);
-void step_empty();
-void step_DNA_shield(int slot_manifold);
+void step_sampling(int slot_manifold, bool stop_pressure = true);   // pump water through filter
+void step_rewind();    // rewind deployment module
+void step_empty();   // drains water from deployment module
+void step_DNA_shield(int slot_manifold);    // insert DNA shield to sterivex
 void sample_process(int depth, int manifold_slot = -1);
 void purge_sterivex(int slot_manifold);
-void purge_Pipes();
 
 void demo_sample_process();
 

@@ -139,7 +139,6 @@ const uint8_t BUTTON_SPOOL_UP = 28;
 const uint8_t BUTTON_SPOOL_DOWN = 29;
 const uint8_t BUTTON_LEFT_PIN = 25;
 const uint8_t BUTTON_RIGHT_PIN = 26;
-const uint8_t POTENTIOMETER_PIN = A0;       // ! not used anymore
 const uint8_t MOTOR_INA1_PIN = 32;
 const uint8_t MOTOR_INB1_PIN = 34;
 const uint8_t MOTOR_PWM1_PIN = 2;
@@ -150,9 +149,7 @@ const uint8_t MOTOR_INB2_PIN = 7;
 const uint8_t MOTOR_PWM2_PIN = 3;
 const uint8_t MOTOR_EN2DIAG2_PIN = 5;      // enable pin
 const uint8_t MOTOR_CS2_PIN = A11;
-// ! not used??
-const uint8_t MANIFOLD_PIN[NB_SLOT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // TODO change pin
-// ! not used?
+
 const uint8_t ENCODER_MANIFOLD = 38;
 
 #endif

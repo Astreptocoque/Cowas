@@ -30,9 +30,6 @@ const float angle_offset_pos = 0;// 3; //5.2 for 160 of speed
 //const float angle_offset_neg = 4.9+6.3;
 const float angle_offset_neg = 0;
 
-extern float sterivex_angle[15];       // ! to cahnge back to .cpp
-
-
 enum slot_state
 {
     unaivailable,

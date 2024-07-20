@@ -19,7 +19,6 @@
 #include "Micro_pump.h"
 #include "Motor.h"
 #include "Encoder.h"
-#include "Potentiometer.h"
 #include "Led.h"
 #include <SPI.h>
 #include "C_output.h"
@@ -37,7 +36,6 @@
 
 // ============ MAIN FUNCTION DECLARATION =======
 void system_checkup();
-void before_start_program();
 void main_program();
 void button_control();
 
@@ -79,7 +77,6 @@ Button button_right;                        // User button. Normally open
 Button button_container;                    // Control button. Normally closed
 Button button_spool_up;                     // Control button. Normally closed
 Button button_spool_down;                   // Control button. Normally closed
-Potentiometer potentiometer;                // User rotary knob
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 Manifold manifold;                          // Manifold
 
@@ -114,11 +111,10 @@ void setup()
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
-    // doing problem right now, to investigate
+    // ! doing problem right now, to investigate
     // attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_DOWN), ISR_emergency_stop_down, FALLING);
     spool.endstop_up = false;
     spool.endstop_down = false;
-    potentiometer.begin(POTENTIOMETER_PIN);
     manifold.begin();
     manifold.change_state(PURGE_SLOT, unaivailable); // The purge has no filter
 
@@ -212,7 +208,7 @@ void main_program()
             step_purge();
         }
         else if(data == "purgePipesFunction"){
-            purge_Pipes();
+            purge_pipes_manifold();
         }
         else if(data == "fillContainerFunction"){
             step_fill_container();
@@ -244,43 +240,6 @@ void main_program()
         Serial.print(" - function accomplished - ");
         Serial.println(data);
         Serial.flush();
-    }
-}
-
-void before_start_program()
-{
-    // Enable to move spool manualy with left and right buttons
-    // Tune speed with potentiometer
-
-    uint8_t pot_last_value = potentiometer.get_value(0, 100);
-    uint8_t pot_value = 0;
-    uint8_t speedy = 60;
-    while (!button_start.isPressed())
-    {
-        pot_value = potentiometer.get_value(0, 100);
-        if (pot_value <= pot_last_value - 4 || pot_value >= pot_last_value + 4)
-        {
-            speedy = pot_value;
-            pot_last_value = pot_value;
-            output.println("speed " + String(speedy));
-        }
-        if (button_left.isPressed())
-        {
-            spool.set_speed(speedy, up);
-            spool.start();
-            while (button_left.isPressed())
-                delay(5);
-            spool.stop();
-        }
-        if (button_right.isPressed())
-        {
-            spool.set_speed(speedy, down);
-            spool.start();
-            while (button_right.isPressed())
-                delay(5);
-            spool.stop();
-        }
-        delay(10);
     }
 }
 

@@ -56,17 +56,6 @@ void purge_pipes_manifold(){
 
     button_start.waitPressedAndReleased();
 
-    // // fill some ethanol in the container
-    // valve_1.set_close_way();
-    // valve_23.set_I_way();
-    // // pump for 1 minute or button start is pressed
-    
-    
-    // run_pump(MAINT_FILL_TIME);
-    // delay(2000);
-
-    // alternatively 
-
     step_fill_container();
     delay(1000);
     pump.set_power(25);
@@ -87,7 +76,7 @@ void purge_pipes_manifold(){
         run_pump(MAINT_PURGE_TIME);
         valve_manifold.set_close_way();
 
-        if (slot == 8){
+        if (slot == 8){ // to avoid tangling pipe, note: should work without
             rotateMotor(4);
             rotateMotor(0);
         }
@@ -97,7 +86,7 @@ void purge_pipes_manifold(){
 
     valve_1.set_close_way();
     
-    step_purge(false);
+    step_purge(false);  // emptying container in case some water is left
 
 }
 

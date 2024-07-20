@@ -25,8 +25,6 @@ void test_3_sterivex_1();
 void test_3_sterivex_2();
 
 void tests();
-void test_pressure();
-
 
 void test_pressure_sensor();
 

@@ -17,6 +17,9 @@ void purge_pipes_manifold();
 */
 void calibrate_DNA_pump();
 
+/**
+ * @brief: steps to fill tube until T-connection with DNA shield
+ */
 void fill_DNA_shield_tube();
 
 

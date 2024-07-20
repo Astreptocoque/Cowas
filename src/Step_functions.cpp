@@ -61,7 +61,7 @@ extern Micro_Pump micro_pump;
 /**
  * @brief Unroll the spool at the correct depth
  * 
- * @param _depth Absolute depth at which to go.
+ * @param _depth Absolute depth in centimeters at which to go.
  */
 void step_dive(int _depth)
 {
@@ -133,14 +133,15 @@ void step_fill_container()
 
 /**
  * @brief Empty the container through purge channel. Step_fill_container first.
- * 
+ * Can be stopped manually with buttons
+ * @param stop_pressure if true, will stop purge when pressure is low enough
  */
 void step_purge(bool stop_pressure)
 {
 
     if(VERBOSE_PURGE){output.println("Step purge container started");}
     
-    if(VERBOSE_PURGE && !stop_pressure){output.println("Press right button when container is empty -> will stop purgung");}
+    if(VERBOSE_PURGE && !stop_pressure){output.println("Press right button when container is empty -> will stop purging");}
 
     // set the valves
     rotateMotor(PURGE_SLOT); // purge slot
@@ -333,11 +334,13 @@ void step_sampling(int slot_manifold, bool stop_pressure)
 }
 
 /**
- * @brief Purge Sterivex
+ * @brief Get most water out of Sterivex after sampling
  * 
+ * @param slot_manifold: manifold slot from current sample
  */
 void purge_sterivex(int slot_manifold)
 {
+    // aligning manifod and setting valves frm container to manifold
     rotateMotor(slot_manifold);
     valve_23.set_L_way();
     valve_manifold.set_open_way();
@@ -349,6 +352,7 @@ void purge_sterivex(int slot_manifold)
     delay(DELAY_ACTIONS);
 
     valve_manifold.set_close_way();
+    valve_23.set_off(); // to avoid current draw
 
 }
 
@@ -376,48 +380,6 @@ void step_rewind()
     valve_1.set_close_way();
 
     if(VERBOSE_REWIND){output.println("Step rewind ended");}
-}
-
-/**
- * @brief Dry a sterivex. Step_sample first.
- *        FUNCTION NOT CORRECTLY COMPLETED.
- *        TO ADAPT WITH SYSTEM.
- * 
- * @param num_filter the sterivex to dry
- */
-void step_dry(uint8_t num_filter)
-{
-    output.println("Step drying started");
-
-    // 10 secondes toutes les 2 minutes 3x
-    // temporaire
-
-    // set the valves
-    // TODO add valves
-
-    delay(DELAY_ACTIONS);
-
-    // TODO : function interrupt for pressure2
-    uint32_t time1 = millis();
-
-    for (uint8_t i = 0; i < 3; i++)
-    {
-        pump_vacuum.set_power(100);
-        pump_vacuum.start(10000);
-        while (millis() - time1 < DRYING_TIME)
-        {
-            // if(pressure2.getPressure() > VACUUM_MINIMUM){
-            //     pump_vacuum.start();
-            //     while(pressure2.getPressure() > VACUUM_TO_ACHIEVE && millis() - time1 < DRYING_TIME);
-            //     pump_vacuum.stop();
-            // }
-            delay(50);
-        }
-    }
-
-    // TODO : close valves
-
-    output.println("Step drying ended");
 }
 
 /**
@@ -449,34 +411,12 @@ void step_empty(){
     step_purge();
 }
 
-void purge_Pipes(){
-    step_rewind();
-    if(VERBOSE_FILL_CONTAINER){output.println("Step fill container started");}
-
-    valve_1.set_close_way();
-    valve_23.set_I_way();
-    delay(DELAY_ACTIONS);
-
-    uint32_t time1 = millis();
-    bool run = true;
-
-    pump.set_power(POWER_PUMP);
-    pump.start();
-
-    // two possibilities to stop filling : switch or time
-    do
-    {
-        if (millis() - time1 > EMPTY_TUBE_TIME)
-        {
-            run = false;
-        }
-    } while (run); // conditions are ouside loop to print what condition is responible for stopping
-
-    pump.stop();
-    delay(DELAY_ACTIONS);
-    valve_23.set_L_way();
-}
-
+/**
+ * @brief Function to call to perform a sample
+ * 
+ * @param depth: depth in centimeters 
+ * @param manifold_slot: slot in the manifold to use. If -1, will search for available slot
+ */
 void sample_process(int depth, int manifold_slot){
     // Verify if available filter
     bool filter_available= false;
