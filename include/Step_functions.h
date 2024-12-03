@@ -18,6 +18,8 @@ void step_DNA_shield(int slot_manifold);    // insert DNA shield to sterivex
 void sample_process(int depth, int manifold_slot = -1);
 void purge_sterivex(int slot_manifold);
 
+void abort_sample();   // call if something went wrong to get initial state
+
 void demo_sample_process();
 
 #endif

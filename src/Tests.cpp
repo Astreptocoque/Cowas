@@ -76,6 +76,18 @@ void test_all_components(){
             //test_command = Serial.readStringUntil('b');
             Serial.println(test_command);
 
+            if(test_command == "abort"){
+                Serial.println("Abort: empty container, rewind and empty deplyoment"); 
+                abort_sample();  
+            }
+
+            if (test_command == "temp"){    // quick debugging, change this function
+                valve_1.switch_way();
+                valve_23.switch_way();
+                valve_manifold.switch_way();
+                digitalWrite(PUMP_ENABLE, !digitalRead(PUMP_ENABLE));
+            }
+            
             if (test_command == "sample1m"){
                 Serial.println("test Sampling at 1 meter, press START");
                 button_start.waitPressedAndReleased();
@@ -167,6 +179,11 @@ void test_all_components(){
             if (test_command == "zero"){
                 // Serial.println("Calibrating encoder Manifold");
                 go_to_zero();       // ! maybe need change
+            }
+
+            if (test_command == "slot0"){
+                // Serial.println("Calibrating encoder Manifold");
+                rotateMotor(0);       // ! maybe need change
             }
 
             if (test_command == "micro_pump"){
@@ -507,7 +524,7 @@ void test_manifold(){
     for (int j = 1  ; j < 15; j++)
         {
         rotateMotor(0);
-        delay(3000);
+        delay(1000);
         rotateMotor(j);
 
         pos = getPositionSPI(ENCODER_MANIFOLD, RES12);
@@ -515,7 +532,9 @@ void test_manifold(){
         Serial.print("Manifold encoder value : ");
         Serial.print(pos);
         Serial.print(",    Angle in degrees : ");
-        Serial.println(angle_deg);
+        Serial.print(angle_deg);
+        Serial.print(",    Slot number : ");
+        Serial.println(j);
 
         delay(3000);
         }

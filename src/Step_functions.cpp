@@ -552,3 +552,12 @@ void step_DNA_shield(int slot_manifold){
 
     if(VERBOSE_SHIELD){output.println("Step DNA-shield finished");}
 }
+
+void abort_sample(){
+    // emptying container
+    step_purge();
+    // rewinding hose
+    step_rewind();
+    // emptying the deplyoment module
+    step_empty();
+}
