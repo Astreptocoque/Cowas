@@ -221,15 +221,15 @@ void calibrate_DNA_pump(){
 void fill_DNA_shield_tube(){
     output.println("THe DNA-shield need to be pumped until the first valve");
     output.println("Press RIGHT button to start, LEFT button to stop pump. When DNA-shield is at valve press STOP and then START to continue");
-     while (button_start.isReleased()){
-            if (button_right.isPressed()){
-                micro_pump.start();
-                button_right.waitPressedAndReleased();
-            }
-            if (button_left.isPressed()){
-                micro_pump.stop();
-                button_left.waitPressedAndReleased();
-            }      
+    while (button_start.isReleased()){
+        if (button_right.isPressed()){
+            micro_pump.start();
+            button_right.waitPressedAndReleased();
+        }
+        if (button_left.isPressed()){
+            micro_pump.stop();
+            button_left.waitPressedAndReleased();
+        }      
     }
     button_start.waitPressedAndReleased();
 }
