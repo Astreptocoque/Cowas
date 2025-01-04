@@ -30,6 +30,8 @@
 #include "Step_functions.h"
 #include "Manifold.h"
 #include "Micro_pump.h"
+#include "Pressure_sensor.h"
+#include "Flow_sensor.h"
 
 // Delay when actuating valves
 #define DELAY_ACTIONS 1000
@@ -39,7 +41,7 @@ extern Serial_device serial;
 extern Led blue_led;
 extern Led green_led;
 extern Trustability_ABP_Gage pressure1;
-extern Trustability_ABP_Gage pressure2;
+extern BigPressure pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_manifold;
@@ -57,6 +59,9 @@ extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern Manifold manifold;
 extern Micro_Pump micro_pump;
+
+extern Flow_sensor flow_sensor_small;
+extern Flow_sensor flow_sensor_big;
 
 /**
  * @brief Unroll the spool at the correct depth
@@ -99,11 +104,21 @@ void step_fill_container()
     uint32_t time1 = millis();
     bool run = true;
 
+    // * useless for now, only when pumping to the manifold
+    // flow_sensor_small.reset_values();
+    // flow_sensor_small.activate();
+
+    // flow_sensor_big.reset_values();
+    // flow_sensor_big.activate();
+
+    // uint32_t last_flow_read = millis();
+
     // pump.set_power(POWER_PUMP);
     pump.set_power(100);
     pump.start();
 
     // two possibilities to stop filling : switch or time
+    // read flow every second
     do
     {
         if (button_container.getState() == 0)
@@ -119,6 +134,21 @@ void step_fill_container()
             if(VERBOSE_FILL_CONTAINER){output.println("Fill container stopped by security timer");}
             // TODO : raise a system warning to user
         }
+        // * useless so far because it is not on the pipe to container
+        // // reading flowmeters
+        // if (millis() - last_flow_read > 1000){
+        //     flow_sensor_small.update();
+        //     flow_sensor_big.update();
+
+        //     if (true){  // add condition if want to print flow rate
+        //         Serial.print("Flowrate small : ");
+        //         Serial.println(flow_sensor_small.get_flowRate());
+        //         Serial.print("Flowrate big : ");
+        //         Serial.println(flow_sensor_big.get_flowRate());
+        //     }
+
+        //     last_flow_read = millis();
+        // }
     } while (run); // conditions are ouside loop to print what condition is responible for stopping
 
     pump.stop();
@@ -129,6 +159,12 @@ void step_fill_container()
     valve_23.set_L_way();
 
     if(VERBOSE_FILL_CONTAINER){output.println("Step fill container ended");}
+
+    // printing volume pumped
+    Serial.print("Total milliliters small : ");
+    Serial.println(flow_sensor_small.get_totalFlowMilliL());
+    Serial.print("Total milliliters big : ");
+    Serial.println(flow_sensor_big.get_totalFlowMilliL());
 }
 
 /**
@@ -160,9 +196,18 @@ void step_purge(bool stop_pressure)
     uint32_t time1 = millis();
     uint8_t validation_tick = 0;
     float pressure;
+    float pressure_other;
+
+    // flowsensors
+    flow_sensor_small.reset_values();
+    flow_sensor_small.activate();
+    flow_sensor_big.reset_values();
+    flow_sensor_big.activate();
 
     bool run = true;
-    int compteur = 0;
+    //int compteur = 0;
+
+    uint32_t last_pressure_print = millis();
 
     // loop stops after 2.5 seconds under threshold pressure or when time max is reach
     do
@@ -170,14 +215,29 @@ void step_purge(bool stop_pressure)
         delay(10); // don't read pressure to fast
 
         pressure = pressure1.getPressure();
-        if (compteur > 100){
+        pressure_other = pressure2.readPressure();
+        if (millis() - last_pressure_print > 1000){
             if(VERBOSE_PURGE_PRESSURE){
-                output.println("Pressure equal : " + String(pressure));
+                output.println("Pressure1 equal : " + String(pressure));
+                output.println("Pressure2 equal : " + String(pressure_other));
             }
-            compteur = 0;
+            // compteur = 0;
+
+            // also update flowsensors
+            flow_sensor_small.update();
+            flow_sensor_big.update();
+
+            if (true){  // add condition if want to print flow rate
+                Serial.print("Flowrate small : ");
+                Serial.println(flow_sensor_small.get_flowRate());
+                // Serial.print("Flowrate big : ");
+                // Serial.println(flow_sensor_big.get_flowRate());
+            }
+
+            last_pressure_print = millis();
         }
         
-        compteur++;
+        // compteur++;
         
 
         // adapt pump power to pressure to not go over limit of 3 bar
@@ -221,6 +281,9 @@ void step_purge(bool stop_pressure)
     delay(DELAY_ACTIONS);
     valve_manifold.set_close_way();
 
+    flow_sensor_small.print();
+    flow_sensor_big.print();
+
     if(VERBOSE_PURGE){output.println("Step purge container ended");}
 }
 
@@ -250,10 +313,14 @@ void step_sampling(int slot_manifold, bool stop_pressure)
     uint32_t time1 = millis();
     uint32_t validation_tick = 0;
     float pressure;
+    float pressure_other;
     bool run = true;
     float MIN_POWER_MOTOR=20;
     float MAX_POWER_MOTOR=100;
-    int compteur=0;
+    // int compteur=0;
+
+    uint32_t last_pressure_print = millis();
+
 
     // P-Controler parameters
     float POUT_TARGET = 2.5;      // ! was 3
@@ -267,11 +334,14 @@ void step_sampling(int slot_manifold, bool stop_pressure)
     {
         delay(10); // don't read pressure to fast
         pressure = pressure1.getPressure();
+        pressure_other = pressure2.readPressure();
         
-        if (compteur==100 && VERBOSE_SAMPLE_PRESSURE)
+        // every second
+        if (millis() - last_pressure_print > 1000 && VERBOSE_SAMPLE_PRESSURE)
         {
             output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
-            compteur=0;
+            output.println("Pressure other = " + String(pressure_other));
+            //compteur=0;
         }
 
         // adapt pump power to pressure to not go over limit of 3 bar
@@ -313,10 +383,11 @@ void step_sampling(int slot_manifold, bool stop_pressure)
             if(VERBOSE_SAMPLE){output.println("Sampling stopped, button pressed");}
         }
 
-        compteur++;
+        //compteur++;
     } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
     // pump a little bit more to flush all water
+    // ! no check of pressure, assumes the pump power was good for future
     pump.start(EMPTY_WATER_STX_SECURITY_TIME);
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time to sample water : " + String(millis() - time1) + " ms");}
@@ -506,7 +577,8 @@ void demo_sample_process(){
     if(VERBOSE_SAMPLE){output.println("Sample started");}
     // Sampling steps
     // step_dive(depth);
-    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+    uint8_t purge_num = 2;   // PURGE_NUMBER
+    for(uint8_t i = 0; i < purge_num; i++){
         button_start.waitPressedAndReleased();
         step_fill_container();
         button_start.waitPressedAndReleased();
@@ -520,7 +592,7 @@ void demo_sample_process(){
     // step_dry(get_next_sample_place());   // not completely done yet
 
     // ! TODO: add DNA shield here
-    step_DNA_shield(manifold_slot);
+    // step_DNA_shield(manifold_slot);
 
     // empty deployment module
 
@@ -551,6 +623,17 @@ void step_DNA_shield(int slot_manifold){
     valve_manifold.set_close_way();
 
     if(VERBOSE_SHIELD){output.println("Step DNA-shield finished");}
+}
+
+void DNA_shield_test(int slot_manifold){
+    // ! need to leave water in pipe
+
+    if(VERBOSE_SHIELD){output.println("Step DNA-shield started");}
+
+    // go to right slot
+    rotateMotor(slot_manifold);
+
+    micro_pump.start(FILL_STERIVEX_TIME);
 }
 
 void abort_sample(){

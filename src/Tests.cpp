@@ -26,6 +26,7 @@
 #include "Step_functions.h"
 #include "Manifold.h"
 #include "maintenance.h"
+#include "Pressure_sensor.h"
 
 extern int manifold_slot;
 extern C_output output;
@@ -33,7 +34,6 @@ extern Serial_device serial;
 extern Led status_led;
 extern Led green_led;
 extern Trustability_ABP_Gage pressure1;
-extern Trustability_ABP_Gage pressure2;
 extern Valve_2_2 valve_1;
 extern Valve_3_2 valve_23;
 extern Valve_2_2 valve_manifold;
@@ -53,6 +53,8 @@ extern Button button_right;
 // extern Potentiometer potentiometer;
 extern struct Timer timer_control_pressure1;
 extern struct Timer timer_control_pressure2;
+
+extern BigPressure pressure2;
 
 void test_serial_device()
 {
@@ -503,16 +505,21 @@ void test_3_sterivex_2(){
 
 void test_pressure_sensor(){
     float pressure;
+    float pressureBig;
 
     while (!Serial.available()){
         delay(500); // don't read pressure to fast
         pressure = pressure1.getPressure();
+        pressureBig = pressure2.readPressure();
 
 
-        Serial.print("Pressure encoder value : ");
+        Serial.print("Pressure Trustability value : ");
         Serial.println(pressure);
-        // Serial.print(",    Angle in degrees : ");
-        // Serial.println(angle_deg);
+        Serial.print("Pressure New sensor value : ");
+        Serial.println(pressureBig);
+        // Serial.print("   Analog value: ");
+        // Serial.println(analogRead(pressure_2_pin));
+
         delay(500);
     }
 }

@@ -55,6 +55,10 @@ slot_state Manifold_slot::get_state()
  */
 void Manifold::begin()
 {
+    for(int i=0; i < NB_SLOT; i++){
+        slots[i].begin(0, i);     // TODO: remove pin, not used
+    }   
+
     pinMode(ENCODER_MANIFOLD, OUTPUT);
     digitalWrite(ENCODER_MANIFOLD, HIGH);
 

@@ -21,7 +21,7 @@
 #define RES12           12
 
 const float encoder_to_deg = 360.0 / 4096.0;
-const float purge_angle = 243.5; //is the angle at which the purge hole is aligned with the rotor hole
+const float purge_angle = 234.49; //is the angle at which the purge hole is aligned with the rotor hole
 const float angle_between_slots = 22.5;
 
 const int omitted_angle_nb = 12;

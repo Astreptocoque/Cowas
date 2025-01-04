@@ -33,6 +33,8 @@
 #include "Manifold.h"
 #include "maintenance.h"
 
+#include "Flow_sensor.h"
+#include "Pressure_sensor.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
 void system_checkup();
@@ -53,8 +55,12 @@ void all_on();
 // states to manually control CoWaS with buttons
 bool ctrl_button;       // if possible to control CoWaS with buttons
 enum ctrl_state {ctrl_pump, ctrl_motor_spool, ctrl_v23, ctrl_v1, ctrl_vman, ctrl_man_slot, ctrl_micro_pump};
-uint8_t ctrl_state_len = 7; // to update when modifying lenght of control states
+uint8_t const ctrl_state_len = 7; // to update when modifying lenght of control states
+
+String ctrl_state_name[ctrl_state_len] = {"Pump", "Spool", "V23", "V1", "Vman", "Man Slot", "Micro Pump"};   
+
 ctrl_state control_state;
+
 
 // ============= REAL HARDWARE =================
 // ====> do not forget to add the object.begin() in setup()
@@ -80,9 +86,13 @@ Button button_spool_down;                   // Control button. Normally closed
 struct Timer timer_control_pressure1;       // Timer for interrupts with pressure sensor 1
 Manifold manifold;                          // Manifold
 
+// new sensors
+Flow_sensor flow_sensor_small;
+Flow_sensor flow_sensor_big;
 
-int manifold_slot; // Armand presentation
+BigPressure pressure2;      
 
+// PressureSensor pressureDFRobot;
 
 void setup()
 {
@@ -109,6 +119,7 @@ void setup()
     button_start.begin(BUTTON_START_PIN, "B_start");
     button_container.begin(BUTTON_CONTAINER_PIN, "B_container");
     button_spool_up.begin(BUTTON_SPOOL_UP, "B_spool_UP");
+    // interrupt
     attachInterrupt(digitalPinToInterrupt(BUTTON_SPOOL_UP), ISR_emergency_stop_up, FALLING);
     button_spool_down.begin(BUTTON_SPOOL_DOWN, "B_spool_down");
     // ! doing problem right now, to investigate
@@ -117,6 +128,12 @@ void setup()
     spool.endstop_down = false;
     manifold.begin();
     manifold.change_state(PURGE_SLOT, unaivailable); // The purge has no filter
+
+    // new sensors
+    flow_sensor_small.begin(FLOW_SMALL_PIN, calibrationFactor_small, &pulseCount_small, pulseCounter_small);
+    flow_sensor_big.begin(FLOW_BIG_PIN, calibrationFactor_big, &pulseCount_big, pulseCounter_big);
+
+    pressure2.begin(pressure_2_pin);
 
 
     output.println("system initalized\n");
@@ -151,13 +168,16 @@ void setup()
     // Communication with rapsberry
     Serial.begin(9600);
 
-    // For Armand Presentation
-    manifold_slot=0;
-
     ctrl_button = true;
 
     // ! calling testing function
     // purge_pipes_manifold();
+
+    // ! Flow sensor test
+    // flow_setup();
+    pressure2.readPressure();
+    delay(500);
+    pressure2.readPressure();
     
     test_all_components();
     // cross_cont_exp();
@@ -173,9 +193,10 @@ void setup()
 
 void loop()
 {
-    
-    button_control();
+    // flow_loop();
+    // button_control();
     // main_program();
+
 
 }
 
@@ -301,6 +322,7 @@ void system_checkup()
     }
 }
 
+#endif
 
 /*
     For valves: left close, right open
@@ -380,13 +402,13 @@ void button_control(){
             break;
         }
         case ctrl_motor_spool: {
-            if (button_right.isPressed()){
+            if (button_right.isPressed() && button_spool_down.isReleased()){
                 spool.set_speed(50, down);
                 spool.start();
                 button_right.waitPressedAndReleased();
                 spool.stop();
             }
-            if (button_left.isPressed()){
+            if (button_left.isPressed() && button_spool_up.isReleased()){
                 spool.set_speed(100, up);
                 spool.start();
                 button_left.waitPressedAndReleased();
@@ -413,6 +435,8 @@ void button_control(){
         control_state = static_cast<ctrl_state>((static_cast<uint8_t>(control_state) + 1) % ctrl_state_len);
         button_start.waitPressedAndReleased();
         Serial.print("New control state : ");
+        Serial.print(ctrl_state_name[control_state]);
+        Serial.print(" : ");
         Serial.println(control_state);
     }
 }
@@ -543,4 +567,3 @@ void all_on() {
     green_led.on();
 }
 
-#endif

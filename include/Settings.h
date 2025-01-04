@@ -122,6 +122,8 @@ const bool VERBOSE_SHIELD = true;
 const uint8_t STATUS_LED_PIN = 22;
 const uint8_t GREEN_LED_PIN = 23;
 const uint8_t PRESSURE1_PIN = 8;
+const uint8_t pressure_2_pin = A2;    // pressure 0-16Mpa (water and air)
+const uint8_t pressure_3_pin = A1;    // pressure 0-12 bar (cheaper one, only water)
 const uint8_t VALVE_1_PIN = 44;
 const uint8_t VALVE_23_PIN = 40;
 const uint8_t VALVE_MANIFOLD = 46; // valve manifold
@@ -151,5 +153,6 @@ const uint8_t MOTOR_EN2DIAG2_PIN = 5;      // enable pin
 const uint8_t MOTOR_CS2_PIN = A11;
 
 const uint8_t ENCODER_MANIFOLD = 38;
-
+const uint8_t FLOW_SMALL_PIN = 12;
+const uint8_t FLOW_BIG_PIN = 13;
 #endif
