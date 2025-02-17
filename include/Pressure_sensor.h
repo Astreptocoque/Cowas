@@ -13,6 +13,7 @@ public:
 
     // Read the pressure (analog voltage from input pin)
     float readPressure(); 
+    virtual ~PressureSensor() = default;
 
 protected:
     int _pin;

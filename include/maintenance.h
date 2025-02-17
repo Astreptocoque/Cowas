@@ -23,4 +23,7 @@ void calibrate_DNA_pump();
 void fill_DNA_shield_tube();
 
 
+void system_checkup();
+
+
 #endif

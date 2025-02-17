@@ -70,12 +70,12 @@ void Flow_sensor::update(){
     *_pulseCount = 0;
     // once read and reset can continue to handle new pulses
     activate();
-    Serial.print("Number of pulses counted : ");
-    Serial.println(nb_pulses);
+    // Serial.print("Number of pulses counted : ");
+    // Serial.println(nb_pulses);
     float new_water = nb_pulses * 1000.0 / float(_pulsePerL); // [mL]
 
-    Serial.print("New water : ");
-    Serial.println(new_water);
+    // Serial.print("New water : ");
+    // Serial.println(new_water);
 
     _totalMilliLitres += new_water;
     // 60000 to get from ms to mins and 1000 to get from mL to L

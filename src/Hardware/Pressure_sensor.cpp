@@ -12,8 +12,8 @@ float BigPressure::convertToPressure(float voltage) {
     // Serial.print("Pressure kpa : ");
     // Serial.println(pressure);
 
-    pressure = pressure / 101.325;
-    // Serial.print("Pressure atm : ");
+    pressure = pressure / 100.0;    // to get bars
+    // Serial.print("Pressure bar : ");
     // Serial.println(pressure);
 
     return pressure; // to get atm pressure

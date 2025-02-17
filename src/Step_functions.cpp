@@ -189,7 +189,7 @@ void step_purge(bool stop_pressure)
 
     // first action is to fill all tubes with water
     // otherwise the sensor will detect end of emptying
-    pump.start(FILL_TUBES_WITH_WATER_TIME);
+    pump.start(FILL_TUBES_WITH_WATER_TIME);     // ? replace with control_pressure
 
     // then start with sensor reading
     pump.start();
@@ -216,7 +216,7 @@ void step_purge(bool stop_pressure)
 
         pressure = pressure1.getPressure();
         pressure_other = pressure2.readPressure();
-        if (millis() - last_pressure_print > 1000){
+        if (millis() - last_pressure_print > 2000){
             if(VERBOSE_PURGE_PRESSURE){
                 output.println("Pressure1 equal : " + String(pressure));
                 output.println("Pressure2 equal : " + String(pressure_other));
@@ -230,8 +230,8 @@ void step_purge(bool stop_pressure)
             if (true){  // add condition if want to print flow rate
                 Serial.print("Flowrate small : ");
                 Serial.println(flow_sensor_small.get_flowRate());
-                // Serial.print("Flowrate big : ");
-                // Serial.println(flow_sensor_big.get_flowRate());
+                Serial.print("Flowrate big : ");
+                Serial.println(flow_sensor_big.get_flowRate());
             }
 
             last_pressure_print = millis();
@@ -290,7 +290,7 @@ void step_purge(bool stop_pressure)
 /**
  * @brief Empty water from container into choosen filter. Step_fill_container first.
  * 
- * @param num_filter The filter in which the sampling is made
+ * @param slot_manifold The filter in which the sampling is made
  */
 void step_sampling(int slot_manifold, bool stop_pressure)
 {
@@ -419,7 +419,7 @@ void purge_sterivex(int slot_manifold)
     delay(DELAY_ACTIONS);
 
     pump.set_power(100);
-    pump.start(EMPTY_WATER_SECURITY_TIME * 4);
+    pump.start(EMPTY_WATER_SECURITY_TIME * 4);      // ! no check on pressure
     delay(DELAY_ACTIONS);
 
     valve_manifold.set_close_way();
@@ -577,7 +577,7 @@ void demo_sample_process(){
     if(VERBOSE_SAMPLE){output.println("Sample started");}
     // Sampling steps
     // step_dive(depth);
-    uint8_t purge_num = 2;   // PURGE_NUMBER
+    uint8_t purge_num = 1;   // PURGE_NUMBER
     for(uint8_t i = 0; i < purge_num; i++){
         button_start.waitPressedAndReleased();
         step_fill_container();
@@ -592,7 +592,7 @@ void demo_sample_process(){
     // step_dry(get_next_sample_place());   // not completely done yet
 
     // ! TODO: add DNA shield here
-    // step_DNA_shield(manifold_slot);
+    step_DNA_shield(manifold_slot);
 
     // empty deployment module
 

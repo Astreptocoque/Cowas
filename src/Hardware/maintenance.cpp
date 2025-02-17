@@ -250,3 +250,64 @@ void run_pump(uint32_t max_time){
 
     pump.stop();
 }
+
+
+#ifdef SYSTEM_CHECKUP
+void system_checkup()
+{
+    // check if sensor are operationnal
+    bool error = false;
+
+    // check spool switch 1
+    spool.start(20, down);
+    delay(200);
+    spool.stop();
+    if (button_spool_up.getState() == 1){
+        output.println("CHECK | Button spool working");
+        spool.start_origin();
+    }else
+    {
+        output.println("ERROR | Button spool not working");
+        error = true;
+    }
+
+    // check container switch
+    if (button_container.getState() == 1)
+        output.println("CHECK | Button container working");
+    else{
+        output.println("ERROR | Button container not working");
+        error = true;
+    }
+
+    // check spool down switch
+    if (button_spool_down.getState() == 1)
+        output.println("CHECK | Button spool down working");
+    else{
+        output.println("ERROR | Button spool down not working");
+        error = true;
+    }
+
+    //check temperature
+    // flush first time reading otherwise error (no idea why)
+    pressure1.getTemperature();
+    delay(10);
+    if (pressure1.getTemperature() > 0)
+    {
+        output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
+    }
+    else
+    {
+        output.println("ERROR | Temperature too low (" + String(pressure1.getTemperature()) + ")");
+        error = true;
+    }
+
+    if (error)
+    {
+        output.println("FATAL ERROR AT STARTUP ");
+        set_system_state(state_error);
+        while (true)
+            delay(500);
+    }
+}
+
+#endif
