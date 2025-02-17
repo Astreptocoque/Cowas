@@ -31,7 +31,7 @@ private:
     uint16_t _pulsePerL;
     float _flowRate;             // not needed now, but will to detect if sample is saturated
     //unsigned int _flowMilliLitres;
-    unsigned long _totalMilliLitres;
+    float _totalMilliLitres;
     volatile uint32_t* _pulseCount;
     interruptRoutine _pulseCounter;
     uint32_t _lastUpdate;

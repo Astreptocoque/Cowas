@@ -154,6 +154,6 @@ const uint8_t MOTOR_EN2DIAG2_PIN = 5;      // enable pin
 const uint8_t MOTOR_CS2_PIN = A11;
 
 const uint8_t ENCODER_MANIFOLD = 38;
-const uint8_t FLOW_SMALL_PIN = 12;
-const uint8_t FLOW_BIG_PIN = 13;
+const uint8_t FLOW_SMALL_PIN = 13;  // probably fried
+const uint8_t FLOW_BIG_PIN = 12;
 #endif

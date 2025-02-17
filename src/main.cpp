@@ -32,17 +32,14 @@
 #include "TimeLib.h"
 #include "Manifold.h"
 #include "maintenance.h"
+#include "experiences.h"
 
 #include "Flow_sensor.h"
 #include "Pressure_sensor.h"
 
 // ============ MAIN FUNCTION DECLARATION =======
-void system_checkup();
 void main_program();
 void button_control();
-
-void cross_cont_exp();
-void exp_explore_2905();
 
 void all_on();
 
@@ -138,12 +135,12 @@ void setup()
 
     output.println("system initalized\n");
 
-    // ======== PRE-STARTING EXECUTION =========
-    output.println("========== Press start button to play program ==========================");
-    output.println("========== Press left button to move spool up ==========================");
-    output.println("========== Press right button to move spool down =======================");
-    output.println("========== Press reset button on due button to come back here ==========");
-    output.flush();
+    // // ======== PRE-STARTING EXECUTION =========
+    // output.println("========== Press start button to play program ==========================");
+    // output.println("========== Press left button to move spool up ==========================");
+    // output.println("========== Press right button to move spool down =======================");
+    // output.println("========== Press reset button on due button to come back here ==========");
+    // output.flush();
 
     green_led.on();
     status_led.on();
@@ -175,21 +172,40 @@ void setup()
 
     // ! Flow sensor test
     // flow_setup();
-    pressure2.readPressure();
-    delay(500);
-    pressure2.readPressure();
-    
+    // pressure2.readPressure();
+    // delay(500);
+    // pressure2.readPressure();
+
+    pump_pid.setOutputLimits(0, 100);       // always do in setup/ or in pump.begin()
+    pump_pid.setPID(200, 100, 0);
+
     test_all_components();
-    // cross_cont_exp();
 
+    CtrlPumpNoWater test_ctrl;
+    //test_ctrl.begin(&pump, &pump_pid, &pressure1, &flow_sensor_small, 200, 0.4, true);
+    test_ctrl.begin(&pump, &pump_pid, &pressure1, 0.4, true);
+    test_ctrl.set_end_cond_time(5000);
+    
+    test_ctrl.set_max_runtime(60*1000); // in ms
+    valve_23.set_I_way();       // temp
 
-    // filling the DNA shield pipe
+    test_ctrl.run();        // RUUUUUUUN
+
+    valve_23.set_L_way();
+
+    Serial.println("Test control finished");
+    
     // fill_DNA_shield_tube();
-    // exp_explore_2905();
+
 
     // all_on();
 }
 
+bool pump_on = false;
+uint32_t last_p_p = millis();
+float pressure_meas_count = 0;
+float avg_old = 0;
+float avg_new = 0;
 
 void loop()
 {
@@ -197,7 +213,52 @@ void loop()
     // button_control();
     // main_program();
 
+    if (Serial.available()){
+        while (Serial.available()){
+            Serial.read();
+        }
+        
+        if (pump_on){
+            pump.set_power(0);
+            pump_on = false;
+        } else{
+            pump.set_power(80);
+            pump.start();
+            pump_on = true;
+        }
+        // digitalWrite(PUMP_ENABLE, !digitalRead(PUMP_ENABLE));
+        Serial.println("Toggled relay pump");
+    }
 
+    // float pressure;
+    // float pressureBig;
+    // avg_old += pressure1.getPressure();
+    // avg_new += pressure2.readPressure();
+    // pressure_meas_count = pressure_meas_count + 1.0;
+
+
+    // if (millis() - last_p_p > 500){
+    //     pressure = pressure1.getPressure();
+    //     pressureBig = pressure2.readPressure();
+
+    //     Serial.print("Pressure Trustability avg value : ");
+    //     Serial.println(avg_old/pressure_meas_count);
+    //     // Serial.println(pressure);
+    //     Serial.print("Pressure New sensor avg value : ");
+    //     Serial.println(avg_new/pressure_meas_count);
+    //     // Serial.println(pressureBig);
+    //     Serial.println("-----");
+    //     // Serial.print("   Analog value: ");
+    //     // Serial.println(analogRead(pressure_2_pin));
+
+    //     avg_old = 0;
+    //     avg_new = 0;
+    //     pressure_meas_count = 0;
+
+    //     last_p_p = millis();
+    // }
+
+    delay(50);
 }
 
 void main_program()
@@ -264,65 +325,6 @@ void main_program()
     }
 }
 
-#ifdef SYSTEM_CHECKUP
-void system_checkup()
-{
-    // check if sensor are operationnal
-    bool error = false;
-
-    // check spool switch 1
-    spool.start(20, down);
-    delay(200);
-    spool.stop();
-    if (button_spool_up.getState() == 1){
-        output.println("CHECK | Button spool working");
-        spool.start_origin();
-    }else
-    {
-        output.println("ERROR | Button spool not working");
-        error = true;
-    }
-
-    // check container switch
-    if (button_container.getState() == 1)
-        output.println("CHECK | Button container working");
-    else{
-        output.println("ERROR | Button container not working");
-        error = true;
-    }
-
-    // check spool down switch
-    if (button_spool_down.getState() == 1)
-        output.println("CHECK | Button spool down working");
-    else{
-        output.println("ERROR | Button spool down not working");
-        error = true;
-    }
-
-    //check temperature
-    // flush first time reading otherwise error (no idea why)
-    pressure1.getTemperature();
-    delay(10);
-    if (pressure1.getTemperature() > 0)
-    {
-        output.println("CHECK | Temperature okay (" + String(pressure1.getTemperature()) + ")");
-    }
-    else
-    {
-        output.println("ERROR | Temperature too low (" + String(pressure1.getTemperature()) + ")");
-        error = true;
-    }
-
-    if (error)
-    {
-        output.println("FATAL ERROR AT STARTUP ");
-        set_system_state(state_error);
-        while (true)
-            delay(500);
-    }
-}
-
-#endif
 
 /*
     For valves: left close, right open
@@ -440,116 +442,6 @@ void button_control(){
         Serial.println(control_state);
     }
 }
-
-void cross_cont_exp(){
-    output.println("Cross contamination test started");
-    output.println("");
-    output.println("Reuse the purged water in recipient, to filter and reuse later");
-    output.println("When pipe is destilled water, press start");
-
-    // using 4 liter of distilled water
-
-    button_start.waitPressedAndReleased();
-
-    // sample 1, distilled water
-    // !!!!!!!! -----------------
-    step_fill_container();
-    step_purge(false);
-    // !! ------------
-
-
-    output.println("REUSE filtered water in 5L container");
-    output.println("When pipe is in NEW destilled water, press start to start SAMPLE N°1");
-
-    button_start.waitPressedAndReleased();
-
-    step_fill_container();
-    step_sampling(1, false);
-
-    // sample 2, no need to rinse as sample before was with destilled water
-    output.println("Put filtered water in seperate recipient to discard colony later"); // !
-    output.println("When pipe is in bacterial colony, press start for SAMPLING N°2");
-
-    button_start.waitPressedAndReleased();
-    
-    step_fill_container();
-    step_sampling(2, false);
-
-    output.println("");
-    output.println("Discard the water with the bacterial colony");
-    
-
-    output.println("Reuse water in a recipient");
-    output.println("When pipe is in distilled water container 5L (2L, filtered from sample 1), press start");
-    button_start.waitPressedAndReleased();
-
-    // rinsing bacterial colony, before sample 3
-
-    step_fill_container();
-    delay(3000);
-    step_purge(false);
-
-    output.println("Filter the 4L of water (from last purge and first purge) through a serivex into the 5L container");
-    output.println("When filtered, put pipe into the 5L container (containing 4L of distilled water)");
-    output.println("Press start button when ready");
-
-    button_start.waitPressedAndReleased();
-
-    for(uint8_t i = 0; i < 2; i++){
-        step_fill_container();
-        delay(3000);
-        step_purge(false);
-    }
-
-
-
-    output.println("Purge finished");
-    output.println("When pipe is in NEW (the last 2L) distilled water, press start for SAMPLE N°3");
-    button_start.waitPressedAndReleased();
-
-    step_fill_container();
-    step_sampling(3, false);
-}
-
-
-void exp_explore_2905(){
-    output.println("Start of experiment - L'EXPLORE");
-    output.println("--------------------------------------------");
-
-    // output.println("Start of sample 1 in slot 1");
-    // output.println("Depth : 39m");
-    // output.println("Press start when ready");
-    // button_start.waitPressedAndReleased();
-    // sample_process(39*100, 1);
-
-    output.println("Start of sample 2 in slot 4");
-    output.println("Depth : 5m");
-    output.println("Press start when ready");
-    button_start.waitPressedAndReleased();
-    sample_process(5*100, 4);
-
-    output.println("Start of sample 3 in slot 8");
-    output.println("Depth : 5m");
-    output.println("Press start when ready");
-    button_start.waitPressedAndReleased();
-    sample_process(5*100, 8);
-
-    output.println("Start of sample 4 in slot 11");
-    output.println("Depth : 5m");
-    output.println("Press start when ready");
-    button_start.waitPressedAndReleased();
-    sample_process(5*100, 11);
-
-    output.println("Start of sample 5 in slot 14");
-    output.println("Depth : 3m");
-    output.println("Press start when ready");
-    button_start.waitPressedAndReleased();
-    sample_process(3*100, 14);
-
-    output.println("Well done, get a drink and enjoy the succesfull experiene");
-    output.println("------------------------------------------------------------");
-}
-
 
 void all_on() {
     // Turn on all components here
