@@ -47,14 +47,17 @@ const bool MANIFOLD_USE = true;    // use the manifold in the system
 // system variables
 const int UPDATE_TIME = 1000;                                   // ms. Refresh frequency for main program
 const float STX_MAX_PRESSURE = 3.0;
-const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.035f;//0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
+const float EMPTY_WATER_PRESSURE_PURGE_THRESHOLD = 0.04f;//0.06f;       // bar from atmosphere. Threshold of pressure in tube considered as empty when purging
 const float EMPTY_WATER_PRESSURE_STX_THRESHOLD = 0.8f;  //1.7f;          // bar from atmosphere. Threshold of pressure in tube considered as empty when filtering
 const uint32_t EMPTY_WATER_SECURITY_TIME = 5*1000;              // ms. Time to ensure a correct flush of the container when purging
 const uint32_t EMPTY_WATER_STX_SECURITY_TIME = 60*1000;         // ms. Time to ensure a correct flush of the conainter when filtering
 const uint32_t EMPTY_DEPLOYMENT_TIME = 5*60*1000;
+
 // ! need to change this
 const uint32_t PREPARATION_TIME = 60*30;                        // ms. system needs 30 minutes preparation before sampling
 const uint8_t PURGE_NUMBER = 3;                                 // number of water container purge before sampling
+const float PURGE_MILLILITERS = 2*1000;                        
+const float STX_SAMPLE_MILLILITERS;                             // amount of maximum volume to filter. Need to add a way to determine filter saturation and stop based on that
 const uint32_t SYNC_TIME = 32400;                               // ms. Time before refetching wifi time. Not implemented
 const uint8_t MAX_FILTER_NUMBER = 14;                            // max filters possible in the system
 extern uint8_t FILTER_IN_SYSTEM;                                // max filters currently inserted in the system
@@ -102,13 +105,13 @@ const bool DEBUG_MODE_PRINT = true;
 
 const bool ENABLE_TIME_LOG = false;                              // If true, print the time before each printed output
 const bool VERBOSE_INIT = false;
-const bool VERBOSE_VALVES = false;
+const bool VERBOSE_VALVES = true;
 const bool VERBOSE_MOTOR = false;
-const bool VERBOSE_PURGE = false;
-const bool VERBOSE_PURGE_PRESSURE = false;
-const bool VERBOSE_SAMPLE = false;
-const bool VERBOSE_SAMPLE_PRESSURE = false;
-const bool VERBOSE_PUMP = false;
+const bool VERBOSE_PURGE = true;
+const bool VERBOSE_PURGE_PRESSURE = true;
+const bool VERBOSE_SAMPLE = true;
+const bool VERBOSE_SAMPLE_PRESSURE = true;
+const bool VERBOSE_PUMP = true;
 const bool VERBOSE_REWIND = false;
 const bool VERBOSE_FILL_CONTAINER = false;
 const bool VERBOSE_DIVE = false;

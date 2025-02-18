@@ -13,7 +13,6 @@ extern Trustability_ABP_Gage pressure2;
 extern Led status_led;
 extern Pump pump;
 
-extern Flow_sensor flow_sensor_small;       // only for testing
 
 /**
  * @brief Constructor for a diaphragm pump
@@ -193,16 +192,10 @@ void CtrlPump::run(){
         if ((millis() - last_print > 1000) && print_){
             // print info
             // check with bool print
-            // Serial.print("Pressure bar : ");
-            // Serial.println(pres_sens_->getPressure());
-            // Serial.print("Pump power : ");
-            // Serial.println(pump_->get_power());
-
             Serial.print("Pressure bar : ");
             Serial.println(pres_sens_->getPressure());
-            flow_sensor_small.update();
-            Serial.print("Flow : ");
-            Serial.println(flow_sensor_small.get_totalFlowMilliL());
+            Serial.print("Pump power : ");
+            Serial.println(pump_->get_power());
 
             last_print = millis();
         }
@@ -229,17 +222,17 @@ bool CtrlPump::update_end_cond(bool new_end_cond){
     bool ret_val = false;
     if (!new_end_cond && end_cond_met_){
         reset_end_cond();   // the end condition was not valid long enough so reset
-        Serial.println("Update end cond reset");
+        if (print_){Serial.println("Update end cond reset");}
     }
     else if (new_end_cond){
         if (!end_cond_met_){     // first time the end condition is met
             time_first_cond_met_ = millis();
-            Serial.println("End cond first met");
+            if(print_){Serial.println("End cond first met");}
         }
         else{   // when end condition valid long enough
             if (millis() - time_first_cond_met_ > time_end_valid_){
                 ret_val = true;
-                Serial.println("Pump control loop should stop now");
+                if(true){Serial.println("Pump control loop should stop now");}
             }
         }
     }
