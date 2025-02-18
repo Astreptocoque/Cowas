@@ -155,6 +155,7 @@ void CtrlPump::begin(Pump *pump, MiniPID *pid, Trustability_ABP_Gage *pressure_s
 
     max_pressure_ = STX_MAX_PRESSURE;   // can be adapted with the set function if needed
     max_runtime_ = (uint32_t)~0;    // largest number possible, need to change later
+    time_end_valid_ = 0;
 }
 
 
@@ -199,6 +200,7 @@ void CtrlPump::run(){
 
             Serial.print("Pressure bar : ");
             Serial.println(pres_sens_->getPressure());
+            flow_sensor_small.update();
             Serial.print("Flow : ");
             Serial.println(flow_sensor_small.get_totalFlowMilliL());
 
@@ -250,10 +252,13 @@ bool CtrlPump::update_end_cond(bool new_end_cond){
 void CtrlPumpNoWater::begin(Pump *pump, MiniPID *pid, Trustability_ABP_Gage *pressure_sens, float target_pressure, bool print){
     CtrlPump::begin(pump, pid, pressure_sens, target_pressure, print);
     pressure_thresh_ = EMPTY_WATER_PRESSURE_PURGE_THRESHOLD;
+    filtered_pressure_ = 0;
 }
 
 bool CtrlPumpNoWater::check_end_cond(){
-    return pres_sens_->getPressure() < pressure_thresh_;
+    // using exponential filter to smooth peaks when there is only little water in pipes
+    filtered_pressure_ = (1-0.3)*filtered_pressure_ + 0.3*pres_sens_->getPressure();
+    return filtered_pressure_ < pressure_thresh_;
 }
 
 
@@ -276,6 +281,8 @@ void CtrlPumpFlow::reset(){
     flow_sensor_->reset_values();
     flow_sensor_->activate();
     Serial.println("Flow sensor reset, CtrlPumpFlow");
+    Serial.print("Millil after reset: ");
+    Serial.println(flow_sensor_->get_totalFlowMilliL());
 }
 
 

@@ -88,6 +88,8 @@ void step_dive(int _depth)
     if(VERBOSE_DIVE){output.println("Step dive ended");}
 }
 
+
+// ! Useless function now
 /**
  * @brief Fill with water the container. Step_dive first.
  * 
@@ -174,117 +176,136 @@ void step_fill_container()
  */
 void step_purge(bool stop_pressure)
 {
-
-    if(VERBOSE_PURGE){output.println("Step purge container started");}
-    
-    if(VERBOSE_PURGE && !stop_pressure){output.println("Press right button when container is empty -> will stop purging");}
+    if(VERBOSE_PURGE){output.println("Step purge started");}
 
     // set the valves
     rotateMotor(PURGE_SLOT); // purge slot
-    valve_manifold.set_open_way();
-    valve_23.set_L_way();
+    valve_1.set_close_way();
     delay(DELAY_ACTIONS);
 
-    pump.set_power(POWER_FLUSH);
+    CtrlPumpFlow ctrl_flow;
+    ctrl_flow.begin(&pump, &pump_pid, &pressure1, &flow_sensor_small, 200, 2, true);
+    ctrl_flow.set_max_runtime(3*60*1000); // in ms
 
-    // first action is to fill all tubes with water
-    // otherwise the sensor will detect end of emptying
-    pump.start(FILL_TUBES_WITH_WATER_TIME);     // ? replace with control_pressure
+    // CtrlPumpNoWater ctrl_empty;
+    // ctrl_empty.begin(&pump, &pump_pid, &pressure1, 0.4, true);
+    // ctrl_empty.set_end_cond_time(5000);
+    // ctrl_empty.set_max_runtime(60*1000); // in ms
 
-    // then start with sensor reading
-    pump.start();
+
     uint32_t time1 = millis();
-    uint8_t validation_tick = 0;
-    float pressure;
-    float pressure_other;
+    // purge with certain flow
+    if(VERBOSE_PURGE){output.println("ctrl flow started");}
+    ctrl_flow.run();
+    // emptying the tubes, not necessarly possible as we can pump straight into sterivex
+    // valve_1.set_open_way();     // we only want to empty system, not deployment module
+    // // ! maybe don't even empty as deployment module will partially empty itself when opening valve
+    // if(VERBOSE_PURGE){output.println("Ctrl no water started");}
+    // ctrl_empty.run();
+    valve_1.set_close_way();
 
-    // flowsensors
-    flow_sensor_small.reset_values();
-    flow_sensor_small.activate();
-    flow_sensor_big.reset_values();
-    flow_sensor_big.activate();
+    //* ----------- old way
 
-    bool run = true;
-    //int compteur = 0;
+    // pump.set_power(POWER_FLUSH);
 
-    uint32_t last_pressure_print = millis();
+    // // first action is to fill all tubes with water
+    // // otherwise the sensor will detect end of emptying
+    // pump.start(FILL_TUBES_WITH_WATER_TIME);     // ? replace with control_pressure
 
-    // loop stops after 2.5 seconds under threshold pressure or when time max is reach
-    do
-    {
-        delay(10); // don't read pressure to fast
+    // // then start with sensor reading
+    // pump.start();
 
-        pressure = pressure1.getPressure();
-        pressure_other = pressure2.readPressure();
-        if (millis() - last_pressure_print > 2000){
-            if(VERBOSE_PURGE_PRESSURE){
-                output.println("Pressure1 equal : " + String(pressure));
-                output.println("Pressure2 equal : " + String(pressure_other));
-            }
-            // compteur = 0;
+    // uint8_t validation_tick = 0;
+    // float pressure;
+    // float pressure_other;
 
-            // also update flowsensors
-            flow_sensor_small.update();
-            flow_sensor_big.update();
+    // // flowsensors
+    // flow_sensor_small.reset_values();
+    // flow_sensor_small.activate();
+    // flow_sensor_big.reset_values();
+    // flow_sensor_big.activate();
 
-            if (true){  // add condition if want to print flow rate
-                Serial.print("Flowrate small : ");
-                Serial.println(flow_sensor_small.get_flowRate());
-                Serial.print("Flowrate big : ");
-                Serial.println(flow_sensor_big.get_flowRate());
-            }
+    // bool run = true;
+    // //int compteur = 0;
 
-            last_pressure_print = millis();
-        }
+    // uint32_t last_pressure_print = millis();
+
+    // // loop stops after 2.5 seconds under threshold pressure or when time max is reach
+    // do
+    // {
+    //     delay(10); // don't read pressure to fast
+
+    //     pressure = pressure1.getPressure();
+    //     pressure_other = pressure2.readPressure();
+    //     if (millis() - last_pressure_print > 2000){
+    //         if(VERBOSE_PURGE_PRESSURE){
+    //             output.println("Pressure1 equal : " + String(pressure));
+    //             output.println("Pressure2 equal : " + String(pressure_other));
+    //         }
+    //         // compteur = 0;
+
+    //         // also update flowsensors
+    //         flow_sensor_small.update();
+    //         flow_sensor_big.update();
+
+    //         if (true){  // add condition if want to print flow rate
+    //             Serial.print("Flowrate small : ");
+    //             Serial.println(flow_sensor_small.get_flowRate());
+    //             Serial.print("Flowrate big : ");
+    //             Serial.println(flow_sensor_big.get_flowRate());
+    //         }
+
+    //         last_pressure_print = millis();
+    //     }
         
-        // compteur++;
+    //     // compteur++;
         
 
-        // adapt pump power to pressure to not go over limit of 3 bar
-        // simple incremental controler. Not the best one but does the job
-        if (pressure > 3)
-            pump.set_power(pump.get_power() - 2);
-        else if (pressure < 2.6f)
-            pump.set_power(pump.get_power() + 2);
+    //     // adapt pump power to pressure to not go over limit of 3 bar
+    //     // simple incremental controler. Not the best one but does the job
+    //     if (pressure > 3)
+    //         pump.set_power(pump.get_power() - 2);
+    //     else if (pressure < 2.6f)
+    //         pump.set_power(pump.get_power() + 2);
 
-        // if pressure is low enough, engage stopping processure
-        if (pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD)
-            validation_tick++;
-        else
-            validation_tick = 0;
+    //     // if pressure is low enough, engage stopping processure
+    //     if (pressure1.getPressure() < EMPTY_WATER_PRESSURE_PURGE_THRESHOLD)
+    //         validation_tick++;
+    //     else
+    //         validation_tick = 0;
 
-        // stop purge only if the setting is true
-        if (validation_tick >= 250 && stop_pressure)
-        {
-            run = false;
-            if(VERBOSE_PURGE && stop_pressure){output.println("Purge stopped by low pressure");}
-        }
-        else if (millis() - time1 > EMPTY_CONTAINER_TIME_PURGE)
-        {
-            run = false;
-            if(VERBOSE_PURGE){output.println("Purge stopped by security timer");}
-            // TODO : raise a system warning to user
-        }
-        // stop if button pressed
-        else if (button_right.isPressed()){
-            run = false;
-            if(VERBOSE_PURGE){output.println("Purge stopped, button pressed");}
-        }
+    //     // stop purge only if the setting is true
+    //     if (validation_tick >= 250 && stop_pressure)
+    //     {
+    //         run = false;
+    //         if(VERBOSE_PURGE && stop_pressure){output.println("Purge stopped by low pressure");}
+    //     }
+    //     else if (millis() - time1 > EMPTY_CONTAINER_TIME_PURGE)
+    //     {
+    //         run = false;
+    //         if(VERBOSE_PURGE){output.println("Purge stopped by security timer");}
+    //         // TODO : raise a system warning to user
+    //     }
+    //     // stop if button pressed
+    //     else if (button_right.isPressed()){
+    //         run = false;
+    //         if(VERBOSE_PURGE){output.println("Purge stopped, button pressed");}
+    //     }
 
-    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+    // } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
-    // pump a little bit more to flush all water
-    pump.start(EMPTY_WATER_SECURITY_TIME);
+    // // pump a little bit more to flush all water
+    // pump.start(EMPTY_WATER_SECURITY_TIME);
 
-    if(VERBOSE_PURGE || TIMER){output.println("Time to purge container : " + String(millis() - time1) + " ms");}
+    if(VERBOSE_PURGE || TIMER){output.println("Time to purge : " + String(millis() - time1) + " ms");}
 
-    delay(DELAY_ACTIONS);
-    valve_manifold.set_close_way();
+    // delay(DELAY_ACTIONS);
+    // valve_manifold.set_close_way();
 
-    flow_sensor_small.print();
-    flow_sensor_big.print();
+    // flow_sensor_small.print();
+    // flow_sensor_big.print();
 
-    if(VERBOSE_PURGE){output.println("Step purge container ended");}
+    if(VERBOSE_PURGE){output.println("Step purge ended");}
 }
 
 /**
@@ -300,106 +321,148 @@ void step_sampling(int slot_manifold, bool stop_pressure)
 
     // set the valves
     rotateMotor(slot_manifold);
-    valve_23.set_L_way();
-    valve_manifold.set_open_way();
+    valve_1.set_close_way();
+    // valve_23.set_L_way();
+    // valve_manifold.set_open_way();
     delay(DELAY_ACTIONS);
 
-    pump.set_power(POWER_STX);
 
-    // start by filling all tubes with water to have enough pressure (sensor)
-    pump.start(FILL_TUBES_WITH_WATER_TIME);
+    // sample certain amount
+    // todo: detect when pressure is below certain threshhold == sterivex saturated
+    CtrlPumpFlow ctrl_flow;
+    ctrl_flow.begin(&pump, &pump_pid, &pressure1, &flow_sensor_small, 200, 2, true);
+    ctrl_flow.set_max_runtime(3*60*1000); // in ms
 
-    pump.start();
+    CtrlPumpNoWater ctrl_empty; // here we want to empty sterivex
+    ctrl_empty.begin(&pump, &pump_pid, &pressure1, 0.4, true);
+    ctrl_empty.set_end_cond_time(5000);
+    ctrl_empty.set_max_runtime(60*1000); // in ms
+
+
     uint32_t time1 = millis();
-    uint32_t validation_tick = 0;
-    float pressure;
-    float pressure_other;
-    bool run = true;
-    float MIN_POWER_MOTOR=20;
-    float MAX_POWER_MOTOR=100;
-    // int compteur=0;
 
-    uint32_t last_pressure_print = millis();
+    // purge with certain flow
+    if(VERBOSE_SAMPLE){output.println("Step sample: pumping water through sterivex");}
+    ctrl_flow.run();
+
+    // emptying the tubes
+    valve_1.set_open_way();   // here we want to empty the system
+    rotateMotor(PURGE_SLOT);   //!
+    valve_1.set_open_way();     // to take air instead of water
+    if(VERBOSE_SAMPLE){output.println("Step sample: emptying through purge");}
+    ctrl_empty.run();
+
+    // replaces purge_sterivex();
+    rotateMotor(slot_manifold);
+    if(VERBOSE_SAMPLE){output.println("Step sample: emptying sterivex");}
+
+    ctrl_empty.set_pressure_thresh(EMPTY_WATER_PRESSURE_STX_THRESHOLD);
+    ctrl_empty.run();   // emptying sterivex
+    valve_1.set_close_way();
 
 
-    // P-Controler parameters
-    float POUT_TARGET = 2.5;      // ! was 3
-    float error = 0;
-    float gain = 0;
-    float offset = 0;
-    float Kp = 90;
 
-    // loop stops after 2.5 seconds under pressure threshold or when time max is reached
-    do
-    {
-        delay(10); // don't read pressure to fast
-        pressure = pressure1.getPressure();
-        pressure_other = pressure2.readPressure();
+
+
+    // pump.set_power(POWER_STX);
+
+    // // start by filling all tubes with water to have enough pressure (sensor)
+    // pump.start(FILL_TUBES_WITH_WATER_TIME);
+
+    // pump.start();
+    // uint32_t time1 = millis();
+    // uint32_t validation_tick = 0;
+    // float pressure;
+    // float pressure_other;
+    // bool run = true;
+    // float MIN_POWER_MOTOR=20;
+    // float MAX_POWER_MOTOR=100;
+    // // int compteur=0;
+
+    // uint32_t last_pressure_print = millis();
+
+
+    // // P-Controler parameters
+    // float POUT_TARGET = 2.5;      // ! was 3
+    // float error = 0;
+    // float gain = 0;
+    // float offset = 0;
+    // float Kp = 90;
+
+    // // loop stops after 2.5 seconds under pressure threshold or when time max is reached
+    // do
+    // {
+    //     delay(10); // don't read pressure to fast
+    //     pressure = pressure1.getPressure();
+    //     pressure_other = pressure2.readPressure();
         
-        // every second
-        if (millis() - last_pressure_print > 1000 && VERBOSE_SAMPLE_PRESSURE)
-        {
-            output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
-            output.println("Pressure other = " + String(pressure_other));
-            //compteur=0;
-        }
+    //     // every second
+    //     if (millis() - last_pressure_print > 1000 && VERBOSE_SAMPLE_PRESSURE)
+    //     {
+    //         output.println("Pressure = " + String(pressure)+ ",   pump power = " +String(pump.get_power()));
+    //         output.println("Pressure other = " + String(pressure_other));
+    //         //compteur=0;
+    //     }
 
-        // adapt pump power to pressure to not go over limit of 3 bar
-        error=POUT_TARGET-pressure;
-        gain=error*Kp + offset;
+    //     // adapt pump power to pressure to not go over limit of 3 bar
+    //     error=POUT_TARGET-pressure;
+    //     gain=error*Kp + offset;
 
-        if (gain > MAX_POWER_MOTOR)
-        {
-            gain=100;
-        }
-        else if (gain < MIN_POWER_MOTOR)
-        {
-            gain=0;
-        }
+    //     if (gain > MAX_POWER_MOTOR)
+    //     {
+    //         gain=100;
+    //     }
+    //     else if (gain < MIN_POWER_MOTOR)
+    //     {
+    //         gain=0;
+    //     }
 
-        pump.set_power(gain);
+    //     pump.set_power(gain);
 
-        // if pressure low enough, engage stopping processure
-        if (pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
-            validation_tick++;}
-        else
-            validation_tick = 0;
+    //     // if pressure low enough, engage stopping processure
+    //     if (pressure < EMPTY_WATER_PRESSURE_STX_THRESHOLD){
+    //         validation_tick++;}
+    //     else
+    //         validation_tick = 0;
 
-        if (validation_tick >= 2000 && stop_pressure)
-        {
-            run = false;
-            if(VERBOSE_SAMPLE){output.println("Sampling stopped by low pressure");}
-        }
-        else if (millis() - time1 > EMPTY_CONTAINER_TIME_FILTER && !TIMER)
-        {
-            run = false;
-            if(VERBOSE_SAMPLE){output.println("Sampling stopped by security timer");}
-            // TODO : raise a system warning to user
-        }
+    //     if (validation_tick >= 2000 && stop_pressure)
+    //     {
+    //         run = false;
+    //         if(VERBOSE_SAMPLE){output.println("Sampling stopped by low pressure");}
+    //     }
+    //     else if (millis() - time1 > EMPTY_CONTAINER_TIME_FILTER && !TIMER)
+    //     {
+    //         run = false;
+    //         if(VERBOSE_SAMPLE){output.println("Sampling stopped by security timer");}
+    //         // TODO : raise a system warning to user
+    //     }
 
-        // stop if button pressed
-        else if (button_right.isPressed()){
-            run = false;
-            if(VERBOSE_SAMPLE){output.println("Sampling stopped, button pressed");}
-        }
+    //     // stop if button pressed
+    //     else if (button_right.isPressed()){
+    //         run = false;
+    //         if(VERBOSE_SAMPLE){output.println("Sampling stopped, button pressed");}
+    //     }
 
-        //compteur++;
-    } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
+    //     //compteur++;
+    // } while (run); // conditions outside while loop to allow printing which condition is responsible for stop
 
-    // pump a little bit more to flush all water
-    // ! no check of pressure, assumes the pump power was good for future
-    pump.start(EMPTY_WATER_STX_SECURITY_TIME);
+    // // pump a little bit more to flush all water
+    // // ! no check of pressure, assumes the pump power was good for future
+    // pump.start(EMPTY_WATER_STX_SECURITY_TIME);
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time to sample water : " + String(millis() - time1) + " ms");}
 
-    delay(DELAY_ACTIONS);
-    valve_manifold.set_close_way();
+    // delay(DELAY_ACTIONS);
+    // valve_manifold.set_close_way();
 
+
+
+    // * adapt
     // Do a purge to facilitate emptying the tubes from remaining water (hard trough filter)
-    step_purge();
+    // step_purge();
 
     // after purge, all tube are mainly empty. Push air through sterivex again to really flush last water in filter tubing
-    purge_sterivex(slot_manifold);
+    //purge_sterivex(slot_manifold);
 
     if(VERBOSE_SAMPLE){output.println("Step sample through filter ended");}
 }
@@ -457,29 +520,43 @@ void step_rewind()
  * @brief empties the deployment module and system, call at the end of sample
 */
 void step_empty(){
-    // filling container with water remaning in deployment module
-    valve_1.set_close_way();
+
+    valve_1.set_close_way();    // pump from deplayment
     valve_23.set_I_way();
     delay(DELAY_ACTIONS);
 
-    // pump.set_power(POWER_PUMP);
-    pump.set_power(100);
+    // do it through the purge slot, not the sterivex
+    rotateMotor(PURGE_SLOT);
 
-    uint32_t start_pump = millis();
-    bool empty = false;
+    CtrlPumpNoWater pump_ctrl;
+    pump_ctrl.begin(&pump, &pump_pid, &pressure1, 2);
+    pump_ctrl.set_end_cond_time(5000);
+    pump_ctrl.set_max_runtime(EMPTY_DEPLOYMENT_TIME); // in ms
 
-    pump.start();
+    // ! should add a security time, as no water at pressure sensor doesn't mean no water in system
 
-    // for now, only empties max 1 container. When close to the surface, it is most probably not enough
-    while ((millis() - start_pump < EMPTY_DEPLOYMENT_TIME) && button_container.isReleased())
-    {
-        delay(20);
-    }
+    pump_ctrl.run();
+
+    // ------------------ old way
+
+    // // pump.set_power(POWER_PUMP);
+    // pump.set_power(100);
+
+    // uint32_t start_pump = millis();
+    // bool empty = false;
+
+    // pump.start();
+
+    // // for now, only empties max 1 container. When close to the surface, it is most probably not enough
+    // while ((millis() - start_pump < EMPTY_DEPLOYMENT_TIME) && button_container.isReleased())
+    // {
+    //     delay(20);
+    // }
     
-    delay(DELAY_ACTIONS);
+    // delay(DELAY_ACTIONS);
 
-    // emptying the container and the rest of the system
-    step_purge();
+    // // emptying the container and the rest of the system
+    // step_purge();
 }
 
 /**
@@ -522,11 +599,13 @@ void sample_process(int depth, int manifold_slot){
     if(VERBOSE_SAMPLE){output.println("Sample started at depth " + String(depth) + "cm in filter ");}
     // Sampling steps
     step_dive(depth);
-    for(uint8_t i = 0; i < PURGE_NUMBER; i++){
-        step_fill_container();
-        step_purge();
-    }
-    step_fill_container();
+    // for(uint8_t i = 0; i < PURGE_NUMBER; i++){
+    //     step_fill_container();
+    //     step_purge();
+    // }
+    step_purge();
+
+    // step_fill_container();
     step_rewind();
     step_sampling(manifold_slot); // sample place is a human number, start at 1
 
@@ -535,7 +614,7 @@ void sample_process(int depth, int manifold_slot){
     delay(DELAY_ACTIONS);
 
     // go back to purge slot, to avoid that DNA-shield goes through pipe
-    rotateMotor(0);
+    rotateMotor(PURGE_SLOT);
 
     // emptying system
     if (VERBOSE_SAMPLE) {output.println("Last step: emptying system from water");}
@@ -577,28 +656,34 @@ void demo_sample_process(){
     if(VERBOSE_SAMPLE){output.println("Sample started");}
     // Sampling steps
     // step_dive(depth);
-    uint8_t purge_num = 1;   // PURGE_NUMBER
-    for(uint8_t i = 0; i < purge_num; i++){
-        button_start.waitPressedAndReleased();
-        step_fill_container();
-        button_start.waitPressedAndReleased();
-        step_purge();
-    }
+    // uint8_t purge_num = 1;   // PURGE_NUMBER
+    // for(uint8_t i = 0; i < purge_num; i++){
+    //     button_start.waitPressedAndReleased();
+    //     step_fill_container();
+    //     button_start.waitPressedAndReleased();
+    //     step_purge();
+    // }
     button_start.waitPressedAndReleased();
-    step_fill_container();
+    step_purge();
     button_start.waitPressedAndReleased();
     // step_rewind();
     step_sampling(manifold_slot); // sample place is a human number, start at 1
-    // step_dry(get_next_sample_place());   // not completely done yet
 
     // ! TODO: add DNA shield here
+    button_start.waitPressedAndReleased();
     step_DNA_shield(manifold_slot);
 
     // empty deployment module
-
+    button_start.waitPressedAndReleased();
+    step_empty();
 
     if(VERBOSE_SAMPLE || TIMER){output.println("Time for complete sample : " + String(millis()-time_sampling) + " ms");}
 
+
+    // closing all valves
+    valve_1.set_close_way();
+    valve_23.set_off();
+    valve_manifold.set_close_way();
 }
 
 void step_DNA_shield(int slot_manifold){
@@ -607,10 +692,12 @@ void step_DNA_shield(int slot_manifold){
     // go to right slot
     rotateMotor(slot_manifold);
 
-    micro_pump.start(FILL_STERIVEX_TIME);
+    micro_pump.start(FILL_STERIVEX_TIME/100.);      // ! remove /100, only to be faster for testing
 
     delay(500);
 
+
+    // only depending on architecture
     valve_23.set_L_way();
     valve_manifold.set_open_way();
 

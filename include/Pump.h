@@ -69,10 +69,11 @@ public:
     // constructor or begin
     void begin(Pump *pump, MiniPID *pid, Trustability_ABP_Gage *pressure_sens, float target_pressure = 2.5, bool print = false);
     void set_pressure_thresh(float pres_tresh){pressure_thresh_ = pres_tresh;}   // if not the default
-    void reset(){;}
+    void reset(){filtered_pressure_ = 0;}
 protected:
     bool check_end_cond();
     float pressure_thresh_;  // below it is considered to be air
+    float filtered_pressure_;
     //Trustability_ABP_Gage* pressure_sens;       // already in parent class
 };
 
